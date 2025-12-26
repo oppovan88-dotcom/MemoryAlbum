@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Content from "@/components/Content";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import AdminDashboard from "@/components/AdminDashboard";
+import AdminDashboard from "@/components/AdminDashboardNexus";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "aos/dist/aos.css";
 import AOS from "aos";
