@@ -1,0 +1,407 @@
+/* --- Carousel Image Fit --- */
+.carousel-img-fit {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+@media (min-width: 992px) {
+  .carousel-img-fit {
+    height: 350px;
+  }
+}
+
+/* --- Memory Horizontal Scroll Card --- */
+.memory-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding: 1rem 0;
+  scroll-behavior: smooth;
+}
+.memory-card {
+  min-width: 300px;
+  flex: 0 0 auto;
+}
+.memory-img {
+  width: 100%;
+  object-fit: cover;
+  height: 200px;
+}
+
+/* --- Footer --- */
+/* Footer gradient line */
+.footer-gradient-line {
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #ff69b4 0%, #ffb3d6 100%);
+  border-radius: 6px;
+  margin: 0 auto 14px auto;
+  opacity: 0.45;
+}
+
+/* Footer container styles */
+.footer {
+  background: rgba(255,255,255,0.93);
+  border-top: 1.5px solid #ffd6e6;
+  box-shadow: 0 -2px 24px #ff69b417;
+  position: relative;
+  z-index: 10;
+}
+
+/* Couple names font/accent */
+.footer-couple {
+  font-family: 'Quicksand', cursive, sans-serif;
+  letter-spacing: 1px;
+  font-size: 1.23rem;
+  color: #ea4c89;
+  text-shadow: 0 2px 12px #ff69b444, 0 1px 0 #fff;
+}
+
+.footer-heart {
+  color: #ff69b4;
+  font-size: 1.45em;
+  margin: 0 3px;
+  vertical-align: -0.1em;
+  animation: footerHeartBeat 1.3s infinite;
+  display: inline-block;
+}
+
+@keyframes footerHeartBeat {
+  0%, 100% { transform: scale(1);}
+  30% { transform: scale(1.25);}
+  60% { transform: scale(0.95);}
+}
+
+.footer-copyright {
+  color: #b5838d;
+  letter-spacing: 0.7px;
+  font-family: 'Poppins', sans-serif;
+  opacity: 0.85;
+}
+
+
+/* --- Relationship Main Card: always horizontal, desktop style --- */
+.relationship-main-card {
+  /* No background, no box-shadow */
+  border-radius: 2.2rem;
+  padding: 1.7rem 2vw;
+  max-width: 970px;
+  width: 98vw;
+  margin: 32px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.relationship-row-scroll {
+  overflow-x: auto;
+  flex-wrap: nowrap !important;
+  scrollbar-width: thin;
+  scrollbar-color: #ffb3c6 #fff;
+}
+
+.relationship-main-card .col-12,
+.relationship-main-card .col-md-4 {
+  min-width: 270px;
+  max-width: 340px;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.relationship-bubble {
+  /* No background, no box-shadow */
+  color: #b44ea2;
+  border-radius: 1.2rem;
+  font-family: 'Quicksand', cursive, sans-serif;
+  font-size: 1.12rem;
+  font-weight: 500;
+  padding: 13px 18px 12px 18px;
+  margin-top: 10px;
+  margin-bottom: 0;
+  max-width: 260px;
+  text-align: center;
+}
+
+.since-cute {
+  /* No background, no box-shadow */
+  border-radius: 1rem;
+  margin: 0 auto 0 auto;
+  display: inline-block;
+  padding: 10px 20px 6px 20px;
+  margin-bottom: 6px;
+  font-family: 'Quicksand', cursive, sans-serif;
+  font-size: 1rem;
+  text-align: center;
+}
+
+@keyframes beat {
+  0%, 100% { transform: scale(1);}
+  20% { transform: scale(1.13);}
+  40% { transform: scale(0.96);}
+  60% { transform: scale(1.12);}
+  80% { transform: scale(0.98);}
+}
+
+@media (max-width: 900px) {
+  .relationship-main-card {
+    padding: 0.6rem 0.2rem;
+  }
+  .relationship-main-card .col-12,
+  .relationship-main-card .col-md-4 {
+    min-width: 220px;
+    max-width: 300px;
+  }
+}
+@media (max-width: 600px) {
+  .relationship-main-card {
+    border-radius: 0.6rem;
+    padding: 0.2rem 0.01rem;
+  }
+  .relationship-main-card .col-12,
+  .relationship-main-card .col-md-4 {
+    min-width: 105px;
+    max-width: 120px;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .relationship-bubble {
+    font-size: 0.75rem;
+    max-width: 88vw;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+  .since-cute {
+    padding: 4px 0.8vw;
+    font-size: 0.74rem;
+  }
+  img.rounded-circle {
+    width: 70px !important;
+    height: 70px !important;
+  }
+  .fw-bold.mb-4 {
+    font-size: 1.45rem !important;
+    margin-bottom: 0.5rem !important;
+    line-height: 1.1;
+  }
+  .badge {
+    font-size: 0.65rem !important;
+    padding: 0.1em 0.5em !important;
+  }
+}
+@media (max-width: 400px) {
+  .relationship-main-card {
+    border-radius: 0.5rem;
+    padding: 0 !important;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  .relationship-main-card .col-12,
+  .relationship-main-card .col-md-4 {
+    min-width: 80px;
+    max-width: 100px;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin: 0 !important;
+    flex: 1 1 auto;
+  }
+  .relationship-bubble {
+    font-size: 0.7rem;
+    max-width: 90vw;
+    padding: 2px 4px !important;
+    border-radius: 0.7rem;
+    margin: 0 auto !important;
+    text-align: center;
+  }
+  .since-cute {
+    padding: 2px 4px !important;
+    font-size: 0.65rem;
+    border-radius: 0.7rem;
+    margin-bottom: 0 !important;
+    text-align: center;
+  }
+  img.rounded-circle {
+    width: 64px !important;
+    height: 64px !important;
+    border-width: 3px !important;
+    margin: 0 auto !important;
+    display: block;
+  }
+  .fw-bold.mb-4 {
+    font-size: 1.1rem !important;
+    margin-bottom: 4px !important;
+    line-height: 1.2;
+    letter-spacing: 0.15px;
+  }
+  .badge,
+  .badge.rounded-pill,
+  .badge.px-3.py-2 {
+    font-size: 0.65rem !important;
+    padding: 0.1em 0.4em !important;
+    border-radius: 0.8em !important;
+    margin: 0 1px !important;
+  }
+  .relationship-main-card .d-flex.flex-column.align-items-center {
+    padding: 0 !important;
+    margin: 0 auto !important;
+  }
+  .relationship-row-scroll {
+    gap: 1px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow-x: auto;
+  }
+}
+
+
+html, body {
+  overflow-x: hidden !important;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Background animations for light and night modes */
+/* 🎄 Merry Christmas Theme 🎄 */
+.bg-light {
+  background: linear-gradient(-45deg, #1a472a, #c41e3a, #2d5a3c, #ffd700, #8b0000, #228b22);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+}
+
+.bg-night {
+  background:
+    radial-gradient(ellipse at 80% 10%, #7f53ff 0%, transparent 45%),
+    radial-gradient(ellipse at 20% 80%, #0abcf9 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 30%, #e664fa55 0%, transparent 55%),
+    linear-gradient(135deg, #1b2346 0%, #3d194e 50%, #0a1338 100%);
+  animation: galaxyGradientMove 30s ease-in-out infinite alternate;
+}
+
+/* Heart icon animations */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes galaxyGradientMove {
+  0% { filter: hue-rotate(0deg) blur(0px);}
+  100% { filter: hue-rotate(40deg) blur(1px);}
+}
+
+@keyframes floatHeart {
+  from { transform: translateY(100vh) rotate(0deg); }
+  to { transform: translateY(-30vh) rotate(360deg); }
+}
+
+/* Floating hearts container styling */
+.floating-bg-heart {
+  position: absolute;
+  animation: floatHeart linear infinite;
+  pointer-events: none;
+  user-select: none;
+  mix-blend-mode: lighten;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8em;
+  height: 2.8em;
+  border-radius: 50%;
+  font-size: 1.9rem;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+/* Floating hearts positions and animation timing */
+.h1 {
+  left: 10%;
+  animation-duration: 26s;
+  animation-delay: 0s;
+  font-size: 2.3rem;
+}
+
+.h2 {
+  left: 22%;
+  animation-duration: 32s;
+  animation-delay: 3s;
+  font-size: 2rem;
+}
+
+.h3 {
+  left: 45%;
+  animation-duration: 28s;
+  animation-delay: 7s;
+  font-size: 2.7rem;
+}
+
+.h4 {
+  left: 63%;
+  animation-duration: 35s;
+  animation-delay: 6s;
+  font-size: 2.2rem;
+}
+
+.h5 {
+  left: 78%;
+  animation-duration: 27s;
+  animation-delay: 5s;
+  font-size: 2.8rem;
+}
+
+.h6 {
+  left: 88%;
+  animation-duration: 31s;
+  animation-delay: 2s;
+  font-size: 3.1rem;
+}
+
+/* Night mode heart icon backgrounds and colors */
+.night .floating-bg-heart {
+  background-color: rgba(111, 81, 255, 0.3); /* purple glow */
+  box-shadow: 0 0 12px 5px rgba(111, 81, 255, 0.5);
+  color: #b993ff;
+}
+
+/* Light mode heart icon backgrounds and colors - 🎄 Christmas Theme 🎄 */
+.light .floating-bg-heart {
+  background-color: rgba(255, 215, 0, 0.35); /* golden glow */
+  box-shadow: 0 0 15px 6px rgba(255, 215, 0, 0.5), 0 0 30px 10px rgba(196, 30, 58, 0.3);
+  color: #ffd700;
+}
+
+/* Star twinkle animation */
+@keyframes starTwinkle {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+/* Music button styling - 🎄 Christmas Theme 🎄 */
+.btn-outline-pink {
+  color: #c41e3a;
+  border-color: #c41e3a;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-pink:hover,
+.btn-outline-pink:focus {
+  background-color: #c41e3a;
+  color: white;
+  border-color: #c41e3a;
+  box-shadow: 0 4px 20px rgba(196, 30, 58, 0.5);
+}
+
+.music-toggle.btn-outline-primary {
+  color: #b993ff;
+  border-color: #b993ff;
+  transition: all 0.3s ease;
+}
+
+.music-toggle.btn-outline-primary:hover,
+.music-toggle.btn-outline-primary:focus {
+  background-color: #b993ff;
+  color: white;
+  border-color: #b993ff;
+  box-shadow: 0 4px 20px #b993ffaa;
+}

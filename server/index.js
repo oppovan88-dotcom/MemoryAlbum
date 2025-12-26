@@ -1,0 +1,506 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+require('dotenv').config();
+
+const app = express();
+
+// Middleware
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+app.use(express.json());
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadDir = path.join(__dirname, 'uploads');
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
+        cb(null, uniqueName);
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|gif|webp/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        if (extname && mimetype) {
+            return cb(null, true);
+        }
+        cb(new Error('Only image files are allowed!'));
+    }
+});
+
+// MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('✅ Connected to MongoDB'))
+    .catch(err => console.error('❌ MongoDB connection error:', err));
+
+// ============== SCHEMAS ==============
+
+// Admin Schema
+const adminSchema = new mongoose.Schema({
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    name: { type: String, default: 'Admin' },
+    createdAt: { type: Date, default: Date.now }
+});
+
+// Memory Schema
+const memorySchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    description: String,
+    imageUrl: String,
+    imageData: String, // Base64 encoded image for cloud storage
+    date: { type: Date, default: Date.now },
+    order: { type: Number, default: 0 },
+    isFeatured: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+
+// Visitor Schema (for analytics)
+const visitorSchema = new mongoose.Schema({
+    ip: String,
+    userAgent: String,
+    page: String,
+    country: String,
+    visitedAt: { type: Date, default: Date.now }
+});
+
+// Message Schema (guestbook)
+const messageSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: String,
+    message: { type: String, required: true },
+    isRead: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+
+// Stats Schema
+const statsSchema = new mongoose.Schema({
+    date: { type: Date, required: true, unique: true },
+    pageViews: { type: Number, default: 0 },
+    uniqueVisitors: { type: Number, default: 0 },
+    messages: { type: Number, default: 0 }
+});
+
+// Site Settings Schema (for relationship profile)
+const siteSettingsSchema = new mongoose.Schema({
+    key: { type: String, required: true, unique: true },
+    // Person 1 (Left)
+    person1Name: { type: String, default: 'Rith' },
+    person1Age: { type: Number, default: 20 },
+    person1Gender: { type: String, default: '♂' },
+    person1Zodiac: { type: String, default: 'Pisces' },
+    person1ZodiacSymbol: { type: String, default: '♓' },
+    person1Photo: { type: String, default: './assets/images/1.jpg' },
+    person1Tagline: { type: String, default: 'Rith Ft Ry' },
+    // Person 2 (Right)
+    person2Name: { type: String, default: 'Chanry' },
+    person2Age: { type: Number, default: 19 },
+    person2Gender: { type: String, default: '♀' },
+    person2Zodiac: { type: String, default: 'Aries' },
+    person2ZodiacSymbol: { type: String, default: '♈' },
+    person2Photo: { type: String, default: './assets/images/7.jpg' },
+    person2Tagline: { type: String, default: 'Ry Ft Rith' },
+    // Relationship
+    relationshipDate: { type: String, default: '2025-05-13' },
+    updatedAt: { type: Date, default: Date.now }
+});
+
+const Admin = mongoose.model('Admin', adminSchema);
+const Memory = mongoose.model('Memory', memorySchema);
+const Visitor = mongoose.model('Visitor', visitorSchema);
+const Message = mongoose.model('Message', messageSchema);
+const Stats = mongoose.model('Stats', statsSchema);
+const SiteSettings = mongoose.model('SiteSettings', siteSettingsSchema);
+
+// ============== MIDDLEWARE ==============
+
+// Auth Middleware - Optional (no login required for /ryxrith/dashboard)
+const authMiddleware = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token || token === 'no-auth-required') {
+            // No auth required - allow access
+            return next();
+        }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.adminId = decoded.id;
+        next();
+    } catch (error) {
+        // Allow access even if token is invalid
+        next();
+    }
+};
+
+// ============== ROUTES ==============
+
+// Create default admin on startup
+const createDefaultAdmin = async () => {
+    try {
+        const existingAdmin = await Admin.findOne({ email: process.env.ADMIN_EMAIL });
+        if (!existingAdmin) {
+            const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+            await Admin.create({
+                email: process.env.ADMIN_EMAIL,
+                password: hashedPassword,
+                name: 'Administrator'
+            });
+            console.log('✅ Default admin created');
+        } else {
+            // Update password if it changed
+            const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+            await Admin.findOneAndUpdate(
+                { email: process.env.ADMIN_EMAIL },
+                { password: hashedPassword }
+            );
+            console.log('✅ Admin password updated');
+        }
+    } catch (error) {
+        console.error('Error creating default admin:', error);
+    }
+};
+
+// Auth Routes
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        console.log('Login attempt for:', email);
+
+        const admin = await Admin.findOne({ email: email.toLowerCase().trim() });
+
+        if (!admin) {
+            console.log('Admin not found for email:', email);
+            return res.status(401).json({ error: 'Email not found' });
+        }
+
+        const isMatch = await bcrypt.compare(password, admin.password);
+        console.log('Password match:', isMatch);
+
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Wrong password' });
+        }
+
+        const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+        res.json({
+            token,
+            admin: {
+                id: admin._id,
+                email: admin.email,
+                name: admin.name
+            }
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Debug endpoint - check what email is registered
+app.get('/api/auth/check', async (req, res) => {
+    try {
+        const admin = await Admin.findOne({});
+        res.json({
+            registeredEmail: admin ? admin.email : 'No admin found',
+            envEmail: process.env.ADMIN_EMAIL
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.get('/api/auth/me', authMiddleware, async (req, res) => {
+    try {
+        const admin = await Admin.findById(req.adminId).select('-password');
+        res.json(admin);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Dashboard Stats
+app.get('/api/dashboard/stats', authMiddleware, async (req, res) => {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const totalMemories = await Memory.countDocuments();
+        const totalMessages = await Message.countDocuments();
+        const unreadMessages = await Message.countDocuments({ isRead: false });
+        const todayVisitors = await Visitor.countDocuments({ visitedAt: { $gte: today } });
+        const totalVisitors = await Visitor.countDocuments();
+
+        // Get last 7 days stats
+        const last7Days = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            date.setHours(0, 0, 0, 0);
+            const nextDay = new Date(date);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            const visitors = await Visitor.countDocuments({
+                visitedAt: { $gte: date, $lt: nextDay }
+            });
+
+            last7Days.push({
+                date: date.toISOString().split('T')[0],
+                visitors
+            });
+        }
+
+        // Recent messages
+        const recentMessages = await Message.find()
+            .sort({ createdAt: -1 })
+            .limit(5);
+
+        res.json({
+            totalMemories,
+            totalMessages,
+            unreadMessages,
+            todayVisitors,
+            totalVisitors,
+            last7Days,
+            recentMessages
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Memory Routes
+app.get('/api/memories', async (req, res) => {
+    try {
+        const memories = await Memory.find().sort({ order: 1, createdAt: -1 });
+        res.json(memories);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.post('/api/memories', authMiddleware, async (req, res) => {
+    try {
+        // Get lowest order number and subtract 1 to put new memory first
+        const firstMemory = await Memory.findOne().sort({ order: 1 });
+        const newOrder = firstMemory ? firstMemory.order - 1 : 0;
+        const memory = await Memory.create({ ...req.body, order: newOrder });
+        res.status(201).json(memory);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/memories/:id', authMiddleware, async (req, res) => {
+    try {
+        const memory = await Memory.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(memory);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.delete('/api/memories/:id', authMiddleware, async (req, res) => {
+    try {
+        await Memory.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Memory deleted' });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Move memory to first position
+app.put('/api/memories/:id/move-first', authMiddleware, async (req, res) => {
+    try {
+        const firstMemory = await Memory.findOne().sort({ order: 1 });
+        const newOrder = firstMemory ? firstMemory.order - 1 : 0;
+        const memory = await Memory.findByIdAndUpdate(req.params.id, { order: newOrder }, { new: true });
+        res.json(memory);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Move memory up (decrease order)
+app.put('/api/memories/:id/move-up', authMiddleware, async (req, res) => {
+    try {
+        const currentMemory = await Memory.findById(req.params.id);
+        if (!currentMemory) return res.status(404).json({ error: 'Memory not found' });
+
+        // Find memory with next lower order (appears before current)
+        const previousMemory = await Memory.findOne({ order: { $lt: currentMemory.order } }).sort({ order: -1 });
+
+        if (previousMemory) {
+            // Swap orders
+            const tempOrder = currentMemory.order;
+            await Memory.findByIdAndUpdate(currentMemory._id, { order: previousMemory.order });
+            await Memory.findByIdAndUpdate(previousMemory._id, { order: tempOrder });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Move memory down (increase order)
+app.put('/api/memories/:id/move-down', authMiddleware, async (req, res) => {
+    try {
+        const currentMemory = await Memory.findById(req.params.id);
+        if (!currentMemory) return res.status(404).json({ error: 'Memory not found' });
+
+        // Find memory with next higher order (appears after current)
+        const nextMemory = await Memory.findOne({ order: { $gt: currentMemory.order } }).sort({ order: 1 });
+
+        if (nextMemory) {
+            // Swap orders
+            const tempOrder = currentMemory.order;
+            await Memory.findByIdAndUpdate(currentMemory._id, { order: nextMemory.order });
+            await Memory.findByIdAndUpdate(nextMemory._id, { order: tempOrder });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Image Upload Route - stores Base64 for cloud deployment
+app.post('/api/upload', authMiddleware, (req, res) => {
+    upload.single('image')(req, res, (err) => {
+        if (err) {
+            console.error('Multer error:', err);
+            return res.status(400).json({ error: err.message || 'File upload failed' });
+        }
+
+        if (!req.file) {
+            console.error('No file in request');
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        console.log('File uploaded:', req.file.filename);
+
+        // Convert to Base64 for cloud storage
+        const fs = require('fs');
+        const filePath = req.file.path;
+        const base64 = fs.readFileSync(filePath, { encoding: 'base64' });
+        const mimeType = req.file.mimetype;
+        const imageData = `data:${mimeType};base64,${base64}`;
+
+        // Clean up the file after converting to Base64
+        fs.unlinkSync(filePath);
+
+        res.json({ imageUrl: imageData, imageData: imageData, filename: req.file.filename });
+    });
+});
+
+// Message Routes
+app.get('/api/messages', authMiddleware, async (req, res) => {
+    try {
+        const messages = await Message.find().sort({ createdAt: -1 });
+        res.json(messages);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.post('/api/messages', async (req, res) => {
+    try {
+        const message = await Message.create(req.body);
+        res.status(201).json(message);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/messages/:id/read', authMiddleware, async (req, res) => {
+    try {
+        const message = await Message.findByIdAndUpdate(
+            req.params.id,
+            { isRead: true },
+            { new: true }
+        );
+        res.json(message);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.delete('/api/messages/:id', authMiddleware, async (req, res) => {
+    try {
+        await Message.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Message deleted' });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Track visitor
+app.post('/api/track', async (req, res) => {
+    try {
+        const { page, userAgent } = req.body;
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+        await Visitor.create({ ip, userAgent, page });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Settings Routes
+app.get('/api/settings', async (req, res) => {
+    try {
+        let settings = await SiteSettings.findOne({ key: 'relationship' });
+        if (!settings) {
+            // Create default settings
+            settings = await SiteSettings.create({ key: 'relationship' });
+        }
+        res.json(settings);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/settings', authMiddleware, async (req, res) => {
+    try {
+        const settings = await SiteSettings.findOneAndUpdate(
+            { key: 'relationship' },
+            { ...req.body, updatedAt: Date.now() },
+            { new: true, upsert: true }
+        );
+        res.json(settings);
+    } catch (error) {
+        console.error('Settings update error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Start Server
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, async () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    await createDefaultAdmin();
+});
