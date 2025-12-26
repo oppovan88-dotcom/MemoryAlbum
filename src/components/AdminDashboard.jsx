@@ -148,41 +148,42 @@ const LoginForm = ({ onLogin }) => {
     );
 };
 
-// ============== STAT CARD COMPONENT ==============
+// ============== STAT CARD COMPONENT - Mobile Responsive ==============
 const StatCard = ({ icon, label, value, color, subValue }) => (
     <div style={{
         background: '#fff',
-        borderRadius: 16,
-        padding: 24,
+        borderRadius: 12,
+        padding: 16,
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
         border: `2px solid ${color}20`,
         transition: 'transform 0.2s, box-shadow 0.2s',
         cursor: 'pointer',
     }}
         onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = `0 8px 30px ${color}30`;
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = `0 6px 20px ${color}30`;
         }}
         onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'none';
             e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
         }}
     >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-                <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: 8 }}>{label}</p>
-                <p style={{ fontSize: '2rem', fontWeight: 700, color: color, margin: 0 }}>{value}</p>
-                {subValue && <p style={{ color: '#888', fontSize: '0.8rem', marginTop: 4 }}>{subValue}</p>}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div style={{ minWidth: 0 }}>
+                <p style={{ color: '#666', fontSize: '0.75rem', marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</p>
+                <p style={{ fontSize: '1.5rem', fontWeight: 700, color: color, margin: 0 }}>{value}</p>
+                {subValue && <p style={{ color: '#888', fontSize: '0.7rem', marginTop: 2 }}>{subValue}</p>}
             </div>
             <div style={{
-                width: 60,
-                height: 60,
-                borderRadius: 16,
+                width: 40,
+                height: 40,
+                borderRadius: 10,
                 background: `${color}15`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 28,
+                fontSize: 20,
+                flexShrink: 0,
             }}>
                 {icon}
             </div>
@@ -438,42 +439,42 @@ const Dashboard = ({ admin, onLogout }) => {
 
     return (
         <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
-            {/* Header */}
+            {/* Header - Mobile Responsive */}
             <header style={{
                 background: 'linear-gradient(135deg, #1a472a 0%, #0d2818 100%)',
-                padding: '16px 24px',
+                padding: '12px 16px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+                flexWrap: 'wrap',
+                gap: 10,
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontSize: 32 }}>🎄</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 28 }}>🎄</span>
                     <div>
-                        <h1 style={{ color: '#fff', fontSize: '1.3rem', margin: 0, fontWeight: 700 }}>
+                        <h1 style={{ color: '#fff', fontSize: '1.1rem', margin: 0, fontWeight: 700 }}>
                             Memory Album
                         </h1>
-                        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem', margin: 0 }}>
+                        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem', margin: 0, display: window.innerWidth < 400 ? 'none' : 'block' }}>
                             Admin Dashboard
                         </p>
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <span style={{ color: '#fff', fontSize: '0.9rem' }}>
-                        👋 Welcome, {admin?.name || 'Admin'}
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <button
                         onClick={handleLogout}
                         style={{
-                            padding: '10px 20px',
-                            borderRadius: 10,
+                            padding: '8px 12px',
+                            borderRadius: 8,
                             border: '2px solid rgba(255,255,255,0.3)',
                             background: 'rgba(255,255,255,0.1)',
                             color: '#fff',
-                            fontSize: '0.9rem',
+                            fontSize: '0.8rem',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
+                            whiteSpace: 'nowrap',
                         }}
                     >
                         🚪 Logout
@@ -481,13 +482,17 @@ const Dashboard = ({ admin, onLogout }) => {
                 </div>
             </header>
 
-            {/* Navigation */}
+            {/* Navigation - Mobile Scrollable */}
             <nav style={{
                 background: '#fff',
-                padding: '12px 24px',
+                padding: '10px 12px',
                 borderBottom: '1px solid #e5e7eb',
                 display: 'flex',
-                gap: 8,
+                gap: 6,
+                overflowX: 'auto',
+                WebkitOverflowScrolling: 'touch',
+                msOverflowStyle: 'none',
+                scrollbarWidth: 'none',
             }}>
                 {[
                     { id: 'dashboard', icon: '📊', label: 'Dashboard' },
@@ -499,15 +504,17 @@ const Dashboard = ({ admin, onLogout }) => {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         style={{
-                            padding: '10px 20px',
-                            borderRadius: 10,
+                            padding: '8px 12px',
+                            borderRadius: 8,
                             border: 'none',
                             background: activeTab === tab.id ? '#1a472a' : 'transparent',
                             color: activeTab === tab.id ? '#fff' : '#666',
-                            fontSize: '0.95rem',
+                            fontSize: '0.85rem',
                             fontWeight: 600,
                             cursor: 'pointer',
                             transition: 'all 0.2s',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0,
                         }}
                     >
                         {tab.icon} {tab.label}
@@ -515,17 +522,17 @@ const Dashboard = ({ admin, onLogout }) => {
                 ))}
             </nav>
 
-            {/* Main Content */}
-            <main style={{ padding: 24, maxWidth: 1400, margin: '0 auto' }}>
+            {/* Main Content - Mobile Responsive */}
+            <main style={{ padding: '16px 12px', maxWidth: 1400, margin: '0 auto' }}>
                 {/* Dashboard Tab */}
                 {activeTab === 'dashboard' && stats && (
                     <>
-                        {/* Stats Grid */}
+                        {/* Stats Grid - Mobile Responsive */}
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                            gap: 20,
-                            marginBottom: 30,
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                            gap: 12,
+                            marginBottom: 20,
                         }}>
                             <StatCard
                                 icon="📷"
@@ -555,8 +562,8 @@ const Dashboard = ({ admin, onLogout }) => {
                             />
                         </div>
 
-                        {/* Charts & Recent Activity */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
+                        {/* Charts & Recent Activity - Mobile Stack */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
                             {/* Visitor Chart */}
                             <div style={{
                                 background: '#fff',
