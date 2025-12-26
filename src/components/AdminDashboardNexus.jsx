@@ -283,32 +283,40 @@ const StatCard = ({ icon, label, value, color, subValue, isMobile }) => (
     </div>
 );
 
-// ============== MEMORY CARD (Mobile) ==============
-const MemoryCard = ({ memory, onEdit, onDelete, onMoveFirst, onMoveUp, onMoveDown }) => (
-    <div style={{
-        background: '#fff', borderRadius: 12, overflow: 'hidden',
-        border: '1px solid #e5e7eb', marginBottom: 12,
-    }}>
-        <div style={{ display: 'flex', gap: 12, padding: 12 }}>
+// ============== DRAGGABLE MEMORY CARD (Mobile) ==============
+const MemoryCard = ({ memory, index, onEdit, onDelete, onDragStart, onDragOver, onDrop, isDragging, dragOverIndex }) => (
+    <div
+        draggable
+        onDragStart={(e) => onDragStart(e, index)}
+        onDragOver={(e) => onDragOver(e, index)}
+        onDrop={(e) => onDrop(e, index)}
+        onDragEnd={(e) => e.currentTarget.style.opacity = '1'}
+        style={{
+            background: '#fff', borderRadius: 12, overflow: 'hidden',
+            border: dragOverIndex === index ? '2px dashed #6366f1' : '1px solid #e5e7eb',
+            marginBottom: 12,
+            opacity: isDragging === index ? 0.5 : 1,
+            cursor: 'grab',
+            transition: 'all 0.2s',
+            transform: dragOverIndex === index ? 'scale(1.02)' : 'scale(1)',
+        }}
+    >
+        <div style={{ display: 'flex', gap: 12, padding: 12, alignItems: 'center' }}>
+            {/* Drag Handle */}
+            <div style={{ fontSize: '1.2rem', color: '#9ca3af', cursor: 'grab', padding: '0 4px' }}>⋮⋮</div>
             {memory.imageUrl ? (
-                <img src={memory.imageUrl} alt="" style={{ width: 70, height: 70, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
-            ) : <div style={{ width: 70, height: 70, borderRadius: 8, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>🖼️</div>}
+                <img src={memory.imageUrl} alt="" style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
+            ) : <div style={{ width: 60, height: 60, borderRadius: 8, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🖼️</div>}
             <div style={{ flex: 1, minWidth: 0 }}>
-                <h4 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>{memory.title}</h4>
-                <p style={{ margin: '0 0 4px', fontSize: '0.8rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {memory.description || 'No description'}
-                </p>
+                <h4 style={{ margin: '0 0 4px', fontSize: '0.9rem', fontWeight: 600, color: '#1e293b' }}>{memory.title}</h4>
                 <p style={{ margin: 0, fontSize: '0.75rem', color: '#9ca3af' }}>
                     📅 {new Date(memory.date || memory.createdAt).toLocaleDateString()}
                 </p>
             </div>
-        </div>
-        <div style={{ display: 'flex', borderTop: '1px solid #f3f4f6', background: '#fafafa' }}>
-            <button onClick={onMoveFirst} style={{ flex: 1, padding: 10, border: 'none', background: 'transparent', fontSize: '0.8rem', cursor: 'pointer' }}>⭐</button>
-            <button onClick={onMoveUp} style={{ flex: 1, padding: 10, border: 'none', background: 'transparent', fontSize: '0.8rem', cursor: 'pointer' }}>⬆️</button>
-            <button onClick={onMoveDown} style={{ flex: 1, padding: 10, border: 'none', background: 'transparent', fontSize: '0.8rem', cursor: 'pointer' }}>⬇️</button>
-            <button onClick={onEdit} style={{ flex: 1, padding: 10, border: 'none', background: 'transparent', color: '#6366f1', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>Edit</button>
-            <button onClick={onDelete} style={{ flex: 1, padding: 10, border: 'none', background: 'transparent', color: '#ef4444', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>Delete</button>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ padding: '8px 12px', borderRadius: 8, border: 'none', background: '#6366f1', color: '#fff', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>Edit</button>
+                <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ padding: '8px 12px', borderRadius: 8, border: 'none', background: '#ef4444', color: '#fff', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>🗑️</button>
+            </div>
         </div>
     </div>
 );
@@ -325,6 +333,10 @@ const Dashboard = ({ admin, onLogout }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [settingsSaving, setSettingsSaving] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    // Drag and drop states
+    const [dragIndex, setDragIndex] = useState(null);
+    const [dragOverIndex, setDragOverIndex] = useState(null);
 
     // Modal states
     const [showAddModal, setShowAddModal] = useState(false);
@@ -410,9 +422,66 @@ const Dashboard = ({ admin, onLogout }) => {
         finally { setSaving(false); }
     };
 
-    const moveToFirst = async (id) => { try { await axios.put(`${API_URL}/memories/${id}/move-first`, {}, authHeader); fetchData(); } catch (err) { console.error(err); } };
-    const moveUp = async (id) => { try { await axios.put(`${API_URL}/memories/${id}/move-up`, {}, authHeader); fetchData(); } catch (err) { console.error(err); } };
-    const moveDown = async (id) => { try { await axios.put(`${API_URL}/memories/${id}/move-down`, {}, authHeader); fetchData(); } catch (err) { console.error(err); } };
+    // Drag and drop handlers
+    const handleDragStart = (e, index) => {
+        setDragIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+        e.currentTarget.style.opacity = '0.5';
+    };
+
+    const handleDragOver = (e, index) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (dragOverIndex !== index) {
+            setDragOverIndex(index);
+        }
+    };
+
+    const handleDrop = async (e, dropIndex) => {
+        e.preventDefault();
+        setDragOverIndex(null);
+
+        if (dragIndex === null || dragIndex === dropIndex) {
+            setDragIndex(null);
+            return;
+        }
+
+        const draggedMemory = filteredMemories[dragIndex];
+        const targetMemory = filteredMemories[dropIndex];
+
+        if (!draggedMemory || !targetMemory) {
+            setDragIndex(null);
+            return;
+        }
+
+        // Optimistically update UI
+        const newMemories = [...memories];
+        const draggedIdx = memories.findIndex(m => m._id === draggedMemory._id);
+        const targetIdx = memories.findIndex(m => m._id === targetMemory._id);
+
+        if (draggedIdx !== -1 && targetIdx !== -1) {
+            const [removed] = newMemories.splice(draggedIdx, 1);
+            newMemories.splice(targetIdx, 0, removed);
+            setMemories(newMemories);
+        }
+
+        // Save to backend
+        try {
+            await axios.put(`${API_URL}/memories/${draggedMemory._id}/reorder`, {
+                targetId: targetMemory._id
+            }, authHeader);
+        } catch (err) {
+            console.error('Reorder failed:', err);
+            fetchData(); // Refresh on error
+        }
+
+        setDragIndex(null);
+    };
+
+    const handleDragEnd = () => {
+        setDragIndex(null);
+        setDragOverIndex(null);
+    };
 
     const markAsRead = async (id) => { try { await axios.put(`${API_URL}/messages/${id}/read`, {}, authHeader); fetchData(); } catch (err) { console.error(err); } };
     const deleteMessage = async (id) => { if (!confirm('Delete?')) return; try { await axios.delete(`${API_URL}/messages/${id}`, authHeader); fetchData(); } catch (err) { console.error(err); } };
@@ -505,13 +574,19 @@ const Dashboard = ({ admin, onLogout }) => {
                                 </div>
                             ) : isMobile ? (
                                 <div style={{ padding: 16 }}>
-                                    {filteredMemories.map(memory => (
-                                        <MemoryCard key={memory._id} memory={memory}
+                                    <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: 12, textAlign: 'center' }}>✋ Drag cards to reorder</p>
+                                    {filteredMemories.map((memory, index) => (
+                                        <MemoryCard
+                                            key={memory._id}
+                                            memory={memory}
+                                            index={index}
                                             onEdit={() => { setEditMemory({ ...memory }); setShowEditModal(true); }}
                                             onDelete={() => deleteMemory(memory._id)}
-                                            onMoveFirst={() => moveToFirst(memory._id)}
-                                            onMoveUp={() => moveUp(memory._id)}
-                                            onMoveDown={() => moveDown(memory._id)}
+                                            onDragStart={handleDragStart}
+                                            onDragOver={handleDragOver}
+                                            onDrop={handleDrop}
+                                            isDragging={dragIndex}
+                                            dragOverIndex={dragOverIndex}
                                         />
                                     ))}
                                 </div>
@@ -529,11 +604,28 @@ const Dashboard = ({ admin, onLogout }) => {
                                         </thead>
                                         <tbody>
                                             {filteredMemories.map((memory, idx) => (
-                                                <tr key={memory._id} style={{ borderBottom: idx < filteredMemories.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                                                <tr
+                                                    key={memory._id}
+                                                    draggable
+                                                    onDragStart={(e) => handleDragStart(e, idx)}
+                                                    onDragOver={(e) => handleDragOver(e, idx)}
+                                                    onDrop={(e) => handleDrop(e, idx)}
+                                                    onDragEnd={handleDragEnd}
+                                                    style={{
+                                                        borderBottom: idx < filteredMemories.length - 1 ? '1px solid #f3f4f6' : 'none',
+                                                        background: dragOverIndex === idx ? '#f0f9ff' : 'transparent',
+                                                        opacity: dragIndex === idx ? 0.5 : 1,
+                                                        cursor: 'grab',
+                                                        transition: 'all 0.15s',
+                                                    }}
+                                                >
                                                     <td style={{ padding: '12px 24px' }}>
-                                                        {memory.imageUrl ? (
-                                                            <img src={memory.imageUrl} alt="" style={{ width: 50, height: 50, borderRadius: 8, objectFit: 'cover' }} />
-                                                        ) : <span style={{ fontSize: 24 }}>🖼️</span>}
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                            <span style={{ fontSize: '1.2rem', color: '#9ca3af', cursor: 'grab' }}>⋮⋮</span>
+                                                            {memory.imageUrl ? (
+                                                                <img src={memory.imageUrl} alt="" style={{ width: 50, height: 50, borderRadius: 8, objectFit: 'cover' }} />
+                                                            ) : <span style={{ fontSize: 24 }}>🖼️</span>}
+                                                        </div>
                                                     </td>
                                                     <td style={{ padding: '12px 16px', fontWeight: 500, color: '#1e293b' }}>{memory.title}</td>
                                                     <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.9rem', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{memory.description || '-'}</td>
@@ -541,12 +633,9 @@ const Dashboard = ({ admin, onLogout }) => {
                                                         {new Date(memory.date || memory.createdAt).toLocaleDateString()}
                                                     </td>
                                                     <td style={{ padding: '12px 24px' }}>
-                                                        <div style={{ display: 'flex', gap: 4 }}>
-                                                            <button onClick={() => moveToFirst(memory._id)} style={{ padding: '6px 8px', borderRadius: 6, border: 'none', background: '#fef3c7', color: '#b45309', fontSize: '0.75rem', cursor: 'pointer' }}>⭐</button>
-                                                            <button onClick={() => moveUp(memory._id)} style={{ padding: '6px 8px', borderRadius: 6, border: 'none', background: '#dcfce7', color: '#166534', fontSize: '0.75rem', cursor: 'pointer' }}>⬆️</button>
-                                                            <button onClick={() => moveDown(memory._id)} style={{ padding: '6px 8px', borderRadius: 6, border: 'none', background: '#dbeafe', color: '#1d4ed8', fontSize: '0.75rem', cursor: 'pointer' }}>⬇️</button>
-                                                            <button onClick={() => { setEditMemory({ ...memory }); setShowEditModal(true); }} style={{ padding: '6px 10px', borderRadius: 6, border: 'none', background: 'transparent', color: '#6366f1', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500 }}>Edit</button>
-                                                            <button onClick={() => deleteMemory(memory._id)} style={{ padding: '6px 10px', borderRadius: 6, border: 'none', background: 'transparent', color: '#ef4444', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500 }}>Delete</button>
+                                                        <div style={{ display: 'flex', gap: 6 }}>
+                                                            <button onClick={() => { setEditMemory({ ...memory }); setShowEditModal(true); }} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: '#6366f1', color: '#fff', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500 }}>Edit</button>
+                                                            <button onClick={() => deleteMemory(memory._id)} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: '#ef4444', color: '#fff', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500 }}>Delete</button>
                                                         </div>
                                                     </td>
                                                 </tr>

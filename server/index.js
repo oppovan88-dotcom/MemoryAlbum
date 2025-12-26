@@ -395,6 +395,29 @@ app.put('/api/memories/:id/move-down', authMiddleware, async (req, res) => {
     }
 });
 
+// Reorder memory (drag and drop)
+app.put('/api/memories/:id/reorder', authMiddleware, async (req, res) => {
+    try {
+        const { targetId } = req.body;
+        const draggedMemory = await Memory.findById(req.params.id);
+        const targetMemory = await Memory.findById(targetId);
+
+        if (!draggedMemory || !targetMemory) {
+            return res.status(404).json({ error: 'Memory not found' });
+        }
+
+        // Swap the orders
+        const tempOrder = draggedMemory.order;
+        await Memory.findByIdAndUpdate(draggedMemory._id, { order: targetMemory.order });
+        await Memory.findByIdAndUpdate(targetMemory._id, { order: tempOrder });
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Reorder error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Image Upload Route - uploads to Cloudinary
 app.post('/api/upload', authMiddleware, (req, res) => {
     upload.single('image')(req, res, async (err) => {
