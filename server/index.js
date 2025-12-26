@@ -6,7 +6,15 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 require('dotenv').config();
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const app = express();
 
@@ -387,9 +395,9 @@ app.put('/api/memories/:id/move-down', authMiddleware, async (req, res) => {
     }
 });
 
-// Image Upload Route - stores Base64 for cloud deployment
+// Image Upload Route - uploads to Cloudinary
 app.post('/api/upload', authMiddleware, (req, res) => {
-    upload.single('image')(req, res, (err) => {
+    upload.single('image')(req, res, async (err) => {
         if (err) {
             console.error('Multer error:', err);
             return res.status(400).json({ error: err.message || 'File upload failed' });
@@ -400,19 +408,38 @@ app.post('/api/upload', authMiddleware, (req, res) => {
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        console.log('File uploaded:', req.file.filename);
+        console.log('File uploaded locally:', req.file.filename);
 
-        // Convert to Base64 for cloud storage
-        const fs = require('fs');
-        const filePath = req.file.path;
-        const base64 = fs.readFileSync(filePath, { encoding: 'base64' });
-        const mimeType = req.file.mimetype;
-        const imageData = `data:${mimeType};base64,${base64}`;
+        try {
+            // Upload to Cloudinary
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'memoryalbum',
+                resource_type: 'image',
+                transformation: [
+                    { width: 1200, height: 1200, crop: 'limit' }, // Max size
+                    { quality: 'auto:good' } // Auto optimize quality
+                ]
+            });
 
-        // Clean up the file after converting to Base64
-        fs.unlinkSync(filePath);
+            console.log('Cloudinary upload success:', result.secure_url);
 
-        res.json({ imageUrl: imageData, imageData: imageData, filename: req.file.filename });
+            // Clean up local file
+            fs.unlinkSync(req.file.path);
+
+            // Return Cloudinary URL
+            res.json({
+                imageUrl: result.secure_url,
+                publicId: result.public_id,
+                filename: req.file.filename
+            });
+        } catch (cloudError) {
+            console.error('Cloudinary error:', cloudError);
+            // Clean up local file on error
+            if (fs.existsSync(req.file.path)) {
+                fs.unlinkSync(req.file.path);
+            }
+            res.status(500).json({ error: 'Failed to upload to cloud storage' });
+        }
     });
 });
 
