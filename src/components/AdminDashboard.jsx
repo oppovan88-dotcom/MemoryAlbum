@@ -273,6 +273,30 @@ const Dashboard = ({ admin, onLogout }) => {
         }
     };
 
+    // Upload directly to Cloudinary (bypasses server size limits)
+    const uploadToCloudinary = async (file) => {
+        const cloudName = 'dbkdd1wrl';
+        const uploadPreset = 'memoryalbum_unsigned'; // We'll create this preset
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', uploadPreset);
+        formData.append('folder', 'memoryalbum');
+
+        const response = await axios.post(
+            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+            formData,
+            {
+                onUploadProgress: (progressEvent) => {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(progress);
+                },
+            }
+        );
+
+        return response.data.secure_url;
+    };
+
     const addMemory = async () => {
         if (!newMemory.title) {
             alert('Please enter a title');
@@ -287,26 +311,14 @@ const Dashboard = ({ admin, onLogout }) => {
         setUploadProgress(0);
 
         try {
-            // First upload the image
-            const formData = new FormData();
-            formData.append('image', selectedFile);
-
-            const uploadRes = await axios.post(`${API_URL}/upload`, formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data',
-                },
-                onUploadProgress: (progressEvent) => {
-                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setUploadProgress(progress);
-                },
-            });
+            // Upload directly to Cloudinary (bypasses Render's size limit)
+            const imageUrl = await uploadToCloudinary(selectedFile);
 
             // Then create the memory with the image URL
             await axios.post(`${API_URL}/memories`, {
                 title: newMemory.title,
                 description: newMemory.description,
-                imageUrl: uploadRes.data.imageUrl,
+                imageUrl: imageUrl,
             }, authHeader);
 
             setShowAddModal(false);
