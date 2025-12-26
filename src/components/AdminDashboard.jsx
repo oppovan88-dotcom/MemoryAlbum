@@ -1541,13 +1541,44 @@ const Dashboard = ({ admin, onLogout }) => {
 
 // ============== MAIN ADMIN COMPONENT ==============
 const AdminDashboard = () => {
-    // No login required - direct access
-    const admin = { name: 'Administrator', email: 'admin@memoryalbum.com' };
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [admin, setAdmin] = useState(null);
 
-    return <Dashboard admin={admin} onLogout={() => {
-        // Go back to home
-        window.location.href = '/';
-    }} />;
+    // Check if already logged in on mount
+    useEffect(() => {
+        const token = localStorage.getItem('adminToken');
+        const savedAdmin = localStorage.getItem('adminData');
+        if (token && savedAdmin) {
+            try {
+                setAdmin(JSON.parse(savedAdmin));
+                setIsLoggedIn(true);
+            } catch (e) {
+                // Invalid data, clear it
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminData');
+            }
+        }
+    }, []);
+
+    const handleLogin = (adminData) => {
+        setAdmin(adminData);
+        setIsLoggedIn(true);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminData');
+        setIsLoggedIn(false);
+        setAdmin(null);
+    };
+
+    // Show login form if not logged in
+    if (!isLoggedIn) {
+        return <LoginForm onLogin={handleLogin} />;
+    }
+
+    // Show dashboard if logged in
+    return <Dashboard admin={admin} onLogout={handleLogout} />;
 };
 
 export default AdminDashboard;
