@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const getApiUrl = () => {
-    // If we're on localhost, default to local backend unless explicitly overridden
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:5000/api';
-    }
-    // Otherwise use the environment variable (mostly for Vercel/Production)
-    return import.meta.env.VITE_API_URL || 'https://memoryalbum-7j7f.onrender.com/api';
-};
-
-const API_URL = getApiUrl();
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // ============== NAVIGATION ITEMS ==============
 const navItems = [
