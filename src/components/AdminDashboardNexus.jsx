@@ -612,6 +612,30 @@ const Dashboard = ({ admin, onLogout }) => {
         finally { setTimelineSaving(false); }
     };
 
+    const moveTimelineItem = async (index, direction) => {
+        const newItems = [...timelineItems];
+        if (direction === 'up' && index > 0) {
+            [newItems[index], newItems[index - 1]] = [newItems[index - 1], newItems[index]];
+        } else if (direction === 'down' && index < newItems.length - 1) {
+            [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
+        } else {
+            return;
+        }
+
+        // Optimistically update UI
+        const reorderedItems = newItems.map((item, idx) => ({ ...item, order: idx }));
+        setTimelineItems(reorderedItems);
+
+        try {
+            await axios.put(`${API_URL}/timeline/reorder-all`, {
+                orders: reorderedItems.map(item => ({ id: item._id, order: item.order }))
+            }, authHeader);
+        } catch (err) {
+            console.error('Failed to reorder timeline:', err);
+            fetchData(); // Rollback on error
+        }
+    };
+
     const filteredMemories = memories.filter(m =>
         m.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         m.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -845,7 +869,13 @@ const Dashboard = ({ admin, onLogout }) => {
                                                 <h4 style={{ margin: '6px 0 4px', color: '#be185d', fontSize: '0.95rem' }}>{item.activity}</h4>
                                                 {item.details && <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>{item.details}</p>}
                                             </div>
-                                            <div style={{ display: 'flex', gap: 6 }}>
+                                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                    <button onClick={() => moveTimelineItem(idx, 'up')} disabled={idx === 0}
+                                                        style={{ padding: '4px 8px', borderRadius: 6, border: 'none', background: idx === 0 ? '#e2e8f0' : '#8b5cf6', color: '#fff', fontSize: '0.7rem', cursor: idx === 0 ? 'not-allowed' : 'pointer', fontWeight: 700 }}>↑</button>
+                                                    <button onClick={() => moveTimelineItem(idx, 'down')} disabled={idx === timelineItems.length - 1}
+                                                        style={{ padding: '4px 8px', borderRadius: 6, border: 'none', background: idx === timelineItems.length - 1 ? '#e2e8f0' : '#8b5cf6', color: '#fff', fontSize: '0.7rem', cursor: idx === timelineItems.length - 1 ? 'not-allowed' : 'pointer', fontWeight: 700 }}>↓</button>
+                                                </div>
                                                 <button onClick={() => { setEditTimelineItem({ ...item }); setShowEditTimelineModal(true); }}
                                                     style={{ padding: '8px 12px', borderRadius: 8, border: 'none', background: '#22c55e', color: '#fff', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}>Edit</button>
                                                 <button onClick={() => deleteTimelineItem(item._id)}

@@ -153,6 +153,7 @@ const timelineSchema = new mongoose.Schema({
     activity: { type: String, required: true },
     details: { type: String, default: '' },
     isCompleted: { type: Boolean, default: false },
+    order: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -647,7 +648,7 @@ app.put('/api/settings', authMiddleware, async (req, res) => {
 // Timeline Routes
 app.get('/api/timeline', async (req, res) => {
     try {
-        const timeline = await Timeline.find().sort({ createdAt: 1 });
+        const timeline = await Timeline.find().sort({ order: 1 });
         res.json(timeline);
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
@@ -662,13 +663,17 @@ app.post('/api/timeline', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Time and activity are required' });
         }
 
+        const maxOrder = await Timeline.findOne().sort({ order: -1 });
+        const order = maxOrder ? maxOrder.order + 1 : 0;
+
         const timelineItem = await Timeline.create({
             time,
             activity,
-            details: details || ''
+            details: details || '',
+            order
         });
 
-        console.log('✅ Timeline item created:', timelineItem._id);
+        console.log('✅ Timeline item created:', timelineItem._id, 'Order:', order);
         res.status(201).json(timelineItem);
     } catch (error) {
         console.error('❌ Timeline creation error:', error);
@@ -676,7 +681,28 @@ app.post('/api/timeline', authMiddleware, async (req, res) => {
     }
 });
 
-/* REORDER ROUTES REMOVED */
+app.put('/api/timeline/reorder-all', authMiddleware, async (req, res) => {
+    try {
+        const { orders } = req.body;
+        if (!orders || !Array.isArray(orders)) {
+            return res.status(400).json({ error: 'Orders array is required' });
+        }
+
+        const bulkOps = orders.map(item => ({
+            updateOne: {
+                filter: { _id: item.id },
+                update: { $set: { order: item.order } }
+            }
+        }));
+
+        await Timeline.bulkWrite(bulkOps);
+        console.log('✅ Timeline reordered successfully');
+        res.json({ message: 'Timeline reordered successfully' });
+    } catch (error) {
+        console.error('❌ Timeline reorder error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 
 app.put('/api/timeline/:id', authMiddleware, async (req, res) => {
     try {
