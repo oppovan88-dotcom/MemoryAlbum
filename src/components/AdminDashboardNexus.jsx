@@ -513,11 +513,18 @@ const Dashboard = ({ admin, onLogout }) => {
         if (!newTimelineItem.time || !newTimelineItem.activity) { alert('Please fill time and activity'); return; }
         setTimelineSaving(true);
         try {
-            await axios.post(`${API_URL}/timeline`, { ...newTimelineItem, order: timelineItems.length }, authHeader);
+            console.log('Adding timeline item:', { ...newTimelineItem, order: timelineItems.length });
+            console.log('API URL:', `${API_URL}/timeline`);
+            const response = await axios.post(`${API_URL}/timeline`, { ...newTimelineItem, order: timelineItems.length }, authHeader);
+            console.log('Response:', response.data);
             setShowAddTimelineModal(false);
             setNewTimelineItem({ time: '', activity: '', details: '' });
             fetchData();
-        } catch (err) { alert('Failed to add timeline item'); }
+        } catch (err) {
+            console.error('Error adding timeline item:', err);
+            console.error('Error response:', err.response?.data);
+            alert('Failed to add timeline item: ' + (err.response?.data?.error || err.message));
+        }
         finally { setTimelineSaving(false); }
     };
 

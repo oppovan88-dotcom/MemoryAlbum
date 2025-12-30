@@ -595,7 +595,7 @@ app.get('/api/settings', async (req, res) => {
 
 app.put('/api/settings', authMiddleware, async (req, res) => {
     try {
-        const settings = await SiteSettings.dOneAndUpdate(
+        const settings = await SiteSettings.findOneAndUpdate(
             { key: 'relationship' },
             { ...req.body, updatedAt: Date.now() },
             { new: true, upsert: true }
