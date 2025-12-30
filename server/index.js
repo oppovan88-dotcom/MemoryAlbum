@@ -464,20 +464,19 @@ app.put('/api/memories/reorder-all', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Invalid orders data' });
         }
 
-        const bulkOps = orders.map(item => ({
-            updateOne: {
-                // Use mongoose.Types.ObjectId to ensure correct ID lookup in bulkWrite
-                filter: { _id: new mongoose.Types.ObjectId(item.id) },
-                update: { $set: { order: item.order } }
-            }
-        }));
+        // Use Promise.all with findByIdAndUpdate for better stability and auto-casting of IDs
+        const updatePromises = orders.map(async (item) => {
+            if (!item.id) return null;
+            return Memory.findByIdAndUpdate(item.id, { $set: { order: item.order } }, { new: true });
+        });
 
-        const result = await Memory.bulkWrite(bulkOps);
-        console.log(`✅ Memories reordered: ${result.modifiedCount} updated`);
-        res.json({ success: true, modifiedCount: result.modifiedCount });
+        await Promise.all(updatePromises);
+
+        console.log(`✅ Memories reordered: ${orders.length} items processed`);
+        res.json({ success: true, count: orders.length });
     } catch (error) {
         console.error('❌ Bulk reorder error:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: error.message || 'Server error' });
     }
 });
 
@@ -690,19 +689,18 @@ app.put('/api/timeline/reorder-all', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Orders array is required' });
         }
 
-        const bulkOps = orders.map(item => ({
-            updateOne: {
-                filter: { _id: new mongoose.Types.ObjectId(item.id) },
-                update: { $set: { order: item.order } }
-            }
-        }));
+        const updatePromises = orders.map(async (item) => {
+            if (!item.id) return null;
+            return Timeline.findByIdAndUpdate(item.id, { $set: { order: item.order } }, { new: true });
+        });
 
-        const result = await Timeline.bulkWrite(bulkOps);
-        console.log(`✅ Timeline reordered: ${result.modifiedCount} updated`);
-        res.json({ message: 'Timeline reordered successfully', modifiedCount: result.modifiedCount });
+        await Promise.all(updatePromises);
+
+        console.log(`✅ Timeline reordered: ${orders.length} items processed`);
+        res.json({ success: true, message: 'Timeline reordered successfully' });
     } catch (error) {
         console.error('❌ Timeline reorder error:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: error.message || 'Server error' });
     }
 });
 

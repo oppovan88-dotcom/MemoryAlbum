@@ -567,7 +567,7 @@ const Dashboard = ({ admin, onLogout }) => {
             }, { headers: { Authorization: `Bearer ${token}` } });
 
             if (res.data.success) {
-                console.log(`✅ Order saved! ${res.data.modifiedCount} items updated.`);
+                console.log(`✅ Order saved! ${res.data.count || ''} items processed.`);
             }
         } catch (err) {
             console.error('❌ Reorder failed:', err.response?.data || err.message);
