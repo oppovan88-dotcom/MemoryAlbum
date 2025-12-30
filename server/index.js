@@ -464,17 +464,18 @@ app.put('/api/memories/reorder-all', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Invalid orders data' });
         }
 
-        // Update all memories with their new order values
-        const updatePromises = orders.map(item =>
-            Memory.findByIdAndUpdate(item.id, { order: item.order })
-        );
+        const bulkOps = orders.map(item => ({
+            updateOne: {
+                filter: { _id: item.id },
+                update: { $set: { order: item.order } }
+            }
+        }));
 
-        await Promise.all(updatePromises);
-
-        console.log('Bulk reorder success:', orders.length, 'memories updated');
+        await Memory.bulkWrite(bulkOps);
+        console.log('✅ Memories reordered successfully via bulkWrite');
         res.json({ success: true });
     } catch (error) {
-        console.error('Bulk reorder error:', error);
+        console.error('❌ Bulk reorder error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });

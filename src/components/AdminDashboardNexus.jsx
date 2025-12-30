@@ -540,28 +540,34 @@ const Dashboard = ({ admin, onLogout }) => {
         }
 
         // Create new array with proper reordering
-        const newFilteredMemories = [...filteredMemories];
-        const [movedItem] = newFilteredMemories.splice(dragIndex, 1);
-        newFilteredMemories.splice(dropIndex, 0, movedItem);
+        const newMemories = [...memories];
+        const draggedInMemory = filteredMemories[dragIndex];
+        const targetInMemory = filteredMemories[dropIndex];
 
-        // Update order values for all memories based on new positions
-        const updatedMemories = newFilteredMemories.map((m, index) => ({
+        const realDragIndex = newMemories.findIndex(m => m._id === draggedInMemory._id);
+        const realDropIndex = newMemories.findIndex(m => m._id === targetInMemory._id);
+
+        if (realDragIndex === -1 || realDropIndex === -1) return;
+
+        const [movedItem] = newMemories.splice(realDragIndex, 1);
+        newMemories.splice(realDropIndex, 0, movedItem);
+
+        // Update order values for all memories
+        const updatedMemories = newMemories.map((m, index) => ({
             ...m,
             order: index
         }));
 
-        // Immediately update UI with new order
         setMemories(updatedMemories);
 
-        // Save to backend - send all the new order values
         try {
+            const token = localStorage.getItem('adminToken');
             await axios.put(`${API_URL}/memories/reorder-all`, {
                 orders: updatedMemories.map(m => ({ id: m._id, order: m.order }))
-            }, authHeader);
+            }, { headers: { Authorization: `Bearer ${token}` } });
+            console.log('✅ Memories reordered on server');
         } catch (err) {
-            console.error('Reorder failed:', err);
-            // Refresh on error to get correct state from server
-            fetchData();
+            console.error('❌ Reorder failed:', err.response?.data || err.message);
         }
 
         setDragIndex(null);
@@ -639,12 +645,12 @@ const Dashboard = ({ admin, onLogout }) => {
         setTimelineItems(reorderedItems);
 
         try {
+            const token = localStorage.getItem('adminToken');
             await axios.put(`${API_URL}/timeline/reorder-all`, {
                 orders: reorderedItems.map(item => ({ id: item._id, order: item.order }))
-            }, authHeader);
+            }, { headers: { Authorization: `Bearer ${token}` } });
         } catch (err) {
-            console.error('Failed to reorder timeline:', err);
-            fetchData(); // Rollback on error
+            console.error('Failed to reorder timeline:', err.response?.data || err.message);
         }
     };
 
@@ -667,12 +673,12 @@ const Dashboard = ({ admin, onLogout }) => {
         setMemories(reordered);
 
         try {
+            const token = localStorage.getItem('adminToken');
             await axios.put(`${API_URL}/memories/reorder-all`, {
                 orders: reordered.map(m => ({ id: m._id, order: m.order }))
-            }, authHeader);
+            }, { headers: { Authorization: `Bearer ${token}` } });
         } catch (err) {
-            console.error('Failed to reorder memories:', err);
-            fetchData();
+            console.error('Failed to reorder memories:', err.response?.data || err.message);
         }
     };
 
