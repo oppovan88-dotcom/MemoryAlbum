@@ -3,7 +3,14 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getApiUrl = () => {
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:5000/api';
+  }
+  return import.meta.env.VITE_API_URL || 'https://memoryalbum-7j7f.onrender.com/api';
+};
+
+const API_URL = getApiUrl();
 
 const BlueTick = ({ nightMode }) => (
   <span

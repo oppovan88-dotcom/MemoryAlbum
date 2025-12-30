@@ -1,7 +1,16 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getApiUrl = () => {
+    // If we're on localhost, default to local backend unless explicitly overridden
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:5000/api';
+    }
+    // Otherwise use the environment variable (mostly for Vercel/Production)
+    return import.meta.env.VITE_API_URL || 'https://memoryalbum-7j7f.onrender.com/api';
+};
+
+const API_URL = getApiUrl();
 
 // ============== NAVIGATION ITEMS ==============
 const navItems = [
@@ -165,7 +174,7 @@ const MobileBottomNav = ({ activeTab, setActiveTab }) => (
 );
 
 // ============== SIDEBAR COMPONENT ==============
-const Sidebar = ({ activeTab, setActiveTab, admin, onLogout, isOpen, setIsOpen, isMobile }) => {
+const Sidebar = ({ activeTab, setActiveTab, admin, onLogout, isOpen, setIsOpen, isMobile, backendStatus }) => {
     if (isMobile) return null;
 
     return (
@@ -227,7 +236,28 @@ const Sidebar = ({ activeTab, setActiveTab, admin, onLogout, isOpen, setIsOpen, 
                     width: '100%', padding: '10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.2)',
                     background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)',
                     fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s',
+                    marginBottom: 12
                 }}>🚪 Logout</button>
+
+                {/* Connection Status Badge */}
+                <div style={{
+                    padding: '8px 12px', borderRadius: 8,
+                    background: backendStatus === 'online' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                    border: `1px solid ${backendStatus === 'online' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                    display: 'flex', alignItems: 'center', gap: 8
+                }}>
+                    <div style={{
+                        width: 8, height: 8, borderRadius: '50%',
+                        background: backendStatus === 'online' ? '#22c55e' : '#ef4444',
+                        boxShadow: `0 0 8px ${backendStatus === 'online' ? '#22c55e' : '#ef4444'}`
+                    }} />
+                    <span style={{
+                        fontSize: '0.75rem', fontWeight: 600,
+                        color: backendStatus === 'online' ? '#22c55e' : '#ef4444'
+                    }}>
+                        Server: {backendStatus === 'online' ? 'CONNECTED' : 'OFFLINE'}
+                    </span>
+                </div>
             </div>
         </aside>
     );
@@ -334,6 +364,7 @@ const Dashboard = ({ admin, onLogout }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [settingsSaving, setSettingsSaving] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [backendStatus, setBackendStatus] = useState('checking'); // 'checking', 'online', 'offline'
 
     // Drag and drop states
     const [dragIndex, setDragIndex] = useState(null);
@@ -360,11 +391,36 @@ const Dashboard = ({ admin, onLogout }) => {
     const token = localStorage.getItem('adminToken') || 'no-auth-required';
     const authHeader = { headers: { Authorization: `Bearer ${token}` } };
 
+    // Generate time options for dropdown
+    const timeOptions = [];
+    for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += 30) {
+            const hour = h % 12 || 12;
+            const ampm = h < 12 ? 'AM' : 'PM';
+            const minute = m.toString().padStart(2, '0');
+            timeOptions.push(`${hour.toString().padStart(2, '0')}:${minute} ${ampm}`);
+        }
+    }
+
     useEffect(() => {
-        console.log('🚀 Dashboard mounted');
-        console.log('📍 Current API URL:', API_URL);
+        console.warn('🛠️ ADMIN DASHBOARD: Checking Backend Connection...');
+        console.log('📍 TARGET API:', API_URL);
+        checkHealth();
         fetchData();
+
+        // Periodic health check
+        const healthInterval = setInterval(checkHealth, 30000);
+        return () => clearInterval(healthInterval);
     }, []);
+
+    const checkHealth = async () => {
+        try {
+            await axios.get(`${API_URL.replace('/api', '')}/api/health`);
+            setBackendStatus('online');
+        } catch (e) {
+            setBackendStatus('offline');
+        }
+    };
 
     const fetchData = async () => {
         try {
@@ -594,7 +650,7 @@ const Dashboard = ({ admin, onLogout }) => {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} admin={admin} onLogout={onLogout} isOpen={sidebarOpen} setIsOpen={setSidebarOpen} isMobile={isMobile} />
+            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} admin={admin} onLogout={onLogout} isOpen={sidebarOpen} setIsOpen={setSidebarOpen} isMobile={isMobile} backendStatus={backendStatus} />
 
             <div style={{ flex: 1, marginLeft: isMobile ? 0 : 260, display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? 80 : 0 }}>
                 <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} title={getTitle()} isMobile={isMobile} onLogout={onLogout} />
@@ -961,8 +1017,11 @@ const Dashboard = ({ admin, onLogout }) => {
                         <h2 style={{ margin: '0 0 20px', color: '#be185d', fontSize: '1.1rem', textAlign: 'center' }}>💖 Add New Moment</h2>
                         <div style={{ marginBottom: 16 }}>
                             <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: '0.9rem', color: '#be185d' }}>⏰ Time *</label>
-                            <input type="text" value={newTimelineItem.time} onChange={(e) => setNewTimelineItem({ ...newTimelineItem, time: e.target.value })}
-                                placeholder="e.g., 09:00 AM" style={{ width: '100%', padding: 12, borderRadius: 8, border: '2px solid #ec4899', boxSizing: 'border-box', fontSize: '16px' }} />
+                            <select value={newTimelineItem.time} onChange={(e) => setNewTimelineItem({ ...newTimelineItem, time: e.target.value })}
+                                style={{ width: '100%', padding: 12, borderRadius: 8, border: '2px solid #ec4899', boxSizing: 'border-box', fontSize: '16px', background: '#fff' }}>
+                                <option value="">Select Time</option>
+                                {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
                         </div>
                         <div style={{ marginBottom: 16 }}>
                             <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: '0.9rem', color: '#be185d' }}>💫 Activity *</label>
@@ -994,8 +1053,10 @@ const Dashboard = ({ admin, onLogout }) => {
                         <h2 style={{ margin: '0 0 20px', color: '#be185d', fontSize: '1.1rem', textAlign: 'center' }}>✏️ Edit Moment</h2>
                         <div style={{ marginBottom: 16 }}>
                             <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: '0.9rem', color: '#be185d' }}>⏰ Time *</label>
-                            <input type="text" value={editTimelineItem.time} onChange={(e) => setEditTimelineItem({ ...editTimelineItem, time: e.target.value })}
-                                placeholder="e.g., 09:00 AM" style={{ width: '100%', padding: 12, borderRadius: 8, border: '2px solid #ec4899', boxSizing: 'border-box', fontSize: '16px' }} />
+                            <select value={editTimelineItem.time} onChange={(e) => setEditTimelineItem({ ...editTimelineItem, time: e.target.value })}
+                                style={{ width: '100%', padding: 12, borderRadius: 8, border: '2px solid #ec4899', boxSizing: 'border-box', fontSize: '16px', background: '#fff' }}>
+                                {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
                         </div>
                         <div style={{ marginBottom: 16 }}>
                             <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: '0.9rem', color: '#be185d' }}>💫 Activity *</label>
