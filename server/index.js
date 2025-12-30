@@ -620,12 +620,17 @@ app.get('/api/timeline', async (req, res) => {
 
 app.post('/api/timeline', authMiddleware, async (req, res) => {
     try {
-        const { time, activity, details, order } = req.body;
+        const { time, activity, details } = req.body;
+
+        // Get highest order number to put new item at the end
+        const lastItem = await Timeline.findOne().sort({ order: -1 });
+        const newOrder = lastItem ? lastItem.order + 1 : 0;
+
         const timelineItem = await Timeline.create({
             time,
             activity,
             details: details || '',
-            order: order || 0
+            order: newOrder
         });
         res.json(timelineItem);
     } catch (error) {
@@ -656,6 +661,65 @@ app.delete('/api/timeline/:id', authMiddleware, async (req, res) => {
         if (!timelineItem) {
             return res.status(404).json({ error: 'Timeline item not found' });
         }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Move timeline item up
+app.put('/api/timeline/:id/move-up', authMiddleware, async (req, res) => {
+    try {
+        const currentItem = await Timeline.findById(req.params.id);
+        if (!currentItem) return res.status(404).json({ error: 'Item not found' });
+
+        const previousItem = await Timeline.findOne({ order: { $lt: currentItem.order } }).sort({ order: -1 });
+
+        if (previousItem) {
+            const tempOrder = currentItem.order;
+            await Timeline.findByIdAndUpdate(currentItem._id, { order: previousItem.order });
+            await Timeline.findByIdAndUpdate(previousItem._id, { order: tempOrder });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Move timeline item down
+app.put('/api/timeline/:id/move-down', authMiddleware, async (req, res) => {
+    try {
+        const currentItem = await Timeline.findById(req.params.id);
+        if (!currentItem) return res.status(404).json({ error: 'Item not found' });
+
+        const nextItem = await Timeline.findOne({ order: { $gt: currentItem.order } }).sort({ order: 1 });
+
+        if (nextItem) {
+            const tempOrder = currentItem.order;
+            await Timeline.findByIdAndUpdate(currentItem._id, { order: nextItem.order });
+            await Timeline.findByIdAndUpdate(nextItem._id, { order: tempOrder });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Bulk reorder timeline items
+app.put('/api/timeline/reorder-all', authMiddleware, async (req, res) => {
+    try {
+        const { orders } = req.body; // Array of { id, order }
+        if (!orders || !Array.isArray(orders)) {
+            return res.status(400).json({ error: 'Invalid orders data' });
+        }
+
+        const updatePromises = orders.map(item =>
+            Timeline.findByIdAndUpdate(item.id, { order: item.order })
+        );
+
+        await Promise.all(updatePromises);
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
