@@ -1,3 +1,4 @@
+// MemoryAlbum Server - Version 1.1.0 - Timeline API Enabled
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
