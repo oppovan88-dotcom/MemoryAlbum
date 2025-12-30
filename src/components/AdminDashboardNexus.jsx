@@ -479,10 +479,26 @@ const Dashboard = ({ admin, onLogout }) => {
         if (!newMemory.title || !selectedFile) { alert('Please fill title and select image'); return; }
         setSaving(true); setUploadProgress(0);
         try {
+            // Step 1: Upload image to Cloudinary
             const imageUrl = await uploadToCloudinary(selectedFile);
-            console.log('✅ Memory added successfully');
-            setShowAddModal(false); setNewMemory({ title: '', description: '' });
-            setSelectedFile(null); setPreviewUrl(''); fetchData();
+            console.log('📸 Image uploaded to Cloudinary:', imageUrl);
+
+            // Step 2: Save memory to database with the Cloudinary URL
+            const memoryData = {
+                title: newMemory.title,
+                description: newMemory.description || '',
+                imageUrl: imageUrl,
+                date: new Date().toISOString()
+            };
+
+            await axios.post(`${API_URL}/memories`, memoryData, authHeader);
+            console.log('✅ Memory saved to database successfully');
+
+            setShowAddModal(false);
+            setNewMemory({ title: '', description: '' });
+            setSelectedFile(null);
+            setPreviewUrl('');
+            fetchData();
         } catch (err) {
             console.error('❌ Failed to add memory:', err);
             const errorMsg = err.response?.data?.error || err.message;
@@ -562,17 +578,12 @@ const Dashboard = ({ admin, onLogout }) => {
 
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await axios.put(`${API_URL}/memories/reorder-all`, {
+            await axios.put(`${API_URL}/memories/reorder-all`, {
                 orders: updatedMemories.map(m => ({ id: m._id, order: m.order }))
             }, { headers: { Authorization: `Bearer ${token}` } });
-
-            if (res.data.success) {
-                console.log(`✅ Order saved! ${res.data.count || ''} items processed.`);
-            }
+            console.log('✅ Memories reordered on server');
         } catch (err) {
             console.error('❌ Reorder failed:', err.response?.data || err.message);
-            alert('Failed to save the new order. Please check your internet and try again.');
-            fetchData(); // Rollback on actual failure
         }
 
         setDragIndex(null);
