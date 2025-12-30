@@ -349,6 +349,14 @@ const Dashboard = ({ admin, onLogout }) => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [editMemory, setEditMemory] = useState(null);
 
+    // Timeline states
+    const [timelineItems, setTimelineItems] = useState([]);
+    const [showAddTimelineModal, setShowAddTimelineModal] = useState(false);
+    const [newTimelineItem, setNewTimelineItem] = useState({ time: '', activity: '', details: '' });
+    const [showEditTimelineModal, setShowEditTimelineModal] = useState(false);
+    const [editTimelineItem, setEditTimelineItem] = useState(null);
+    const [timelineSaving, setTimelineSaving] = useState(false);
+
     const token = localStorage.getItem('adminToken') || 'no-auth-required';
     const authHeader = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -356,16 +364,18 @@ const Dashboard = ({ admin, onLogout }) => {
 
     const fetchData = async () => {
         try {
-            const [statsRes, memoriesRes, messagesRes, settingsRes] = await Promise.all([
+            const [statsRes, memoriesRes, messagesRes, settingsRes, timelineRes] = await Promise.all([
                 axios.get(`${API_URL}/dashboard/stats`, authHeader),
                 axios.get(`${API_URL}/memories`),
                 axios.get(`${API_URL}/messages`, authHeader),
                 axios.get(`${API_URL}/settings`),
+                axios.get(`${API_URL}/timeline`),
             ]);
             setStats(statsRes.data);
             setMemories(memoriesRes.data);
             setMessages(messagesRes.data);
             setSettings(settingsRes.data);
+            setTimelineItems(timelineRes.data);
         } catch (err) { console.error('Error fetching data:', err); }
         finally { setLoading(false); }
     };
@@ -501,14 +511,14 @@ const Dashboard = ({ admin, onLogout }) => {
     // Timeline functions
     const addTimelineItem = async () => {
         if (!newTimelineItem.time || !newTimelineItem.activity) { alert('Please fill time and activity'); return; }
-        setSaving(true);
+        setTimelineSaving(true);
         try {
-            await axios.post(`${API_URL}/timeline`, newTimelineItem, authHeader);
+            await axios.post(`${API_URL}/timeline`, { ...newTimelineItem, order: timelineItems.length }, authHeader);
             setShowAddTimelineModal(false);
             setNewTimelineItem({ time: '', activity: '', details: '' });
             fetchData();
         } catch (err) { alert('Failed to add timeline item'); }
-        finally { setSaving(false); }
+        finally { setTimelineSaving(false); }
     };
 
     const deleteTimelineItem = async (id) => {
@@ -519,14 +529,14 @@ const Dashboard = ({ admin, onLogout }) => {
 
     const updateTimelineItem = async () => {
         if (!editTimelineItem?.time || !editTimelineItem?.activity) { alert('Please fill time and activity'); return; }
-        setSaving(true);
+        setTimelineSaving(true);
         try {
             await axios.put(`${API_URL}/timeline/${editTimelineItem._id}`, editTimelineItem, authHeader);
             setShowEditTimelineModal(false);
             setEditTimelineItem(null);
             fetchData();
         } catch (err) { alert('Failed to update timeline item'); }
-        finally { setSaving(false); }
+        finally { setTimelineSaving(false); }
     };
 
     const filteredMemories = memories.filter(m =>
@@ -549,6 +559,7 @@ const Dashboard = ({ admin, onLogout }) => {
         switch (activeTab) {
             case 'dashboard': return 'Dashboard';
             case 'memories': return 'Memories';
+            case 'timeline': return 'Timeline';
             case 'messages': return 'Messages';
             case 'settings': return 'Settings';
             default: return 'Dashboard';
@@ -714,6 +725,66 @@ const Dashboard = ({ admin, onLogout }) => {
                         </div>
                     )}
 
+                    {/* Timeline Tab */}
+                    {activeTab === 'timeline' && (
+                        <div style={{ background: '#fff', borderRadius: 16, padding: isMobile ? 16 : 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+                                <h2 style={{ margin: 0, color: '#1e293b', fontSize: isMobile ? '1rem' : '1.1rem' }}>💖 Timeline Manager</h2>
+                                <button onClick={() => setShowAddTimelineModal(true)} style={{
+                                    padding: '10px 20px', borderRadius: 10, border: 'none',
+                                    background: 'linear-gradient(135deg, #ec4899, #db2777)', color: '#fff',
+                                    fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem',
+                                    boxShadow: '0 4px 15px rgba(236, 72, 153, 0.4)',
+                                }}>➕ Add Moment</button>
+                            </div>
+
+                            {timelineItems.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: 48, color: '#64748b' }}>
+                                    <span style={{ fontSize: 40, display: 'block', marginBottom: 12 }}>💕</span>
+                                    <p>No timeline items yet. Click "Add Moment" to create one!</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                    {timelineItems.map((item, idx) => (
+                                        <div key={item._id} style={{
+                                            padding: isMobile ? 12 : 16,
+                                            background: 'linear-gradient(135deg, #fff5f9 0%, #ffe8f3 100%)',
+                                            borderRadius: 12,
+                                            borderLeft: '4px solid #ec4899',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            flexWrap: 'wrap',
+                                            gap: 12,
+                                        }}>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
+                                                    <span style={{
+                                                        background: 'linear-gradient(135deg, #ec4899, #db2777)',
+                                                        color: '#fff',
+                                                        padding: '4px 10px',
+                                                        borderRadius: 20,
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 600,
+                                                    }}>⏰ {item.time}</span>
+                                                    <span style={{ color: '#9ca3af', fontSize: '0.7rem' }}>#{idx + 1}</span>
+                                                </div>
+                                                <h4 style={{ margin: '6px 0 4px', color: '#be185d', fontSize: '0.95rem' }}>{item.activity}</h4>
+                                                {item.details && <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>{item.details}</p>}
+                                            </div>
+                                            <div style={{ display: 'flex', gap: 6 }}>
+                                                <button onClick={() => { setEditTimelineItem({ ...item }); setShowEditTimelineModal(true); }}
+                                                    style={{ padding: '8px 12px', borderRadius: 8, border: 'none', background: '#22c55e', color: '#fff', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}>Edit</button>
+                                                <button onClick={() => deleteTimelineItem(item._id)}
+                                                    style={{ padding: '8px 12px', borderRadius: 8, border: 'none', background: '#ef4444', color: '#fff', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}>🗑️</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {/* Settings Tab */}
                     {activeTab === 'settings' && settings && (
                         <div style={{ background: '#fff', borderRadius: 16, padding: isMobile ? 16 : 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
@@ -851,6 +922,72 @@ const Dashboard = ({ admin, onLogout }) => {
                             <button onClick={() => setShowEditModal(false)} style={{ flex: 1, padding: 14, borderRadius: 10, border: '2px solid #e5e7eb', background: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Cancel</button>
                             <button onClick={updateMemory} disabled={saving} style={{ flex: 1, padding: 14, borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontWeight: 600, cursor: 'pointer', opacity: saving ? 0.7 : 1, fontSize: '0.9rem' }}>
                                 {saving ? 'Saving...' : 'Save'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Add Timeline Modal */}
+            {showAddTimelineModal && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001, padding: 16 }} onClick={() => setShowAddTimelineModal(false)}>
+                    <div style={{ background: '#fff', borderRadius: 16, padding: isMobile ? 20 : 32, width: '100%', maxWidth: 480, maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+                        <h2 style={{ margin: '0 0 20px', color: '#be185d', fontSize: '1.1rem', textAlign: 'center' }}>💖 Add New Moment</h2>
+                        <div style={{ marginBottom: 16 }}>
+                            <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: '0.9rem', color: '#be185d' }}>⏰ Time *</label>
+                            <input type="text" value={newTimelineItem.time} onChange={(e) => setNewTimelineItem({ ...newTimelineItem, time: e.target.value })}
+                                placeholder="e.g., 09:00 AM" style={{ width: '100%', padding: 12, borderRadius: 8, border: '2px solid #ec4899', boxSizing: 'border-box', fontSize: '16px' }} />
+                        </div>
+                        <div style={{ marginBottom: 16 }}>
+                            <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: '0.9rem', color: '#be185d' }}>💫 Activity *</label>
+                            <input type="text" value={newTimelineItem.activity} onChange={(e) => setNewTimelineItem({ ...newTimelineItem, activity: e.target.value })}
+                                placeholder="e.g., Coffee Date ☕" style={{ width: '100%', padding: 12, borderRadius: 8, border: '2px solid #ec4899', boxSizing: 'border-box', fontSize: '16px' }} />
+                        </div>
+                        <div style={{ marginBottom: 20 }}>
+                            <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: '0.9rem', color: '#be185d' }}>📝 Details (Optional)</label>
+                            <textarea value={newTimelineItem.details} onChange={(e) => setNewTimelineItem({ ...newTimelineItem, details: e.target.value })}
+                                placeholder="Describe this moment..." rows={3}
+                                style={{ width: '100%', padding: 12, borderRadius: 8, border: '2px solid #ec4899', boxSizing: 'border-box', resize: 'vertical', fontSize: '16px' }} />
+                        </div>
+                        <div style={{ display: 'flex', gap: 12 }}>
+                            <button onClick={() => { setShowAddTimelineModal(false); setNewTimelineItem({ time: '', activity: '', details: '' }); }}
+                                style={{ flex: 1, padding: 14, borderRadius: 10, border: '2px solid #e5e7eb', background: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Cancel</button>
+                            <button onClick={addTimelineItem} disabled={timelineSaving}
+                                style={{ flex: 1, padding: 14, borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #ec4899, #db2777)', color: '#fff', fontWeight: 600, cursor: 'pointer', opacity: timelineSaving ? 0.7 : 1, fontSize: '0.9rem' }}>
+                                {timelineSaving ? 'Adding...' : '💖 Add'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Timeline Modal */}
+            {showEditTimelineModal && editTimelineItem && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001, padding: 16 }} onClick={() => setShowEditTimelineModal(false)}>
+                    <div style={{ background: '#fff', borderRadius: 16, padding: isMobile ? 20 : 32, width: '100%', maxWidth: 480, maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+                        <h2 style={{ margin: '0 0 20px', color: '#be185d', fontSize: '1.1rem', textAlign: 'center' }}>✏️ Edit Moment</h2>
+                        <div style={{ marginBottom: 16 }}>
+                            <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: '0.9rem', color: '#be185d' }}>⏰ Time *</label>
+                            <input type="text" value={editTimelineItem.time} onChange={(e) => setEditTimelineItem({ ...editTimelineItem, time: e.target.value })}
+                                placeholder="e.g., 09:00 AM" style={{ width: '100%', padding: 12, borderRadius: 8, border: '2px solid #ec4899', boxSizing: 'border-box', fontSize: '16px' }} />
+                        </div>
+                        <div style={{ marginBottom: 16 }}>
+                            <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: '0.9rem', color: '#be185d' }}>💫 Activity *</label>
+                            <input type="text" value={editTimelineItem.activity} onChange={(e) => setEditTimelineItem({ ...editTimelineItem, activity: e.target.value })}
+                                placeholder="e.g., Coffee Date ☕" style={{ width: '100%', padding: 12, borderRadius: 8, border: '2px solid #ec4899', boxSizing: 'border-box', fontSize: '16px' }} />
+                        </div>
+                        <div style={{ marginBottom: 20 }}>
+                            <label style={{ display: 'block', marginBottom: 6, fontWeight: 600, fontSize: '0.9rem', color: '#be185d' }}>📝 Details (Optional)</label>
+                            <textarea value={editTimelineItem.details} onChange={(e) => setEditTimelineItem({ ...editTimelineItem, details: e.target.value })}
+                                placeholder="Describe this moment..." rows={3}
+                                style={{ width: '100%', padding: 12, borderRadius: 8, border: '2px solid #ec4899', boxSizing: 'border-box', resize: 'vertical', fontSize: '16px' }} />
+                        </div>
+                        <div style={{ display: 'flex', gap: 12 }}>
+                            <button onClick={() => { setShowEditTimelineModal(false); setEditTimelineItem(null); }}
+                                style={{ flex: 1, padding: 14, borderRadius: 10, border: '2px solid #e5e7eb', background: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Cancel</button>
+                            <button onClick={updateTimelineItem} disabled={timelineSaving}
+                                style={{ flex: 1, padding: 14, borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: '#fff', fontWeight: 600, cursor: 'pointer', opacity: timelineSaving ? 0.7 : 1, fontSize: '0.9rem' }}>
+                                {timelineSaving ? 'Saving...' : '💾 Save'}
                             </button>
                         </div>
                     </div>
