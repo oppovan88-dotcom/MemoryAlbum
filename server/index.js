@@ -361,9 +361,9 @@ app.post('/api/memories', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Title is required' });
         }
 
-        // Get highest order number to put new memory at the end
-        const lastMemory = await Memory.findOne().sort({ order: -1 });
-        const newOrder = (lastMemory && typeof lastMemory.order === 'number') ? lastMemory.order + 1 : 0;
+        // Get lowest order number to put new memory at the TOP
+        const firstMemory = await Memory.findOne().sort({ order: 1 });
+        const newOrder = (firstMemory && typeof firstMemory.order === 'number') ? firstMemory.order - 1 : 0;
 
         const memory = await Memory.create({
             title,
