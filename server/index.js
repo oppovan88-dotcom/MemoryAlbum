@@ -466,14 +466,15 @@ app.put('/api/memories/reorder-all', authMiddleware, async (req, res) => {
 
         const bulkOps = orders.map(item => ({
             updateOne: {
-                filter: { _id: item.id },
+                // Use mongoose.Types.ObjectId to ensure correct ID lookup in bulkWrite
+                filter: { _id: new mongoose.Types.ObjectId(item.id) },
                 update: { $set: { order: item.order } }
             }
         }));
 
-        await Memory.bulkWrite(bulkOps);
-        console.log('✅ Memories reordered successfully via bulkWrite');
-        res.json({ success: true });
+        const result = await Memory.bulkWrite(bulkOps);
+        console.log(`✅ Memories reordered: ${result.modifiedCount} updated`);
+        res.json({ success: true, modifiedCount: result.modifiedCount });
     } catch (error) {
         console.error('❌ Bulk reorder error:', error);
         res.status(500).json({ error: 'Server error' });
@@ -691,14 +692,14 @@ app.put('/api/timeline/reorder-all', authMiddleware, async (req, res) => {
 
         const bulkOps = orders.map(item => ({
             updateOne: {
-                filter: { _id: item.id },
+                filter: { _id: new mongoose.Types.ObjectId(item.id) },
                 update: { $set: { order: item.order } }
             }
         }));
 
-        await Timeline.bulkWrite(bulkOps);
-        console.log('✅ Timeline reordered successfully');
-        res.json({ message: 'Timeline reordered successfully' });
+        const result = await Timeline.bulkWrite(bulkOps);
+        console.log(`✅ Timeline reordered: ${result.modifiedCount} updated`);
+        res.json({ message: 'Timeline reordered successfully', modifiedCount: result.modifiedCount });
     } catch (error) {
         console.error('❌ Timeline reorder error:', error);
         res.status(500).json({ error: 'Server error' });

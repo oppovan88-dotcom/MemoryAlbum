@@ -562,12 +562,17 @@ const Dashboard = ({ admin, onLogout }) => {
 
         try {
             const token = localStorage.getItem('adminToken');
-            await axios.put(`${API_URL}/memories/reorder-all`, {
+            const res = await axios.put(`${API_URL}/memories/reorder-all`, {
                 orders: updatedMemories.map(m => ({ id: m._id, order: m.order }))
             }, { headers: { Authorization: `Bearer ${token}` } });
-            console.log('✅ Memories reordered on server');
+
+            if (res.data.success) {
+                console.log(`✅ Order saved! ${res.data.modifiedCount} items updated.`);
+            }
         } catch (err) {
             console.error('❌ Reorder failed:', err.response?.data || err.message);
+            alert('Failed to save the new order. Please check your internet and try again.');
+            fetchData(); // Rollback on actual failure
         }
 
         setDragIndex(null);
