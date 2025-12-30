@@ -623,9 +623,13 @@ app.post('/api/timeline', authMiddleware, async (req, res) => {
     try {
         const { time, activity, details } = req.body;
 
+        if (!time || !activity) {
+            return res.status(400).json({ error: 'Time and activity are required' });
+        }
+
         // Get highest order number to put new item at the end
         const lastItem = await Timeline.findOne().sort({ order: -1 });
-        const newOrder = lastItem ? lastItem.order + 1 : 0;
+        const newOrder = (lastItem && typeof lastItem.order === 'number') ? lastItem.order + 1 : 0;
 
         const timelineItem = await Timeline.create({
             time,
@@ -633,9 +637,32 @@ app.post('/api/timeline', authMiddleware, async (req, res) => {
             details: details || '',
             order: newOrder
         });
-        res.json(timelineItem);
+
+        console.log('✅ Timeline item created:', timelineItem._id);
+        res.status(201).json(timelineItem);
     } catch (error) {
-        res.status(500).json({ error: 'Server error' });
+        console.error('❌ Timeline creation error:', error);
+        res.status(500).json({ error: error.message || 'Server error' });
+    }
+});
+
+// Bulk reorder timeline items - MUST be before any :id routes to avoid conflict
+app.put('/api/timeline/reorder-all', authMiddleware, async (req, res) => {
+    try {
+        const { orders } = req.body; // Array of { id, order }
+        if (!orders || !Array.isArray(orders)) {
+            return res.status(400).json({ error: 'Invalid orders data' });
+        }
+
+        const updatePromises = orders.map(item =>
+            Timeline.findByIdAndUpdate(item.id, { order: item.order })
+        );
+
+        await Promise.all(updatePromises);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('❌ Timeline bulk reorder error:', error);
+        res.status(500).json({ error: error.message || 'Server error' });
     }
 });
 
@@ -645,14 +672,15 @@ app.put('/api/timeline/:id', authMiddleware, async (req, res) => {
         const timelineItem = await Timeline.findByIdAndUpdate(
             req.params.id,
             { time, activity, details, order, isCompleted },
-            { new: true }
+            { new: true, runValidators: true }
         );
         if (!timelineItem) {
             return res.status(404).json({ error: 'Timeline item not found' });
         }
         res.json(timelineItem);
     } catch (error) {
-        res.status(500).json({ error: 'Server error' });
+        console.error('❌ Timeline update error:', error);
+        res.status(500).json({ error: error.message || 'Server error' });
     }
 });
 
@@ -702,25 +730,6 @@ app.put('/api/timeline/:id/move-down', authMiddleware, async (req, res) => {
             await Timeline.findByIdAndUpdate(nextItem._id, { order: tempOrder });
         }
 
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Bulk reorder timeline items
-app.put('/api/timeline/reorder-all', authMiddleware, async (req, res) => {
-    try {
-        const { orders } = req.body; // Array of { id, order }
-        if (!orders || !Array.isArray(orders)) {
-            return res.status(400).json({ error: 'Invalid orders data' });
-        }
-
-        const updatePromises = orders.map(item =>
-            Timeline.findByIdAndUpdate(item.id, { order: item.order })
-        );
-
-        await Promise.all(updatePromises);
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
