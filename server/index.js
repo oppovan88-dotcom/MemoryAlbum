@@ -381,6 +381,31 @@ app.post('/api/memories', authMiddleware, async (req, res) => {
     }
 });
 
+// Bulk reorder memories - MUST be before :id routes to avoid route conflict!
+app.put('/api/memories/reorder-all', authMiddleware, async (req, res) => {
+    try {
+        const { orders } = req.body; // Array of { id, order }
+
+        if (!orders || !Array.isArray(orders)) {
+            return res.status(400).json({ error: 'Invalid orders data' });
+        }
+
+        // Use Promise.all with findByIdAndUpdate for better stability and auto-casting of IDs
+        const updatePromises = orders.map(async (item) => {
+            if (!item.id) return null;
+            return Memory.findByIdAndUpdate(item.id, { $set: { order: item.order } }, { new: true });
+        });
+
+        await Promise.all(updatePromises);
+
+        console.log(`✅ Memories reordered: ${orders.length} items processed`);
+        res.json({ success: true, count: orders.length });
+    } catch (error) {
+        console.error('❌ Bulk reorder error:', error);
+        res.status(500).json({ error: error.message || 'Server error' });
+    }
+});
+
 app.put('/api/memories/:id', authMiddleware, async (req, res) => {
     try {
         const memory = await Memory.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -452,31 +477,6 @@ app.put('/api/memories/:id/move-down', authMiddleware, async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Bulk reorder memories (update all order values at once) - MUST be before :id route
-app.put('/api/memories/reorder-all', authMiddleware, async (req, res) => {
-    try {
-        const { orders } = req.body; // Array of { id, order }
-
-        if (!orders || !Array.isArray(orders)) {
-            return res.status(400).json({ error: 'Invalid orders data' });
-        }
-
-        // Use Promise.all with findByIdAndUpdate for better stability and auto-casting of IDs
-        const updatePromises = orders.map(async (item) => {
-            if (!item.id) return null;
-            return Memory.findByIdAndUpdate(item.id, { $set: { order: item.order } }, { new: true });
-        });
-
-        await Promise.all(updatePromises);
-
-        console.log(`✅ Memories reordered: ${orders.length} items processed`);
-        res.json({ success: true, count: orders.length });
-    } catch (error) {
-        console.error('❌ Bulk reorder error:', error);
-        res.status(500).json({ error: error.message || 'Server error' });
     }
 });
 
