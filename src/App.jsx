@@ -115,12 +115,12 @@ function App() {
       { icon: "🌠", cls: "h6" },
     ]
     : [
-      { icon: "🎄", cls: "h1" },
-      { icon: "🎅", cls: "h2" },
+      { icon: "🎆", cls: "h1" },
+      { icon: "🥂", cls: "h2" },
       { icon: "⭐", cls: "h3" },
-      { icon: "🎁", cls: "h4" },
-      { icon: "❄️", cls: "h5" },
-      { icon: "🔔", cls: "h6" },
+      { icon: "🎊", cls: "h4" },
+      { icon: "✨", cls: "h5" },
+      { icon: "🥂", cls: "h6" },
     ];
 
   return (

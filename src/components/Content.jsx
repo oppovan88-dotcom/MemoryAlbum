@@ -4,13 +4,13 @@ import Mail from "@/components/Mail";
 import Relationship from "@/components/Relationship";
 import Plan from "@/components/Plan";
 import MoneySavingYearPlan from "@/components/Moneysavingyearplan";
-import Christmas from "@/components/Christmas";
+import NewYear from "@/components/NewYear";
 
 const Content = ({ nightMode }) => {
     return (
         <div>
-            {/* 🎄 Christmas Celebration Banner */}
-            <Christmas nightMode={nightMode} />
+            {/* 🎆 Happy New Year 2026 Countdown Banner */}
+            <NewYear nightMode={nightMode} />
             {/* <Slide /> */}
             <Relationship nightMode={nightMode} />
             <Memory nightMode={nightMode} />
