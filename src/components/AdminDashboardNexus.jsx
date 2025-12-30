@@ -364,18 +364,29 @@ const Dashboard = ({ admin, onLogout }) => {
 
     const fetchData = async () => {
         try {
-            const [statsRes, memoriesRes, messagesRes, settingsRes, timelineRes] = await Promise.all([
+            // Fetch each endpoint separately to handle individual errors gracefully
+            const results = await Promise.allSettled([
                 axios.get(`${API_URL}/dashboard/stats`, authHeader),
                 axios.get(`${API_URL}/memories`),
                 axios.get(`${API_URL}/messages`, authHeader),
                 axios.get(`${API_URL}/settings`),
                 axios.get(`${API_URL}/timeline`),
             ]);
-            setStats(statsRes.data);
-            setMemories(memoriesRes.data);
-            setMessages(messagesRes.data);
-            setSettings(settingsRes.data);
-            setTimelineItems(timelineRes.data);
+
+            // Extract data from successful responses
+            if (results[0].status === 'fulfilled') setStats(results[0].value.data);
+            if (results[1].status === 'fulfilled') setMemories(results[1].value.data);
+            if (results[2].status === 'fulfilled') setMessages(results[2].value.data);
+            if (results[3].status === 'fulfilled') setSettings(results[3].value.data);
+            if (results[4].status === 'fulfilled') setTimelineItems(results[4].value.data);
+
+            // Log any errors for debugging
+            results.forEach((result, index) => {
+                if (result.status === 'rejected') {
+                    const endpoints = ['stats', 'memories', 'messages', 'settings', 'timeline'];
+                    console.error(`Failed to fetch ${endpoints[index]}:`, result.reason?.message);
+                }
+            });
         } catch (err) { console.error('Error fetching data:', err); }
         finally { setLoading(false); }
     };
