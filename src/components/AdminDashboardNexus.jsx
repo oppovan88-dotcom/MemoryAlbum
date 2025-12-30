@@ -636,6 +636,30 @@ const Dashboard = ({ admin, onLogout }) => {
         }
     };
 
+    const moveMemoryItem = async (index, direction) => {
+        const newMemories = [...memories];
+        if (direction === 'up' && index > 0) {
+            [newMemories[index], newMemories[index - 1]] = [newMemories[index - 1], newMemories[index]];
+        } else if (direction === 'down' && index < newMemories.length - 1) {
+            [newMemories[index], newMemories[index + 1]] = [newMemories[index + 1], newMemories[index]];
+        } else {
+            return;
+        }
+
+        // Optimistically update UI
+        const reordered = newMemories.map((m, idx) => ({ ...m, order: idx }));
+        setMemories(reordered);
+
+        try {
+            await axios.put(`${API_URL}/memories/reorder-all`, {
+                orders: reordered.map(m => ({ id: m._id, order: m.order }))
+            }, authHeader);
+        } catch (err) {
+            console.error('Failed to reorder memories:', err);
+            fetchData(); // Rollback
+        }
+    };
+
     const filteredMemories = memories.filter(m =>
         m.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         m.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -777,7 +801,13 @@ const Dashboard = ({ admin, onLogout }) => {
                                                         {new Date(memory.date || memory.createdAt).toLocaleDateString()}
                                                     </td>
                                                     <td style={{ padding: '12px 24px' }}>
-                                                        <div style={{ display: 'flex', gap: 6 }}>
+                                                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                                <button onClick={() => moveMemoryItem(idx, 'up')} disabled={idx === 0}
+                                                                    style={{ padding: '4px 8px', borderRadius: 6, border: 'none', background: idx === 0 ? '#e2e8f0' : '#8b5cf6', color: '#fff', fontSize: '0.7rem', cursor: idx === 0 ? 'not-allowed' : 'pointer', fontWeight: 700 }}>↑</button>
+                                                                <button onClick={() => moveMemoryItem(idx, 'down')} disabled={idx === memories.length - 1}
+                                                                    style={{ padding: '4px 8px', borderRadius: 6, border: 'none', background: idx === memories.length - 1 ? '#e2e8f0' : '#8b5cf6', color: '#fff', fontSize: '0.7rem', cursor: idx === memories.length - 1 ? 'not-allowed' : 'pointer', fontWeight: 700 }}>↓</button>
+                                                            </div>
                                                             <button onClick={() => { setEditMemory({ ...memory }); setShowEditModal(true); }} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: '#6366f1', color: '#fff', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500 }}>Edit</button>
                                                             <button onClick={() => deleteMemory(memory._id)} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: '#ef4444', color: '#fff', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500 }}>Delete</button>
                                                         </div>
