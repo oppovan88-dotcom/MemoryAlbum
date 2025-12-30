@@ -347,9 +347,10 @@ app.get('/api/memories', async (req, res) => {
 
 app.post('/api/memories', authMiddleware, async (req, res) => {
     try {
-        // Get lowest order number and subtract 1 to put new memory first
-        const firstMemory = await Memory.findOne().sort({ order: 1 });
-        const newOrder = firstMemory ? firstMemory.order - 1 : 0;
+        // Get highest order number to put new memory at the end
+        const lastMemory = await Memory.findOne().sort({ order: -1 });
+        const newOrder = lastMemory ? lastMemory.order + 1 : 0;
+
         const memory = await Memory.create({ ...req.body, order: newOrder });
         res.status(201).json(memory);
     } catch (error) {
