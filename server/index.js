@@ -134,7 +134,19 @@ const siteSettingsSchema = new mongoose.Schema({
     person2Tagline: { type: String, default: 'Ry Ft Rith' },
     // Relationship
     relationshipDate: { type: String, default: '2025-05-13' },
+    // Timeline
+    timelineTitle: { type: String, default: 'Love Timeline' },
     updatedAt: { type: Date, default: Date.now }
+});
+
+// Timeline Schema (for love timeline)
+const timelineSchema = new mongoose.Schema({
+    time: { type: String, required: true },
+    activity: { type: String, required: true },
+    details: { type: String, default: '' },
+    order: { type: Number, default: 0 },
+    isCompleted: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
 });
 
 const Admin = mongoose.model('Admin', adminSchema);
@@ -143,6 +155,7 @@ const Visitor = mongoose.model('Visitor', visitorSchema);
 const Message = mongoose.model('Message', messageSchema);
 const Stats = mongoose.model('Stats', statsSchema);
 const SiteSettings = mongoose.model('SiteSettings', siteSettingsSchema);
+const Timeline = mongoose.model('Timeline', timelineSchema);
 
 // ============== MIDDLEWARE ==============
 
@@ -188,6 +201,28 @@ const createDefaultAdmin = async () => {
         }
     } catch (error) {
         console.error('Error creating default admin:', error);
+    }
+};
+
+// Create default timeline items on startup
+const createDefaultTimeline = async () => {
+    try {
+        const existingTimeline = await Timeline.find();
+        if (existingTimeline.length === 0) {
+            const defaultItems = [
+                { time: "07:00 AM", activity: "Messenger and TikTok 📱", details: "Good Morning", order: 0 },
+                { time: "08:30 AM", activity: "Make Up 💄", details: "Repair Yourself to go", order: 1 },
+                { time: "09:00 AM", activity: "Arrived 🚗", details: "Go To Chip Mong (Watched Movie)", order: 2 },
+                { time: "10:00 AM", activity: "Movie Time 🎬", details: "រឿង សងដៃខ្ញុំវិញ", order: 3 },
+                { time: "12:00 PM", activity: "Movie Time 🍿", details: "F1 Hall Gaint", order: 4 },
+                { time: "03:00 PM", activity: "Relaxed 🎮", details: "Play Games and Eating some Food", order: 5 },
+                { time: "05:00 PM", activity: "Back Home 🏠", details: "We go home and talking some fun", order: 6 }
+            ];
+            await Timeline.insertMany(defaultItems);
+            console.log('✅ Default timeline items created');
+        }
+    } catch (error) {
+        console.error('Error creating default timeline:', error);
     }
 };
 
@@ -395,7 +430,31 @@ app.put('/api/memories/:id/move-down', authMiddleware, async (req, res) => {
     }
 });
 
-// Reorder memory (drag and drop)
+// Bulk reorder memories (update all order values at once) - MUST be before :id route
+app.put('/api/memories/reorder-all', authMiddleware, async (req, res) => {
+    try {
+        const { orders } = req.body; // Array of { id, order }
+
+        if (!orders || !Array.isArray(orders)) {
+            return res.status(400).json({ error: 'Invalid orders data' });
+        }
+
+        // Update all memories with their new order values
+        const updatePromises = orders.map(item =>
+            Memory.findByIdAndUpdate(item.id, { order: item.order })
+        );
+
+        await Promise.all(updatePromises);
+
+        console.log('Bulk reorder success:', orders.length, 'memories updated');
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Bulk reorder error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Reorder memory (drag and drop) - single swap
 app.put('/api/memories/:id/reorder', authMiddleware, async (req, res) => {
     try {
         const { targetId } = req.body;
@@ -548,10 +607,65 @@ app.put('/api/settings', authMiddleware, async (req, res) => {
     }
 });
 
+// Timeline Routes
+app.get('/api/timeline', async (req, res) => {
+    try {
+        const timeline = await Timeline.find().sort({ order: 1, createdAt: 1 });
+        res.json(timeline);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.post('/api/timeline', authMiddleware, async (req, res) => {
+    try {
+        const { time, activity, details, order } = req.body;
+        const timelineItem = await Timeline.create({
+            time,
+            activity,
+            details: details || '',
+            order: order || 0
+        });
+        res.json(timelineItem);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/timeline/:id', authMiddleware, async (req, res) => {
+    try {
+        const { time, activity, details, order, isCompleted } = req.body;
+        const timelineItem = await Timeline.findByIdAndUpdate(
+            req.params.id,
+            { time, activity, details, order, isCompleted },
+            { new: true }
+        );
+        if (!timelineItem) {
+            return res.status(404).json({ error: 'Timeline item not found' });
+        }
+        res.json(timelineItem);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.delete('/api/timeline/:id', authMiddleware, async (req, res) => {
+    try {
+        const timelineItem = await Timeline.findByIdAndDelete(req.params.id);
+        if (!timelineItem) {
+            return res.status(404).json({ error: 'Timeline item not found' });
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
     console.log(`🚀 Server running on port ${PORT}`);
     await createDefaultAdmin();
+    await createDefaultTimeline();
 });

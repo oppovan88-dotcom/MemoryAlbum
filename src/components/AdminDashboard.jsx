@@ -963,6 +963,31 @@ const Dashboard = ({ admin, onLogout }) => {
                             />
                         </div>
 
+                        {/* Timeline Title */}
+                        <div style={{ marginBottom: 24, padding: 16, background: 'linear-gradient(135deg, #fdf2f8, #fff0fa)', borderRadius: 12, border: '2px solid #ff69b4' }}>
+                            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: '#ff69b4' }}>
+                                💖 Timeline Title ✨
+                            </label>
+                            <p style={{ margin: '0 0 12px', fontSize: '0.85rem', color: '#666' }}>
+                                Customize the title shown on your Love Timeline page
+                            </p>
+                            <input
+                                type="text"
+                                value={settings.timelineTitle || 'Love Timeline'}
+                                onChange={(e) => setSettings({ ...settings, timelineTitle: e.target.value })}
+                                placeholder="Love Timeline"
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    borderRadius: 8,
+                                    border: '2px solid #ff69b4',
+                                    fontSize: '1rem',
+                                    boxSizing: 'border-box',
+                                    background: '#fff',
+                                }}
+                            />
+                        </div>
+
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
                             {/* Person 1 */}
                             <div style={{ padding: 20, background: '#f0fdf4', borderRadius: 12, border: '2px solid #22c55e' }}>

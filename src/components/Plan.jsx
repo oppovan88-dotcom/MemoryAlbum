@@ -1,36 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import axios from 'axios';
 
-const planItems = [
-  {
-    time: "07:00 AM",
-    activity: "Messenger and TikTok 📱",
-    details: "Good Morning",
-  },
-  {
-    time: "08:30 AM",
-    activity: "Make Up 💄",
-    details: "Repair Yourself to go",
-  },
-  {
-    time: "09:00 AM",
-    activity: "Arrived 🚗",
-    details: "Go To Chip Mong (Watched Movie)",
-  },
-  { time: "10:00 AM", activity: "Movie Time 🎬", details: "រឿង សងដៃខ្ញុំវិញ" },
-  { time: "12:00 PM", activity: "Movie Time 🍿", details: "F1 Hall Gaint" },
-  {
-    time: "03:00 PM",
-    activity: "Relaxed 🎮",
-    details: "Play Games and Eating some Food",
-  },
-  {
-    time: "05:00 PM",
-    activity: "Back Home 🏠",
-    details: "We go home and talking some fun",
-  },
-];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const BlueTick = ({ nightMode }) => (
   <span
@@ -52,9 +25,41 @@ const BlueTick = ({ nightMode }) => (
 );
 
 function Plan({ nightMode }) {
+  const [planItems, setPlanItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [timelineTitle, setTimelineTitle] = useState('Love Timeline');
+
   useEffect(() => {
     AOS.init({ duration: 800, once: true, offset: 60 });
   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch both timeline items and settings in parallel
+        const [timelineResponse, settingsResponse] = await Promise.all([
+          axios.get(`${API_URL}/timeline`),
+          axios.get(`${API_URL}/settings`)
+        ]);
+
+        setPlanItems(timelineResponse.data);
+
+        // Use the dynamic timeline title from settings
+        if (settingsResponse.data?.timelineTitle) {
+          setTimelineTitle(settingsResponse.data.timelineTitle);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        // Fallback to empty array if API fails
+        setPlanItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
 
   // Card background: pink in light mode, galaxy in night mode
   const cardBg = nightMode
@@ -104,7 +109,7 @@ function Plan({ nightMode }) {
           >
             💖
           </span>
-          Love Timeline
+          {timelineTitle}
           <span
             role="img"
             aria-label="sparkle"
@@ -120,77 +125,89 @@ function Plan({ nightMode }) {
         </span>
       </div>
 
-      {/* Timeline Cards */}
-      <div className="row g-2">
-        {planItems.map((item, idx) => (
-          <div
-            key={idx}
-            className="col-12 col-md-4 d-flex"
-            data-aos="fade-up"
-            data-aos-delay={idx * 60}
-          >
-            <div
-              className="w-100"
-              style={{
-                borderLeft: cardBorder,
-                background: cardBg,
-                borderRadius: 12,
-                padding: "11px 14px",
-                marginBottom: 2,
-                minHeight: 80,
-                fontFamily: "'Montserrat', sans-serif",
-                boxShadow: cardShadow,
-                transition: "box-shadow 0.14s, transform 0.14s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = cardShadowHover;
-                e.currentTarget.style.transform =
-                  "translateY(-2px) scale(1.03)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = cardShadow;
-                e.currentTarget.style.transform = "none";
-              }}
-            >
+      {/* Loading State */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '16px' }}>💖✨</div>
+          <p style={{ color: nightMode ? '#b993ff' : '#ff69b4', fontSize: '1.1rem' }}>
+            Loading {timelineTitle}...
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Timeline Cards */}
+          <div className="row g-2">
+            {planItems.map((item, idx) => (
               <div
-                style={{
-                  fontWeight: 700,
-                  color: timeColor,
-                  fontSize: 14.2,
-                  marginBottom: 1,
-                  letterSpacing: 0.7,
-                }}
+                key={item._id || idx}
+                className="col-12 col-md-4 d-flex"
+                data-aos="fade-up"
+                data-aos-delay={idx * 60}
               >
-                {item.time}
+                <div
+                  className="w-100"
+                  style={{
+                    borderLeft: cardBorder,
+                    background: cardBg,
+                    borderRadius: 12,
+                    padding: "11px 14px",
+                    marginBottom: 2,
+                    minHeight: 80,
+                    fontFamily: "'Montserrat', sans-serif",
+                    boxShadow: cardShadow,
+                    transition: "box-shadow 0.14s, transform 0.14s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = cardShadowHover;
+                    e.currentTarget.style.transform =
+                      "translateY(-2px) scale(1.03)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = cardShadow;
+                    e.currentTarget.style.transform = "none";
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      color: timeColor,
+                      fontSize: 14.2,
+                      marginBottom: 1,
+                      letterSpacing: 0.7,
+                    }}
+                  >
+                    {item.time}
+                  </div>
+                  <div
+                    style={{
+                      fontWeight: 600,
+                      color: activityColor,
+                      fontSize: 13.8,
+                      marginBottom: 1,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>{item.activity}</span>
+                    <BlueTick nightMode={nightMode} />
+                  </div>
+                  <div
+                    style={{
+                      color: detailsColor,
+                      fontSize: 12.8,
+                      marginTop: 1,
+                      opacity: 0.94,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {item.details}
+                  </div>
+                </div>
               </div>
-              <div
-                style={{
-                  fontWeight: 600,
-                  color: activityColor,
-                  fontSize: 13.8,
-                  marginBottom: 1,
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <span>{item.activity}</span>
-                <BlueTick nightMode={nightMode} />
-              </div>
-              <div
-                style={{
-                  color: detailsColor,
-                  fontSize: 12.8,
-                  marginTop: 1,
-                  opacity: 0.94,
-                  fontWeight: 500,
-                }}
-              >
-                {item.details}
-              </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
     </div>
   );
 }

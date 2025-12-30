@@ -7,6 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const navItems = [
     { id: 'dashboard', icon: '📊', label: 'Dashboard' },
     { id: 'memories', icon: '📷', label: 'Memories' },
+    { id: 'timeline', icon: '💖', label: 'Timeline' },
     { id: 'messages', icon: '💬', label: 'Messages' },
     { id: 'settings', icon: '⚙️', label: 'Settings' },
 ];
@@ -454,25 +455,29 @@ const Dashboard = ({ admin, onLogout }) => {
             return;
         }
 
-        // Optimistically update UI
-        const newMemories = [...memories];
-        const draggedIdx = memories.findIndex(m => m._id === draggedMemory._id);
-        const targetIdx = memories.findIndex(m => m._id === targetMemory._id);
+        // Create new array with proper reordering
+        const newFilteredMemories = [...filteredMemories];
+        const [movedItem] = newFilteredMemories.splice(dragIndex, 1);
+        newFilteredMemories.splice(dropIndex, 0, movedItem);
 
-        if (draggedIdx !== -1 && targetIdx !== -1) {
-            const [removed] = newMemories.splice(draggedIdx, 1);
-            newMemories.splice(targetIdx, 0, removed);
-            setMemories(newMemories);
-        }
+        // Update order values for all memories based on new positions
+        const updatedMemories = newFilteredMemories.map((m, index) => ({
+            ...m,
+            order: index
+        }));
 
-        // Save to backend
+        // Immediately update UI with new order
+        setMemories(updatedMemories);
+
+        // Save to backend - send all the new order values
         try {
-            await axios.put(`${API_URL}/memories/${draggedMemory._id}/reorder`, {
-                targetId: targetMemory._id
+            await axios.put(`${API_URL}/memories/reorder-all`, {
+                orders: updatedMemories.map(m => ({ id: m._id, order: m.order }))
             }, authHeader);
         } catch (err) {
             console.error('Reorder failed:', err);
-            fetchData(); // Refresh on error
+            // Refresh on error to get correct state from server
+            fetchData();
         }
 
         setDragIndex(null);
@@ -491,6 +496,37 @@ const Dashboard = ({ admin, onLogout }) => {
         try { await axios.put(`${API_URL}/settings`, settings, authHeader); alert('Settings saved!'); }
         catch (err) { alert('Failed to save'); }
         finally { setSettingsSaving(false); }
+    };
+
+    // Timeline functions
+    const addTimelineItem = async () => {
+        if (!newTimelineItem.time || !newTimelineItem.activity) { alert('Please fill time and activity'); return; }
+        setSaving(true);
+        try {
+            await axios.post(`${API_URL}/timeline`, newTimelineItem, authHeader);
+            setShowAddTimelineModal(false);
+            setNewTimelineItem({ time: '', activity: '', details: '' });
+            fetchData();
+        } catch (err) { alert('Failed to add timeline item'); }
+        finally { setSaving(false); }
+    };
+
+    const deleteTimelineItem = async (id) => {
+        if (!confirm('Delete this timeline item?')) return;
+        try { await axios.delete(`${API_URL}/timeline/${id}`, authHeader); fetchData(); }
+        catch (err) { console.error(err); }
+    };
+
+    const updateTimelineItem = async () => {
+        if (!editTimelineItem?.time || !editTimelineItem?.activity) { alert('Please fill time and activity'); return; }
+        setSaving(true);
+        try {
+            await axios.put(`${API_URL}/timeline/${editTimelineItem._id}`, editTimelineItem, authHeader);
+            setShowEditTimelineModal(false);
+            setEditTimelineItem(null);
+            fetchData();
+        } catch (err) { alert('Failed to update timeline item'); }
+        finally { setSaving(false); }
     };
 
     const filteredMemories = memories.filter(m =>
