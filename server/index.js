@@ -417,9 +417,42 @@ app.put('/api/memories/:id', authMiddleware, async (req, res) => {
 
 app.delete('/api/memories/:id', authMiddleware, async (req, res) => {
     try {
+        // First, find the memory to get the image URL
+        const memory = await Memory.findById(req.params.id);
+
+        if (!memory) {
+            return res.status(404).json({ error: 'Memory not found' });
+        }
+
+        // If there's a Cloudinary image, delete it
+        if (memory.imageUrl && memory.imageUrl.includes('cloudinary.com')) {
+            try {
+                // Extract public_id from Cloudinary URL
+                // URL format: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/filename.ext
+                const urlParts = memory.imageUrl.split('/');
+                const uploadIndex = urlParts.indexOf('upload');
+                if (uploadIndex !== -1) {
+                    // Get everything after 'upload/vXXX/' - this is the public_id with folder
+                    const publicIdWithExt = urlParts.slice(uploadIndex + 2).join('/');
+                    // Remove file extension
+                    const publicId = publicIdWithExt.replace(/\.[^/.]+$/, '');
+
+                    console.log('🗑️ Deleting Cloudinary image:', publicId);
+                    await cloudinary.uploader.destroy(publicId);
+                    console.log('✅ Cloudinary image deleted');
+                }
+            } catch (cloudErr) {
+                console.error('⚠️ Failed to delete Cloudinary image:', cloudErr.message);
+                // Continue with memory deletion even if Cloudinary deletion fails
+            }
+        }
+
+        // Delete the memory from database
         await Memory.findByIdAndDelete(req.params.id);
+        console.log('✅ Memory deleted:', req.params.id);
         res.json({ message: 'Memory deleted' });
     } catch (error) {
+        console.error('❌ Delete memory error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
