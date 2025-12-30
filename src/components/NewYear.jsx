@@ -124,10 +124,10 @@ const NewYear = ({ nightMode }) => {
             style={{
                 position: "relative",
                 minHeight: s.minHeight,
-                borderRadius: "30px",
-                margin: "20px auto",
+                borderRadius: screen === "mobile" ? "20px" : "30px",
+                margin: screen === "mobile" ? "10px auto" : "20px auto",
                 maxWidth: 1000,
-                width: "95%",
+                width: screen === "mobile" ? "96%" : "95%",
                 overflow: "hidden",
                 background: nightMode
                     ? "linear-gradient(135deg, #020617 0%, #1e1b4b 100%)"
@@ -139,12 +139,13 @@ const NewYear = ({ nightMode }) => {
                 justifyContent: "center",
                 textAlign: "center",
                 color: "#fff",
+                zIndex: 10,
             }}
         >
             {/* Animated Background Sparkles */}
             <div className="sparkles" />
 
-            <div style={{ position: "relative", zIndex: 2, padding: "20px" }}>
+            <div style={{ position: "relative", zIndex: 2, padding: screen === "mobile" ? "15px" : "20px" }}>
                 <div style={{ fontSize: "2rem", marginBottom: "10px" }}>🥂✨🎊</div>
 
                 <h1 style={{

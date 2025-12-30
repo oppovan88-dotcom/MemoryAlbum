@@ -306,7 +306,7 @@ const StatCard = ({ icon, label, value, color, subValue, isMobile }) => (
 );
 
 // ============== DRAGGABLE MEMORY CARD (Mobile) ==============
-const MemoryCard = ({ memory, index, onEdit, onDelete, onDragStart, onDragOver, onDrop, isDragging, dragOverIndex }) => (
+const MemoryCard = ({ memory, index, onEdit, onDelete, onDragStart, onDragOver, onDrop, isDragging, dragOverIndex, totalItems, onMove }) => (
     <div
         draggable
         onDragStart={(e) => onDragStart(e, index)}
@@ -324,8 +324,16 @@ const MemoryCard = ({ memory, index, onEdit, onDelete, onDragStart, onDragOver, 
         }}
     >
         <div style={{ display: 'flex', gap: 12, padding: 12, alignItems: 'center' }}>
-            {/* Drag Handle */}
-            <div style={{ fontSize: '1.2rem', color: '#9ca3af', cursor: 'grab', padding: '0 4px' }}>⋮⋮</div>
+            {/* Drag Handle & Move Buttons */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+                <div style={{ fontSize: '1rem', color: '#9ca3af', cursor: 'grab' }}>⋮⋮</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <button onClick={(e) => { e.stopPropagation(); onMove(index, 'up'); }} disabled={index === 0}
+                        style={{ padding: '6px 8px', borderRadius: 6, border: 'none', background: index === 0 ? '#e2e8f0' : '#8b5cf6', color: '#fff', fontSize: '0.7rem', cursor: index === 0 ? 'not-allowed' : 'pointer' }}>↑</button>
+                    <button onClick={(e) => { e.stopPropagation(); onMove(index, 'down'); }} disabled={index === totalItems - 1}
+                        style={{ padding: '6px 8px', borderRadius: 6, border: 'none', background: index === totalItems - 1 ? '#e2e8f0' : '#8b5cf6', color: '#fff', fontSize: '0.7rem', cursor: index === totalItems - 1 ? 'not-allowed' : 'pointer' }}>↓</button>
+                </div>
+            </div>
             {memory.imageUrl ? (
                 <img src={memory.imageUrl} alt="" style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
             ) : <div style={{ width: 60, height: 60, borderRadius: 8, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🖼️</div>}
@@ -335,9 +343,9 @@ const MemoryCard = ({ memory, index, onEdit, onDelete, onDragStart, onDragOver, 
                     📅 {new Date(memory.date || memory.createdAt).toLocaleDateString()}
                 </p>
             </div>
-            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ padding: '8px 12px', borderRadius: 8, border: 'none', background: '#6366f1', color: '#fff', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>Edit</button>
-                <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ padding: '8px 12px', borderRadius: 8, border: 'none', background: '#ef4444', color: '#fff', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>🗑️</button>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexDirection: 'column' }}>
+                <button onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ padding: '8px 10px', borderRadius: 8, border: 'none', background: '#6366f1', color: '#fff', fontSize: '0.7rem', fontWeight: 600 }}>Edit</button>
+                <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ padding: '8px 10px', borderRadius: 8, border: 'none', background: '#ef4444', color: '#fff', fontSize: '0.7rem', fontWeight: 600 }}>🗑️</button>
             </div>
         </div>
     </div>
@@ -613,11 +621,15 @@ const Dashboard = ({ admin, onLogout }) => {
     };
 
     const moveTimelineItem = async (index, direction) => {
+        // Find the actual item from the current view
+        const itemToMove = timelineItems[index];
+        const indexInAll = timelineItems.findIndex(t => t._id === itemToMove._id);
+
         const newItems = [...timelineItems];
-        if (direction === 'up' && index > 0) {
-            [newItems[index], newItems[index - 1]] = [newItems[index - 1], newItems[index]];
-        } else if (direction === 'down' && index < newItems.length - 1) {
-            [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
+        if (direction === 'up' && indexInAll > 0) {
+            [newItems[indexInAll], newItems[indexInAll - 1]] = [newItems[indexInAll - 1], newItems[indexInAll]];
+        } else if (direction === 'down' && indexInAll < newItems.length - 1) {
+            [newItems[indexInAll], newItems[indexInAll + 1]] = [newItems[indexInAll + 1], newItems[indexInAll]];
         } else {
             return;
         }
@@ -637,16 +649,20 @@ const Dashboard = ({ admin, onLogout }) => {
     };
 
     const moveMemoryItem = async (index, direction) => {
+        // If searching, we need to map the filtered index back to the main memories array
+        const itemToMove = filteredMemories[index];
+        const indexInAll = memories.findIndex(m => m._id === itemToMove._id);
+
         const newMemories = [...memories];
-        if (direction === 'up' && index > 0) {
-            [newMemories[index], newMemories[index - 1]] = [newMemories[index - 1], newMemories[index]];
-        } else if (direction === 'down' && index < newMemories.length - 1) {
-            [newMemories[index], newMemories[index + 1]] = [newMemories[index + 1], newMemories[index]];
+        if (direction === 'up' && indexInAll > 0) {
+            [newMemories[indexInAll], newMemories[indexInAll - 1]] = [newMemories[indexInAll - 1], newMemories[indexInAll]];
+        } else if (direction === 'down' && indexInAll < newMemories.length - 1) {
+            [newMemories[indexInAll], newMemories[indexInAll + 1]] = [newMemories[indexInAll + 1], newMemories[indexInAll]];
         } else {
             return;
         }
 
-        // Optimistically update UI
+        // Apply new order values
         const reordered = newMemories.map((m, idx) => ({ ...m, order: idx }));
         setMemories(reordered);
 
@@ -656,7 +672,7 @@ const Dashboard = ({ admin, onLogout }) => {
             }, authHeader);
         } catch (err) {
             console.error('Failed to reorder memories:', err);
-            fetchData(); // Rollback
+            fetchData();
         }
     };
 
@@ -748,6 +764,8 @@ const Dashboard = ({ admin, onLogout }) => {
                                             key={memory._id}
                                             memory={memory}
                                             index={index}
+                                            totalItems={filteredMemories.length}
+                                            onMove={moveMemoryItem}
                                             onEdit={() => { setEditMemory({ ...memory }); setShowEditModal(true); }}
                                             onDelete={() => deleteMemory(memory._id)}
                                             onDragStart={handleDragStart}
