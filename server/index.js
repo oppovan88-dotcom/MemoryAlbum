@@ -62,9 +62,16 @@ const upload = multer({
 });
 
 // MongoDB Connection
+console.log('⏳ Connecting to MongoDB...');
 mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('✅ Connected to MongoDB'))
-    .catch(err => console.error('❌ MongoDB connection error:', err));
+    .then(() => {
+        console.log('✅ Connected to MongoDB');
+        console.log('Database Name:', mongoose.connection.name);
+    })
+    .catch(err => {
+        console.error('❌ MongoDB connection error:', err);
+        process.exit(1); // Exit if DB connection fails to avoid silent failures
+    });
 
 // ============== SCHEMAS ==============
 
@@ -145,7 +152,6 @@ const timelineSchema = new mongoose.Schema({
     time: { type: String, required: true },
     activity: { type: String, required: true },
     details: { type: String, default: '' },
-    order: { type: Number, default: 0 },
     isCompleted: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
 });
@@ -211,13 +217,13 @@ const createDefaultTimeline = async () => {
         const existingTimeline = await Timeline.find();
         if (existingTimeline.length === 0) {
             const defaultItems = [
-                { time: "07:00 AM", activity: "Messenger and TikTok 📱", details: "Good Morning", order: 0 },
-                { time: "08:30 AM", activity: "Make Up 💄", details: "Repair Yourself to go", order: 1 },
-                { time: "09:00 AM", activity: "Arrived 🚗", details: "Go To Chip Mong (Watched Movie)", order: 2 },
-                { time: "10:00 AM", activity: "Movie Time 🎬", details: "រឿង សងដៃខ្ញុំវិញ", order: 3 },
-                { time: "12:00 PM", activity: "Movie Time 🍿", details: "F1 Hall Gaint", order: 4 },
-                { time: "03:00 PM", activity: "Relaxed 🎮", details: "Play Games and Eating some Food", order: 5 },
-                { time: "05:00 PM", activity: "Back Home 🏠", details: "We go home and talking some fun", order: 6 }
+                { time: "07:00 AM", activity: "Messenger and TikTok 📱", details: "Good Morning" },
+                { time: "08:30 AM", activity: "Make Up 💄", details: "Repair Yourself to go" },
+                { time: "09:00 AM", activity: "Arrived 🚗", details: "Go To Chip Mong (Watched Movie)" },
+                { time: "10:00 AM", activity: "Movie Time 🎬", details: "រឿង សងដៃខ្ញុំវិញ" },
+                { time: "12:00 PM", activity: "Movie Time 🍿", details: "F1 Hall Gaint" },
+                { time: "03:00 PM", activity: "Relaxed 🎮", details: "Play Games and Eating some Food" },
+                { time: "05:00 PM", activity: "Back Home 🏠", details: "We go home and talking some fun" }
             ];
             await Timeline.insertMany(defaultItems);
             console.log('✅ Default timeline items created');
@@ -347,14 +353,30 @@ app.get('/api/memories', async (req, res) => {
 
 app.post('/api/memories', authMiddleware, async (req, res) => {
     try {
+        console.log('📥 POST /api/memories - Body:', req.body);
+        const { title, description, imageUrl, date } = req.body;
+
+        if (!title) {
+            return res.status(400).json({ error: 'Title is required' });
+        }
+
         // Get highest order number to put new memory at the end
         const lastMemory = await Memory.findOne().sort({ order: -1 });
-        const newOrder = lastMemory ? lastMemory.order + 1 : 0;
+        const newOrder = (lastMemory && typeof lastMemory.order === 'number') ? lastMemory.order + 1 : 0;
 
-        const memory = await Memory.create({ ...req.body, order: newOrder });
+        const memory = await Memory.create({
+            title,
+            description: description || '',
+            imageUrl,
+            date: date || Date.now(),
+            order: newOrder
+        });
+
+        console.log('✅ Memory created:', memory._id);
         res.status(201).json(memory);
     } catch (error) {
-        res.status(500).json({ error: 'Server error' });
+        console.error('❌ Memory creation error:', error);
+        res.status(500).json({ error: error.message || 'Server error' });
     }
 });
 
@@ -539,10 +561,13 @@ app.get('/api/messages', authMiddleware, async (req, res) => {
 
 app.post('/api/messages', async (req, res) => {
     try {
+        console.log('📥 POST /api/messages - Body:', req.body);
         const message = await Message.create(req.body);
+        console.log('✅ Message created:', message._id);
         res.status(201).json(message);
     } catch (error) {
-        res.status(500).json({ error: 'Server error' });
+        console.error('❌ Message creation error:', error);
+        res.status(500).json({ error: error.message || 'Server error' });
     }
 });
 
@@ -568,6 +593,15 @@ app.delete('/api/messages/:id', authMiddleware, async (req, res) => {
     }
 });
 
+// Health Check
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Track visitor
 app.post('/api/track', async (req, res) => {
     try {
@@ -577,6 +611,7 @@ app.post('/api/track', async (req, res) => {
         await Visitor.create({ ip, userAgent, page });
         res.json({ success: true });
     } catch (error) {
+        console.error('Track error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -612,7 +647,7 @@ app.put('/api/settings', authMiddleware, async (req, res) => {
 // Timeline Routes
 app.get('/api/timeline', async (req, res) => {
     try {
-        const timeline = await Timeline.find().sort({ order: 1, createdAt: 1 });
+        const timeline = await Timeline.find().sort({ createdAt: 1 });
         res.json(timeline);
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
@@ -627,15 +662,10 @@ app.post('/api/timeline', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Time and activity are required' });
         }
 
-        // Get highest order number to put new item at the end
-        const lastItem = await Timeline.findOne().sort({ order: -1 });
-        const newOrder = (lastItem && typeof lastItem.order === 'number') ? lastItem.order + 1 : 0;
-
         const timelineItem = await Timeline.create({
             time,
             activity,
-            details: details || '',
-            order: newOrder
+            details: details || ''
         });
 
         console.log('✅ Timeline item created:', timelineItem._id);
@@ -646,32 +676,14 @@ app.post('/api/timeline', authMiddleware, async (req, res) => {
     }
 });
 
-// Bulk reorder timeline items - MUST be before any :id routes to avoid conflict
-app.put('/api/timeline/reorder-all', authMiddleware, async (req, res) => {
-    try {
-        const { orders } = req.body; // Array of { id, order }
-        if (!orders || !Array.isArray(orders)) {
-            return res.status(400).json({ error: 'Invalid orders data' });
-        }
-
-        const updatePromises = orders.map(item =>
-            Timeline.findByIdAndUpdate(item.id, { order: item.order })
-        );
-
-        await Promise.all(updatePromises);
-        res.json({ success: true });
-    } catch (error) {
-        console.error('❌ Timeline bulk reorder error:', error);
-        res.status(500).json({ error: error.message || 'Server error' });
-    }
-});
+/* REORDER ROUTES REMOVED */
 
 app.put('/api/timeline/:id', authMiddleware, async (req, res) => {
     try {
-        const { time, activity, details, order, isCompleted } = req.body;
+        const { time, activity, details, isCompleted } = req.body;
         const timelineItem = await Timeline.findByIdAndUpdate(
             req.params.id,
-            { time, activity, details, order, isCompleted },
+            { time, activity, details, isCompleted },
             { new: true, runValidators: true }
         );
         if (!timelineItem) {
@@ -690,46 +702,6 @@ app.delete('/api/timeline/:id', authMiddleware, async (req, res) => {
         if (!timelineItem) {
             return res.status(404).json({ error: 'Timeline item not found' });
         }
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Move timeline item up
-app.put('/api/timeline/:id/move-up', authMiddleware, async (req, res) => {
-    try {
-        const currentItem = await Timeline.findById(req.params.id);
-        if (!currentItem) return res.status(404).json({ error: 'Item not found' });
-
-        const previousItem = await Timeline.findOne({ order: { $lt: currentItem.order } }).sort({ order: -1 });
-
-        if (previousItem) {
-            const tempOrder = currentItem.order;
-            await Timeline.findByIdAndUpdate(currentItem._id, { order: previousItem.order });
-            await Timeline.findByIdAndUpdate(previousItem._id, { order: tempOrder });
-        }
-
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Move timeline item down
-app.put('/api/timeline/:id/move-down', authMiddleware, async (req, res) => {
-    try {
-        const currentItem = await Timeline.findById(req.params.id);
-        if (!currentItem) return res.status(404).json({ error: 'Item not found' });
-
-        const nextItem = await Timeline.findOne({ order: { $gt: currentItem.order } }).sort({ order: 1 });
-
-        if (nextItem) {
-            const tempOrder = currentItem.order;
-            await Timeline.findByIdAndUpdate(currentItem._id, { order: nextItem.order });
-            await Timeline.findByIdAndUpdate(nextItem._id, { order: tempOrder });
-        }
-
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'Server error' });

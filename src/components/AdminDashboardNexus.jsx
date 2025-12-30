@@ -360,7 +360,11 @@ const Dashboard = ({ admin, onLogout }) => {
     const token = localStorage.getItem('adminToken') || 'no-auth-required';
     const authHeader = { headers: { Authorization: `Bearer ${token}` } };
 
-    useEffect(() => { fetchData(); }, []);
+    useEffect(() => {
+        console.log('🚀 Dashboard mounted');
+        console.log('📍 Current API URL:', API_URL);
+        fetchData();
+    }, []);
 
     const fetchData = async () => {
         try {
@@ -421,10 +425,14 @@ const Dashboard = ({ admin, onLogout }) => {
         setSaving(true); setUploadProgress(0);
         try {
             const imageUrl = await uploadToCloudinary(selectedFile);
-            await axios.post(`${API_URL}/memories`, { ...newMemory, imageUrl }, authHeader);
+            console.log('✅ Memory added successfully');
             setShowAddModal(false); setNewMemory({ title: '', description: '' });
             setSelectedFile(null); setPreviewUrl(''); fetchData();
-        } catch (err) { alert('Failed to add memory'); }
+        } catch (err) {
+            console.error('❌ Failed to add memory:', err);
+            const errorMsg = err.response?.data?.error || err.message;
+            alert('Failed to add memory: ' + errorMsg);
+        }
         finally { setSaving(false); }
     };
 
@@ -524,9 +532,9 @@ const Dashboard = ({ admin, onLogout }) => {
         if (!newTimelineItem.time || !newTimelineItem.activity) { alert('Please fill time and activity'); return; }
         setTimelineSaving(true);
         try {
-            console.log('Adding timeline item:', { ...newTimelineItem, order: timelineItems.length });
+            console.log('Adding timeline item:', { ...newTimelineItem });
             console.log('API URL:', `${API_URL}/timeline`);
-            const response = await axios.post(`${API_URL}/timeline`, { ...newTimelineItem, order: timelineItems.length }, authHeader);
+            const response = await axios.post(`${API_URL}/timeline`, newTimelineItem, authHeader);
             console.log('Response:', response.data);
             setShowAddTimelineModal(false);
             setNewTimelineItem({ time: '', activity: '', details: '' });
