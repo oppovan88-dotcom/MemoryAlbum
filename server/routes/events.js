@@ -95,23 +95,23 @@ router.post('/', async (req, res) => {
         const event = new SpecialEvent(eventData);
         await event.save();
 
-        // Calculate how soon the event is
+        // Check if event is TODAY and has a time set
         const now = new Date();
-        let eventDateTime = new Date(event.eventDate);
+        const eventDate = new Date(event.eventDate);
 
-        // If eventTime is set, use it
-        if (event.eventTime) {
-            const [hours, minutes] = event.eventTime.split(':').map(Number);
-            eventDateTime.setHours(hours, minutes, 0, 0);
-        }
+        // Check if it's the same day (compare year, month, day)
+        const isToday = eventDate.getFullYear() === now.getFullYear() &&
+            eventDate.getMonth() === now.getMonth() &&
+            eventDate.getDate() === now.getDate();
 
-        const minutesUntilEvent = (eventDateTime - now) / (1000 * 60);
-
-        // If event is within 30 minutes (or in the past today), send immediate "IT'S TIME" alert
-        if (minutesUntilEvent <= 30 && minutesUntilEvent >= -60) {
+        // If event is TODAY and has a time set, send "IT'S TIME" alert
+        if (isToday && event.eventTime) {
+            await notifyTelegram('eventNow', event);
+        } else if (isToday && !event.eventTime) {
+            // Today but no specific time - also send IT'S TIME
             await notifyTelegram('eventNow', event);
         } else {
-            // Send normal "event created" notification
+            // Future event - send normal "event created" notification
             await notifyTelegram('eventCreated', event);
         }
 
