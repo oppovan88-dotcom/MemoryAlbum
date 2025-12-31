@@ -1,52 +1,35 @@
-// Appearance Settings Routes
+// Appearance Settings Routes - Full Frontend Configuration
 const express = require('express');
 const router = express.Router();
 const AppearanceSettings = require('../models/AppearanceSettings');
 
-// Default appearance settings
-const defaultAppearance = {
-    key: 'appearance',
-    appName: 'Memory Album',
-    appShortName: 'M',
-    appDescription: 'Admin Dashboard',
-    colorPrimary: '#6366f1',
-    colorPrimaryDark: '#8b5cf6',
-    colorSecondary: '#10b981',
-    colorAccent: '#ec4899',
-    colorWarning: '#f59e0b',
-    colorDanger: '#ef4444',
-    colorSuccess: '#22c55e',
-    colorDark: '#1e293b',
-    colorDarker: '#0f172a',
-    colorLight: '#f8fafc',
-    navItems: JSON.stringify([
-        { id: 'dashboard', icon: '📊', label: 'Dashboard' },
-        { id: 'memories', icon: '📷', label: 'Memories' },
-        { id: 'timeline', icon: '💖', label: 'Timeline' },
-        { id: 'messages', icon: '💬', label: 'Messages' },
-        { id: 'settings', icon: '⚙️', label: 'Settings' },
-        { id: 'appearance', icon: '🎨', label: 'Appearance' },
-    ]),
-    statsCards: JSON.stringify([
-        { key: 'totalMemories', icon: '📷', label: 'Memories', color: '#6366f1' },
-        { key: 'totalVisitors', icon: '👥', label: 'Visitors', color: '#10b981', subKey: 'todayVisitors', subLabel: 'today' },
-        { key: 'totalMessages', icon: '💬', label: 'Messages', color: '#f59e0b', subKey: 'unreadMessages', subLabel: 'unread' },
-        { key: 'todayVisitors', icon: '📈', label: 'Today', color: '#ec4899' },
-    ]),
-    icons: JSON.stringify({
-        loading: '📷',
-        memories: '📷',
-        messages: '💬',
-        timeline: '💕',
-        settings: '⚙️',
-        add: '➕',
-        edit: '✏️',
-        delete: '🗑️',
-        save: '💾',
-        logout: '🚪',
-        search: '🔍',
-        heart: '💖',
-    }),
+// JSON fields that need to be parsed/stringified
+const jsonFields = ['navItems', 'statsCards', 'icons', 'messages', 'settingsFields', 'timeOptions'];
+
+// Parse JSON fields from database to objects
+const parseJsonFields = (settings) => {
+    const parsed = settings.toObject ? settings.toObject() : { ...settings };
+    jsonFields.forEach(field => {
+        if (parsed[field] && typeof parsed[field] === 'string') {
+            try {
+                parsed[field] = JSON.parse(parsed[field]);
+            } catch (e) {
+                console.error(`Error parsing ${field}:`, e);
+            }
+        }
+    });
+    return parsed;
+};
+
+// Stringify JSON fields for database storage
+const stringifyJsonFields = (data) => {
+    const stringified = { ...data };
+    jsonFields.forEach(field => {
+        if (stringified[field] && typeof stringified[field] !== 'string') {
+            stringified[field] = JSON.stringify(stringified[field]);
+        }
+    });
+    return stringified;
 };
 
 // GET appearance settings
@@ -54,18 +37,9 @@ router.get('/', async (req, res) => {
     try {
         let settings = await AppearanceSettings.findOne({ key: 'appearance' });
         if (!settings) {
-            settings = await AppearanceSettings.create(defaultAppearance);
+            settings = await AppearanceSettings.create({ key: 'appearance' });
         }
-
-        // Parse JSON strings to objects for frontend
-        const response = {
-            ...settings.toObject(),
-            navItems: JSON.parse(settings.navItems || '[]'),
-            statsCards: JSON.parse(settings.statsCards || '[]'),
-            icons: JSON.parse(settings.icons || '{}'),
-        };
-
-        res.json(response);
+        res.json(parseJsonFields(settings));
     } catch (error) {
         console.error('Error fetching appearance settings:', error);
         res.status(500).json({ error: 'Failed to fetch appearance settings' });
@@ -75,18 +49,7 @@ router.get('/', async (req, res) => {
 // PUT update appearance settings
 router.put('/', async (req, res) => {
     try {
-        const updateData = { ...req.body, updatedAt: Date.now() };
-
-        // Stringify arrays/objects before saving
-        if (typeof updateData.navItems !== 'string') {
-            updateData.navItems = JSON.stringify(updateData.navItems);
-        }
-        if (typeof updateData.statsCards !== 'string') {
-            updateData.statsCards = JSON.stringify(updateData.statsCards);
-        }
-        if (typeof updateData.icons !== 'string') {
-            updateData.icons = JSON.stringify(updateData.icons);
-        }
+        const updateData = stringifyJsonFields({ ...req.body, updatedAt: Date.now() });
 
         let settings = await AppearanceSettings.findOneAndUpdate(
             { key: 'appearance' },
@@ -94,15 +57,7 @@ router.put('/', async (req, res) => {
             { new: true, upsert: true }
         );
 
-        // Parse JSON strings to objects for response
-        const response = {
-            ...settings.toObject(),
-            navItems: JSON.parse(settings.navItems || '[]'),
-            statsCards: JSON.parse(settings.statsCards || '[]'),
-            icons: JSON.parse(settings.icons || '{}'),
-        };
-
-        res.json(response);
+        res.json(parseJsonFields(settings));
     } catch (error) {
         console.error('Error updating appearance settings:', error);
         res.status(500).json({ error: 'Failed to update appearance settings' });
@@ -119,7 +74,7 @@ router.post('/nav-item', async (req, res) => {
 
         let settings = await AppearanceSettings.findOne({ key: 'appearance' });
         if (!settings) {
-            settings = await AppearanceSettings.create(defaultAppearance);
+            settings = await AppearanceSettings.create({ key: 'appearance' });
         }
 
         const navItems = JSON.parse(settings.navItems || '[]');
@@ -155,6 +110,30 @@ router.delete('/nav-item/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting nav item:', error);
         res.status(500).json({ error: 'Failed to delete nav item' });
+    }
+});
+
+// PUT reorder navigation items
+router.put('/nav-items/reorder', async (req, res) => {
+    try {
+        const { navItems } = req.body;
+        if (!Array.isArray(navItems)) {
+            return res.status(400).json({ error: 'Invalid navItems array' });
+        }
+
+        let settings = await AppearanceSettings.findOne({ key: 'appearance' });
+        if (!settings) {
+            return res.status(404).json({ error: 'Settings not found' });
+        }
+
+        settings.navItems = JSON.stringify(navItems);
+        settings.updatedAt = Date.now();
+        await settings.save();
+
+        res.json({ navItems });
+    } catch (error) {
+        console.error('Error reordering nav items:', error);
+        res.status(500).json({ error: 'Failed to reorder nav items' });
     }
 });
 
