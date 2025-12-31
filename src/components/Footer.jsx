@@ -1,24 +1,28 @@
-function Footer({ nightMode, appearance }) {
+function Footer({ nightMode, currentTheme, appearance }) {
   // Use dynamic settings
   const footerText = appearance?.footerText || "Made with ❤️";
   const footerYear = appearance?.footerYear || new Date().getFullYear();
   const socialLinks = appearance?.socialLinks || [];
 
+  // Get theme colors or fallback to nightMode defaults
+  const primaryColor = currentTheme?.colors?.primary || (nightMode ? "#a77dfd" : "#ff69b4");
+  const accentColor = currentTheme?.colors?.accent || (nightMode ? "#bfa7fc" : "#ffb3d6");
+
   const style = nightMode
     ? {
-      background: "linear-gradient(90deg,#201946 60%,#39205c 100%)",
-      color: "#cfaeff",
-      borderTop: "1px solid #45336b",
+      background: `linear-gradient(90deg, ${currentTheme?.colors?.headerBg || 'rgba(32, 25, 70, 0.95)'} 60%, rgba(57, 32, 92, 0.95) 100%)`,
+      color: currentTheme?.colors?.titleColor || "#cfaeff",
+      borderTop: `1px solid ${primaryColor}40`,
       padding: "1.5rem 0 1rem 0",
-      boxShadow: "0 -2px 24px 0 #7d53d229",
+      boxShadow: `0 -2px 24px 0 ${primaryColor}29`,
       transition: "all 0.3s cubic-bezier(.45,.07,.7,1)",
     }
     : {
-      background: "linear-gradient(90deg,#ffe0f4 60%,#fff6fb 100%)",
-      color: "#db339b",
-      borderTop: "1px solid #ffd5ea",
+      background: `linear-gradient(90deg, ${currentTheme?.colors?.headerBg || 'rgba(255, 224, 244, 0.95)'} 60%, rgba(255, 246, 251, 0.95) 100%)`,
+      color: currentTheme?.colors?.titleColor || "#db339b",
+      borderTop: `1px solid ${accentColor}`,
       padding: "1.5rem 0 1rem 0",
-      boxShadow: "0 -2px 24px 0 #ffe6fa77",
+      boxShadow: `0 -2px 24px 0 ${primaryColor}30`,
       transition: "all 0.3s cubic-bezier(.45,.07,.7,1)",
     };
 

@@ -405,3 +405,198 @@ html, body {
   border-color: #b993ff;
   box-shadow: 0 4px 20px #b993ffaa;
 }
+
+/* ============================================
+   THEME-SPECIFIC ANIMATIONS
+   ============================================ */
+
+/* Snow falling animation for Christmas theme */
+@keyframes snowFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0.3;
+  }
+}
+
+/* Bubble rising animation for Ocean theme */
+@keyframes bubbleRise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-100vh) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* Petal falling animation for Sakura theme */
+@keyframes petalFall {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(25vh) translateX(30px) rotate(90deg);
+  }
+  50% {
+    transform: translateY(50vh) translateX(-20px) rotate(180deg);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(75vh) translateX(25px) rotate(270deg);
+  }
+  100% {
+    transform: translateY(100vh) translateX(10px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Leaf falling animation for Forest theme */
+@keyframes leafFall {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  20% {
+    transform: translateY(20vh) translateX(-25px) rotate(45deg);
+  }
+  40% {
+    transform: translateY(40vh) translateX(20px) rotate(90deg);
+  }
+  60% {
+    transform: translateY(60vh) translateX(-15px) rotate(180deg);
+    opacity: 0.7;
+  }
+  80% {
+    transform: translateY(80vh) translateX(20px) rotate(270deg);
+  }
+  100% {
+    transform: translateY(100vh) translateX(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Sparkle glow animation for Luxury theme */
+@keyframes sparkleGlow {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Aurora wave animation */
+@keyframes auroraWave {
+  0%, 100% {
+    transform: translateY(0) scaleY(1);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translateY(-20px) scaleY(1.1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(0) scaleY(0.9);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translateY(20px) scaleY(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* ============================================
+   THEME-SPECIFIC FLOATING ICON STYLES
+   ============================================ */
+
+/* Romance Theme */
+.theme-romance .floating-bg-heart {
+  background-color: rgba(255, 105, 180, 0.25);
+  box-shadow: 0 0 15px 6px rgba(255, 105, 180, 0.4);
+}
+
+/* Galaxy Theme */
+.theme-galaxy .floating-bg-heart {
+  background-color: rgba(111, 81, 255, 0.3);
+  box-shadow: 0 0 12px 5px rgba(111, 81, 255, 0.5);
+}
+
+/* Christmas Theme */
+.theme-christmas .floating-bg-heart {
+  background-color: rgba(255, 215, 0, 0.35);
+  box-shadow: 0 0 15px 6px rgba(255, 215, 0, 0.5), 0 0 30px 10px rgba(196, 30, 58, 0.3);
+}
+
+/* Ocean Theme */
+.theme-ocean .floating-bg-heart {
+  background-color: rgba(0, 188, 212, 0.25);
+  box-shadow: 0 0 15px 6px rgba(0, 188, 212, 0.4);
+}
+
+/* Sunset Theme */
+.theme-sunset .floating-bg-heart {
+  background-color: rgba(255, 154, 158, 0.3);
+  box-shadow: 0 0 15px 6px rgba(255, 154, 158, 0.5);
+}
+
+/* Forest Theme */
+.theme-forest .floating-bg-heart {
+  background-color: rgba(76, 175, 80, 0.25);
+  box-shadow: 0 0 15px 6px rgba(76, 175, 80, 0.4);
+}
+
+/* Midnight Theme */
+.theme-midnight .floating-bg-heart {
+  background-color: rgba(74, 105, 189, 0.3);
+  box-shadow: 0 0 12px 5px rgba(130, 204, 221, 0.5);
+}
+
+/* Sakura Theme */
+.theme-sakura .floating-bg-heart {
+  background-color: rgba(244, 143, 177, 0.3);
+  box-shadow: 0 0 15px 6px rgba(244, 143, 177, 0.5);
+}
+
+/* Luxury Theme */
+.theme-luxury .floating-bg-heart {
+  background-color: rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 15px 8px rgba(255, 215, 0, 0.5);
+}
+
+/* Aurora Theme */
+.theme-aurora .floating-bg-heart {
+  background-color: rgba(100, 255, 218, 0.2);
+  box-shadow: 0 0 15px 6px rgba(100, 255, 218, 0.4), 0 0 30px 10px rgba(187, 134, 252, 0.2);
+}
+
+/* ============================================
+   THEME SELECTOR DROPDOWN SCROLLBAR
+   ============================================ */
+.theme-dropdown-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.theme-dropdown-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.theme-dropdown-scroll::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 3px;
+}
+
+.theme-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.5);
+}
+

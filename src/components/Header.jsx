@@ -1,13 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
+import { getThemeOptions } from "@/config/themes";
 
 const HEADER_HEIGHT = 60;
 
-const Header = ({ nightMode, setNightMode, appearance }) => {
+const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
   const audioRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   // Use dynamic appearance settings
   const appName = appearance?.appName || "Love Memory";
+
+  // Get all theme options
+  const themeOptions = getThemeOptions();
 
   // Play or pause audio based on isPlaying state
   useEffect(() => {
@@ -29,54 +35,29 @@ const Header = ({ nightMode, setNightMode, appearance }) => {
     };
   }, []);
 
-  // Dynamic styles based on nightMode
-  const bg = nightMode
-    ? "rgba(40,26,80,0.84)" // dark with some transparency
-    : "rgba(255,255,255,0.68)";
-  const border = nightMode ? "1.5px solid #6742b7" : "1.5px solid #ffb3d6";
-  const boxShadow = nightMode ? "0 4px 22px #41277670" : "0 4px 18px #ff69b420";
-  const titleColor = nightMode ? "#bfa7fc" : "#d72660";
-  const iconColor = nightMode ? "#a77dfd" : "#ff69b4";
-  const iconShadow = nightMode
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsThemeDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Dynamic styles based on current theme
+  const bg = currentTheme?.colors?.headerBg || (nightMode
+    ? "rgba(40,26,80,0.84)"
+    : "rgba(255,255,255,0.68)");
+  const border = currentTheme?.colors?.headerBorder || (nightMode ? "1.5px solid #6742b7" : "1.5px solid #ffb3d6");
+  const boxShadow = currentTheme?.colors?.headerShadow || (nightMode ? "0 4px 22px #41277670" : "0 4px 18px #ff69b420");
+  const titleColor = currentTheme?.colors?.titleColor || (nightMode ? "#bfa7fc" : "#d72660");
+  const iconColor = currentTheme?.colors?.iconColor || (nightMode ? "#a77dfd" : "#ff69b4");
+  const iconShadow = currentTheme?.colors?.iconShadow || (nightMode
     ? "drop-shadow(0 1px 10px #8f6dfbb2)"
-    : "drop-shadow(0 1px 7px #ffb3d6a8)";
-
-  // Toggle switch styles
-  const switchStyle = {
-    width: 56,
-    height: 32,
-    borderRadius: 20,
-    background: nightMode
-      ? "linear-gradient(90deg,#3d194e,#0a1338 100%)"
-      : "linear-gradient(90deg,#ffe0f4 0%, #ffd4ec 100%)",
-    border: nightMode ? "2px solid #463c58" : "2px solid #ffb6d5",
-    display: "flex",
-    alignItems: "center",
-    position: "relative",
-    cursor: "pointer",
-    transition: "background 0.3s",
-    boxShadow: nightMode ? "0 2px 10px #6e41a633" : "0 2px 16px #ffb6d560",
-    marginRight: 12,
-  };
-
-  const thumbStyle = {
-    width: 26,
-    height: 26,
-    borderRadius: "50%",
-    background: nightMode
-      ? "linear-gradient(135deg, #9f53f9 40%, #3d194e 100%)"
-      : "linear-gradient(135deg, #fff0fa 60%, #ffb6d5 100%)",
-    boxShadow: nightMode ? "0 2px 8px #c17cff88" : "0 2px 10px #ffc8dd90",
-    position: "absolute",
-    top: 2,
-    left: nightMode ? 26 : 2,
-    transition: "left 0.27s cubic-bezier(.48,1.32,.33,.99), background 0.3s",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "1.2rem",
-    border: nightMode ? "none" : "1.5px solid #ffafd8",
-  };
+    : "drop-shadow(0 1px 7px #ffb3d6a8)");
+  const primaryColor = currentTheme?.colors?.primary || "#ff69b4";
 
   // Music button styles
   const musicButtonStyle = {
@@ -85,22 +66,75 @@ const Header = ({ nightMode, setNightMode, appearance }) => {
     fontSize: "1.3rem",
     cursor: "pointer",
     borderRadius: "20px",
-    border: nightMode ? "2px solid #463c58" : "2px solid #ffb6d5",
-    background: nightMode
-      ? "linear-gradient(90deg,#3d194e,#0a1338 100%)"
-      : "linear-gradient(90deg,#ffe0f4 0%, #ffd4ec 100%)",
-    color: nightMode ? "#bfa7fc" : "#d72660",
-    boxShadow: nightMode ? "0 2px 10px #6e41a633" : "0 2px 16px #ffb6d560",
+    border: `2px solid ${primaryColor}40`,
+    background: bg,
+    color: titleColor,
+    boxShadow: `0 2px 10px ${primaryColor}33`,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    transition: "all 0.3s ease",
   };
+
+  // Theme button styles
+  const themeButtonStyle = {
+    height: "32px",
+    padding: "0 12px",
+    fontSize: "0.9rem",
+    cursor: "pointer",
+    borderRadius: "20px",
+    border: `2px solid ${primaryColor}40`,
+    background: bg,
+    color: titleColor,
+    boxShadow: `0 2px 10px ${primaryColor}33`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+    transition: "all 0.3s ease",
+    fontFamily: "'Quicksand', sans-serif",
+    fontWeight: 600,
+    marginRight: "8px",
+  };
+
+  // Dropdown styles
+  const dropdownStyle = {
+    position: "absolute",
+    top: "100%",
+    right: 0,
+    marginTop: "8px",
+    background: nightMode ? "rgba(30, 20, 60, 0.98)" : "rgba(255, 255, 255, 0.98)",
+    border: border,
+    borderRadius: "16px",
+    boxShadow: `0 8px 32px ${primaryColor}30`,
+    padding: "8px",
+    minWidth: "200px",
+    maxHeight: "400px",
+    overflowY: "auto",
+    zIndex: 1001,
+    backdropFilter: "blur(10px)",
+  };
+
+  const themeOptionStyle = (isActive) => ({
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "10px 14px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    background: isActive
+      ? `${primaryColor}30`
+      : "transparent",
+    border: isActive ? `2px solid ${primaryColor}` : "2px solid transparent",
+    marginBottom: "4px",
+  });
 
   return (
     <>
       {/* Google Fonts */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&family=Caveat:wght@700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Caveat:wght@700&display=swap"
         rel="stylesheet"
       />
 
@@ -153,8 +187,103 @@ const Header = ({ nightMode, setNightMode, appearance }) => {
             </span>
           </div>
 
-          {/* Right side: Music button and Toggle button */}
-          <div className="d-flex align-items-center">
+          {/* Right side: Theme selector and Music button */}
+          <div className="d-flex align-items-center" style={{ position: "relative" }} ref={dropdownRef}>
+            {/* Theme Selector Button */}
+            <button
+              type="button"
+              onClick={() => setIsThemeDropdownOpen(!isThemeDropdownOpen)}
+              style={themeButtonStyle}
+              aria-label="Change theme"
+              aria-expanded={isThemeDropdownOpen}
+            >
+              <span style={{ fontSize: "1.1rem" }}>
+                {currentTheme?.name?.split(' ')[0] || '🎨'}
+              </span>
+              <span className="d-none d-sm-inline">Theme</span>
+              <span style={{
+                transform: isThemeDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s ease",
+                fontSize: "0.7rem",
+              }}>
+                ▼
+              </span>
+            </button>
+
+            {/* Theme Dropdown */}
+            {isThemeDropdownOpen && (
+              <div style={dropdownStyle}>
+                <div style={{
+                  padding: "8px 14px",
+                  fontSize: "0.8rem",
+                  color: nightMode ? "#9ca3af" : "#6b7280",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "1px",
+                  borderBottom: `1px solid ${primaryColor}20`,
+                  marginBottom: "8px",
+                }}>
+                  Choose Theme
+                </div>
+                {themeOptions.map((theme) => (
+                  <div
+                    key={theme.id}
+                    style={themeOptionStyle(currentTheme?.id === theme.id)}
+                    onClick={() => {
+                      setTheme(theme.id);
+                      setIsThemeDropdownOpen(false);
+                    }}
+                    onMouseEnter={(e) => {
+                      if (currentTheme?.id !== theme.id) {
+                        e.currentTarget.style.background = `${primaryColor}15`;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (currentTheme?.id !== theme.id) {
+                        e.currentTarget.style.background = "transparent";
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        setTheme(theme.id);
+                        setIsThemeDropdownOpen(false);
+                      }
+                    }}
+                  >
+                    <span style={{ fontSize: "1.2rem" }}>
+                      {theme.name.split(' ')[0]}
+                    </span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        color: titleColor,
+                        fontWeight: 600,
+                        fontSize: "0.9rem",
+                        fontFamily: "'Quicksand', sans-serif",
+                      }}>
+                        {theme.name.split(' ').slice(1).join(' ')}
+                      </div>
+                      <div style={{
+                        color: nightMode ? "#9ca3af" : "#6b7280",
+                        fontSize: "0.75rem",
+                      }}>
+                        {theme.description}
+                      </div>
+                    </div>
+                    {currentTheme?.id === theme.id && (
+                      <span style={{
+                        color: primaryColor,
+                        fontSize: "1rem",
+                      }}>
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Music Button */}
             <button
               aria-label={isPlaying ? "Pause music" : "Play music"}
@@ -168,35 +297,6 @@ const Header = ({ nightMode, setNightMode, appearance }) => {
               <source src="/assets/music/anniversary-song.mp3" type="audio/mpeg" />
               Your browser does not support the audio element.
             </audio>
-
-            {/* Night Mode Toggle */}
-            <div
-              role="button"
-              aria-pressed={nightMode}
-              tabIndex={0}
-              onClick={() => setNightMode(!nightMode)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ")
-                  setNightMode(!nightMode);
-              }}
-              style={switchStyle}
-            >
-              <div style={thumbStyle}>
-                {nightMode ? (
-                  <span role="img" aria-label="moon" style={{ color: "#fff" }}>
-                    🌙
-                  </span>
-                ) : (
-                  <span
-                    role="img"
-                    aria-label="sun"
-                    style={{ color: "#ff69b4" }}
-                  >
-                    ☀️
-                  </span>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       </nav>
