@@ -226,7 +226,25 @@ class EventScheduler {
     // Process reminders for a single event
     async processEventReminders(event, now) {
         try {
-            const eventDate = new Date(event.eventDate);
+            let eventDate = new Date(event.eventDate);
+
+            // If eventTime is set, use it for exact time matching
+            if (event.eventTime) {
+                const [hours, minutes] = event.eventTime.split(':').map(Number);
+                eventDate.setHours(hours, minutes, 0, 0);
+            } else {
+                // Default to 9 AM if no time set
+                eventDate.setHours(9, 0, 0, 0);
+            }
+
+            // For recurring events, check if we need to calculate for this year
+            if (event.isRecurring && event.recurringType === 'yearly') {
+                const thisYear = new Date(now.getFullYear(), eventDate.getMonth(), eventDate.getDate(), eventDate.getHours(), eventDate.getMinutes());
+                const nextYear = new Date(now.getFullYear() + 1, eventDate.getMonth(), eventDate.getDate(), eventDate.getHours(), eventDate.getMinutes());
+
+                // Use this year if the date hasn't passed, otherwise use next year
+                eventDate = thisYear >= now ? thisYear : nextYear;
+            }
 
             // Calculate time differences
             const diffMs = eventDate - now;
@@ -255,7 +273,8 @@ class EventScheduler {
                     event.notificationsSent.push({
                         sentAt: now,
                         channel: 'telegram',
-                        daysBefore: reminder.days || 0
+                        daysBefore: reminder.days || 0,
+                        reminderType: reminder.type
                     });
                     await event.save();
 
@@ -309,23 +328,24 @@ class EventScheduler {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+                day: 'numeric'
             });
+
+            // Add time if set
+            const timeStr = event.eventTime ? `\n⏰ Time: ${event.eventTime}` : '';
 
             if (reminder.type === 'start') {
                 // Event is starting NOW!
                 message = `🎉 *IT'S TIME!*\n\n` +
                     `${event.icon} *${event.title}*\n\n` +
-                    `📅 ${eventDateStr}\n\n` +
+                    `📅 ${eventDateStr}${timeStr}\n\n` +
                     `${event.celebrationMode?.specialMessage || event.description || 'Time to celebrate! 🥳🎊'}\n\n` +
                     `✨ _Have a wonderful time!_`;
             } else if (reminder.type === 'hours') {
                 // 1 hour reminder
                 message = `⏰ *STARTING SOON!*\n\n` +
                     `${event.icon} *${event.title}*\n\n` +
-                    `📅 ${eventDateStr}\n\n` +
+                    `📅 ${eventDateStr}${timeStr}\n\n` +
                     `⏳ Only *1 hour* left!\n\n` +
                     `${event.description || ''}`;
             } else {
@@ -336,7 +356,7 @@ class EventScheduler {
 
                 message = `🔔 *Reminder!*\n\n` +
                     `${event.icon} *${event.title}*\n\n` +
-                    `📅 ${eventDateStr}\n` +
+                    `📅 ${eventDateStr}${timeStr}\n` +
                     `⏳ *${daysText}!*\n\n` +
                     `${event.description || ''}\n\n` +
                     `${this.getCountdownEmoji(diffDays)}`;
