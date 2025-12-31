@@ -95,8 +95,25 @@ router.post('/', async (req, res) => {
         const event = new SpecialEvent(eventData);
         await event.save();
 
-        // Send Telegram notification if configured
-        await notifyTelegram('eventCreated', event);
+        // Calculate how soon the event is
+        const now = new Date();
+        let eventDateTime = new Date(event.eventDate);
+
+        // If eventTime is set, use it
+        if (event.eventTime) {
+            const [hours, minutes] = event.eventTime.split(':').map(Number);
+            eventDateTime.setHours(hours, minutes, 0, 0);
+        }
+
+        const minutesUntilEvent = (eventDateTime - now) / (1000 * 60);
+
+        // If event is within 30 minutes (or in the past today), send immediate "IT'S TIME" alert
+        if (minutesUntilEvent <= 30 && minutesUntilEvent >= -60) {
+            await notifyTelegram('eventNow', event);
+        } else {
+            // Send normal "event created" notification
+            await notifyTelegram('eventCreated', event);
+        }
 
         res.status(201).json(event);
     } catch (error) {
@@ -291,15 +308,19 @@ async function notifyTelegram(type, event, daysUntil = null) {
         telegramService.setToken(botToken);
 
         const template = settings?.templates?.[type] || null;
+        const dateStr = new Date(event.eventDate).toLocaleDateString();
+        const timeStr = event.eventTime ? ` ⏰ ${event.eventTime}` : '';
 
         if (type === 'eventToday') {
             return telegramService.sendEventCelebration(chatId, event, template);
         } else if (type === 'eventReminder') {
             return telegramService.sendEventReminder(chatId, event, daysUntil, template);
         } else if (type === 'eventCreated') {
-            const dateStr = new Date(event.eventDate).toLocaleDateString();
-            const timeStr = event.eventTime ? ` ⏰ ${event.eventTime}` : '';
             const message = `📌 *New Event Created!*\n\n${event.icon} *${event.title}*\n📅 ${dateStr}${timeStr}\n\n${event.description || ''}`;
+            return telegramService.sendMessage(chatId, message);
+        } else if (type === 'eventNow') {
+            // Immediate alert for events happening NOW or within 30 minutes
+            const message = `🎉 *IT'S TIME!*\n\n${event.icon} *${event.title}*\n📅 ${dateStr}${timeStr}\n\n${event.celebrationMode?.specialMessage || event.description || 'Time to celebrate! 🥳🎊'}\n\n✨ _Have a wonderful time!_`;
             return telegramService.sendMessage(chatId, message);
         }
 

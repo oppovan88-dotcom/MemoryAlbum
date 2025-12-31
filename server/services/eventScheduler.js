@@ -70,6 +70,9 @@ class EventScheduler {
             // 2. Check and send reminders for all events
             await this.checkAndSendReminders();
 
+            // 3. Mark passed events as completed (non-recurring only)
+            await this.markPassedEventsAsComplete();
+
             console.log('✅ Scheduled tasks completed');
         } catch (error) {
             console.error('❌ Error in scheduled tasks:', error);
@@ -206,6 +209,41 @@ class EventScheduler {
             }
         } catch (error) {
             console.error(`❌ Error creating/updating auto event ${autoId}:`, error);
+        }
+    }
+
+    // Mark passed non-recurring events as completed
+    async markPassedEventsAsComplete() {
+        try {
+            const now = new Date();
+            const events = await SpecialEvent.find({
+                isActive: true,
+                isCompleted: false,
+                isRecurring: false // Only non-recurring events get marked as done
+            });
+
+            for (const event of events) {
+                let eventDateTime = new Date(event.eventDate);
+
+                // If eventTime is set, use it
+                if (event.eventTime) {
+                    const [hours, minutes] = event.eventTime.split(':').map(Number);
+                    eventDateTime.setHours(hours, minutes, 0, 0);
+                } else {
+                    // Default to end of day if no time set
+                    eventDateTime.setHours(23, 59, 59, 0);
+                }
+
+                // If event time has passed, mark as completed
+                if (now > eventDateTime) {
+                    event.isCompleted = true;
+                    event.completedDate = now;
+                    await event.save();
+                    console.log(`✅ Marked event as completed: ${event.title}`);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error marking passed events as complete:', error);
         }
     }
 
