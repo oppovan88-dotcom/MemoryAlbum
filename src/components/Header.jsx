@@ -2,9 +2,12 @@ import React, { useState, useRef, useEffect } from "react";
 
 const HEADER_HEIGHT = 60;
 
-const Header = ({ nightMode, setNightMode }) => {
+const Header = ({ nightMode, setNightMode, appearance }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
+
+  // Use dynamic appearance settings
+  const appName = appearance?.appName || "Love Memory";
 
   // Play or pause audio based on isPlaying state
   useEffect(() => {
@@ -146,7 +149,7 @@ const Header = ({ nightMode, setNightMode }) => {
                   : "0 2px 8px #fff6",
               }}
             >
-              Love Memory
+              {appName}
             </span>
           </div>
 

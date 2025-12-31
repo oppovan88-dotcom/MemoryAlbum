@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 import Content from "@/components/Content";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -6,6 +7,9 @@ import AdminDashboard from "@/dashboard";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "aos/dist/aos.css";
 import AOS from "aos";
+
+// API URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // Custom hook to detect desktop/tablet
 function useIsDesktopOrTablet() {
@@ -65,6 +69,20 @@ function App() {
   };
 
   const [isAdmin, setIsAdmin] = useState(checkIsAdmin());
+  const [appearance, setAppearance] = useState(null);
+
+  // Fetch appearance settings
+  useEffect(() => {
+    const fetchAppearance = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/appearance`);
+        setAppearance(res.data);
+      } catch (error) {
+        console.log('Using default appearance');
+      }
+    };
+    fetchAppearance();
+  }, []);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
@@ -165,10 +183,10 @@ function App() {
           className="sticky-top"
           style={{ zIndex: 100, background: "transparent" }}
         >
-          <Header nightMode={nightMode} setNightMode={setNightMode} />
+          <Header nightMode={nightMode} setNightMode={setNightMode} appearance={appearance} />
         </div>
-        <Content nightMode={nightMode} />
-        <Footer nightMode={nightMode} />
+        <Content nightMode={nightMode} appearance={appearance} />
+        <Footer nightMode={nightMode} appearance={appearance} />
       </div>
     </div>
   );

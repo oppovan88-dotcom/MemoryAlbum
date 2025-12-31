@@ -6,17 +6,17 @@ import Plan from "@/components/Plan";
 import MoneySavingYearPlan from "@/components/Moneysavingyearplan";
 import NewYear from "@/components/NewYear";
 
-const Content = ({ nightMode }) => {
+const Content = ({ nightMode, appearance }) => {
     return (
         <div>
             {/* 🎆 Happy New Year 2026 Countdown Banner */}
-            <NewYear nightMode={nightMode} />
+            <NewYear nightMode={nightMode} appearance={appearance} />
             {/* <Slide /> */}
-            <Relationship nightMode={nightMode} />
-            <Memory nightMode={nightMode} />
-            <Plan nightMode={nightMode} />
+            <Relationship nightMode={nightMode} appearance={appearance} />
+            <Memory nightMode={nightMode} appearance={appearance} />
+            <Plan nightMode={nightMode} appearance={appearance} />
             {/* <MoneySavingYearPlan nightMode={nightMode} /> */}
-            <Mail nightMode={nightMode} />
+            <Mail nightMode={nightMode} appearance={appearance} />
         </div>
     );
 };
