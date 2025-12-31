@@ -16,6 +16,7 @@ const specialEventSchema = new mongoose.Schema({
 
     // Date Configuration
     eventDate: { type: Date, required: true },
+    eventTime: { type: String, default: '' }, // Time in HH:MM format
     isRecurring: { type: Boolean, default: false },
     recurringType: {
         type: String,

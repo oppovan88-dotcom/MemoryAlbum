@@ -38,6 +38,7 @@ const EventsTab = ({ events = [], setEvents, isMobile, onRefresh }) => {
         icon: '🎉',
         eventType: 'custom',
         eventDate: '',
+        eventTime: '',
         isRecurring: false,
         recurringType: 'yearly',
         reminderEnabled: true,
@@ -140,6 +141,7 @@ const EventsTab = ({ events = [], setEvents, isMobile, onRefresh }) => {
             icon: '🎉',
             eventType: 'custom',
             eventDate: '',
+            eventTime: '',
             isRecurring: false,
             recurringType: 'yearly',
             reminderEnabled: true,
@@ -164,6 +166,7 @@ const EventsTab = ({ events = [], setEvents, isMobile, onRefresh }) => {
             icon: event.icon || '🎉',
             eventType: event.eventType || 'custom',
             eventDate: event.eventDate?.split('T')[0] || '',
+            eventTime: event.eventTime || '',
             isRecurring: event.isRecurring || false,
             recurringType: event.recurringType || 'yearly',
             reminderEnabled: event.reminderEnabled !== false,
@@ -597,8 +600,6 @@ const EventsTab = ({ events = [], setEvents, isMobile, onRefresh }) => {
                                     onChange={e => setFormData({ ...formData, eventType: e.target.value })}
                                     style={inputStyle}
                                 >
-                                    <option value="anniversary">Anniversary</option>
-                                    <option value="birthday">Birthday</option>
                                     <option value="milestone">Milestone</option>
                                     <option value="holiday">Holiday</option>
                                     <option value="custom">Custom</option>
@@ -606,13 +607,26 @@ const EventsTab = ({ events = [], setEvents, isMobile, onRefresh }) => {
                             </div>
                         </div>
 
-                        <label style={labelStyle}>Event Date *</label>
-                        <input
-                            type="date"
-                            value={formData.eventDate}
-                            onChange={e => setFormData({ ...formData, eventDate: e.target.value })}
-                            style={inputStyle}
-                        />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing.md }}>
+                            <div>
+                                <label style={labelStyle}>Event Date *</label>
+                                <input
+                                    type="date"
+                                    value={formData.eventDate}
+                                    onChange={e => setFormData({ ...formData, eventDate: e.target.value })}
+                                    style={inputStyle}
+                                />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Event Time</label>
+                                <input
+                                    type="time"
+                                    value={formData.eventTime}
+                                    onChange={e => setFormData({ ...formData, eventTime: e.target.value })}
+                                    style={inputStyle}
+                                />
+                            </div>
+                        </div>
 
                         <label style={labelStyle}>Description</label>
                         <textarea
