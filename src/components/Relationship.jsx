@@ -5,6 +5,43 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
+// Calculate age from birth date
+const calculateAge = (birthDate) => {
+  if (!birthDate) return null;
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+};
+
+// Calculate zodiac sign from birth date
+const calculateZodiac = (birthDate) => {
+  if (!birthDate) return { sign: 'Unknown', emoji: '✨' };
+  const birth = new Date(birthDate);
+  const month = birth.getMonth() + 1; // JavaScript months are 0-indexed
+  const day = birth.getDate();
+
+  // Zodiac signs based on the zodiac chart
+  if ((month === 3 && day >= 21) || (month === 4 && day <= 20)) return { sign: 'Aries', emoji: '♈' };
+  if ((month === 4 && day >= 21) || (month === 5 && day <= 20)) return { sign: 'Taurus', emoji: '♉' };
+  if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return { sign: 'Gemini', emoji: '♊' };
+  if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return { sign: 'Cancer', emoji: '♋' };
+  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return { sign: 'Leo', emoji: '♌' };
+  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return { sign: 'Virgo', emoji: '♍' };
+  if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return { sign: 'Libra', emoji: '♎' };
+  if ((month === 10 && day >= 23) || (month === 11 && day <= 22)) return { sign: 'Scorpio', emoji: '♏' };
+  if ((month === 11 && day >= 23) || (month === 12 && day <= 21)) return { sign: 'Sagittarius', emoji: '♐' };
+  if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return { sign: 'Capricorn', emoji: '♑' };
+  if ((month === 1 && day >= 20) || (month === 2 && day <= 19)) return { sign: 'Aquarius', emoji: '♒' };
+  if ((month === 2 && day >= 20) || (month === 3 && day <= 20)) return { sign: 'Pisces', emoji: '♓' };
+
+  return { sign: 'Unknown', emoji: '✨' };
+};
+
 export default function Relationship({ nightMode }) {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,17 +63,13 @@ export default function Relationship({ nightMode }) {
         // Use defaults if API fails
         setSettings({
           person1Name: 'Rith',
-          person1Age: 20,
+          person1BirthDate: '2005-03-15',
           person1Gender: '♂',
-          person1Zodiac: 'Pisces',
-          person1ZodiacSymbol: '♓',
           person1Photo: './assets/images/1.jpg',
           person1Tagline: 'Rith Ft Ry',
           person2Name: 'Chanry',
-          person2Age: 19,
+          person2BirthDate: '2006-04-01',
           person2Gender: '♀',
-          person2Zodiac: 'Aries',
-          person2ZodiacSymbol: '♈',
           person2Photo: './assets/images/7.jpg',
           person2Tagline: 'Ry Ft Rith',
           relationshipDate: '2025-05-13',
@@ -56,6 +89,12 @@ export default function Relationship({ nightMode }) {
       </div>
     );
   }
+
+  // Calculate age and zodiac from birth dates
+  const person1Age = calculateAge(settings.person1BirthDate);
+  const person1Zodiac = calculateZodiac(settings.person1BirthDate);
+  const person2Age = calculateAge(settings.person2BirthDate);
+  const person2Zodiac = calculateZodiac(settings.person2BirthDate);
 
   const since = settings.relationshipDate;
   const days = Math.floor(
@@ -163,7 +202,7 @@ export default function Relationship({ nightMode }) {
                   letterSpacing: 1,
                 }}
               >
-                {settings.person1Gender} {settings.person1Age}
+                {settings.person1Gender} {person1Age}
               </span>
               <span
                 className="badge rounded-pill px-3 py-2"
@@ -174,7 +213,7 @@ export default function Relationship({ nightMode }) {
                   letterSpacing: 1,
                 }}
               >
-                {settings.person1ZodiacSymbol} {settings.person1Zodiac}
+                {person1Zodiac.emoji} {person1Zodiac.sign}
               </span>
             </div>
             {/* Single line text below image */}
@@ -267,7 +306,7 @@ export default function Relationship({ nightMode }) {
                   letterSpacing: 1,
                 }}
               >
-                {settings.person2Gender} {settings.person2Age}
+                {settings.person2Gender} {person2Age}
               </span>
               <span
                 className="badge rounded-pill px-3 py-2"
@@ -278,7 +317,7 @@ export default function Relationship({ nightMode }) {
                   letterSpacing: 1,
                 }}
               >
-                {settings.person2ZodiacSymbol} {settings.person2Zodiac}
+                {person2Zodiac.emoji} {person2Zodiac.sign}
               </span>
             </div>
             {/* Single line text below image */}

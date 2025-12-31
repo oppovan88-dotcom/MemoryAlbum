@@ -63,8 +63,7 @@ export const appConfig = {
             titleColor: '#166534',
             fields: [
                 { key: 'person1Name', label: 'Name', type: 'text' },
-                { key: 'person1Age', label: 'Age', type: 'number', half: true },
-                { key: 'person1Zodiac', label: 'Zodiac', type: 'text', half: true },
+                { key: 'person1BirthDate', label: 'Date of Birth', type: 'date' },
                 { key: 'person1Photo', label: 'Photo URL', type: 'text' },
             ]
         },
@@ -75,8 +74,7 @@ export const appConfig = {
             titleColor: '#be185d',
             fields: [
                 { key: 'person2Name', label: 'Name', type: 'text' },
-                { key: 'person2Age', label: 'Age', type: 'number', half: true },
-                { key: 'person2Zodiac', label: 'Zodiac', type: 'text', half: true },
+                { key: 'person2BirthDate', label: 'Date of Birth', type: 'date' },
                 { key: 'person2Photo', label: 'Photo URL', type: 'text' },
             ]
         }

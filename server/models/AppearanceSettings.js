@@ -101,13 +101,11 @@ const appearanceSettingsSchema = new mongoose.Schema({
     settingsFields: {
         type: String, default: JSON.stringify([
             { key: 'person1Name', label: 'Person 1 Name', type: 'text', section: 'person1' },
-            { key: 'person1Age', label: 'Age', type: 'number', section: 'person1' },
+            { key: 'person1BirthDate', label: 'Date of Birth', type: 'date', section: 'person1' },
             { key: 'person1Gender', label: 'Gender', type: 'text', section: 'person1' },
-            { key: 'person1Zodiac', label: 'Zodiac', type: 'text', section: 'person1' },
             { key: 'person2Name', label: 'Person 2 Name', type: 'text', section: 'person2' },
-            { key: 'person2Age', label: 'Age', type: 'number', section: 'person2' },
+            { key: 'person2BirthDate', label: 'Date of Birth', type: 'date', section: 'person2' },
             { key: 'person2Gender', label: 'Gender', type: 'text', section: 'person2' },
-            { key: 'person2Zodiac', label: 'Zodiac', type: 'text', section: 'person2' },
             { key: 'relationshipDate', label: 'Relationship Date', type: 'date', section: 'relationship' },
             { key: 'timelineTitle', label: 'Timeline Title', type: 'text', section: 'relationship' },
         ])
