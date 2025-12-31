@@ -75,7 +75,7 @@ function App() {
   useEffect(() => {
     const fetchAppearance = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/appearance`);
+        const res = await axios.get(`${API_URL}/appearance`);
         setAppearance(res.data);
       } catch (error) {
         console.log('Using default appearance');
