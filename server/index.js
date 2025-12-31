@@ -10,6 +10,7 @@ const { configureCloudinary } = require('./config/cloudinary');
 
 // Import services
 const { eventScheduler } = require('./services/eventScheduler');
+const { keepAliveService } = require('./services/keepAliveService');
 
 // Import routes
 const {
@@ -95,6 +96,21 @@ app.post('/api/scheduler/trigger', async (req, res) => {
     }
 });
 
+// Keep-Alive Status Route
+app.get('/api/keep-alive/status', (req, res) => {
+    res.json(keepAliveService.getStatus());
+});
+
+// Keep-Alive Trigger Route (for testing)
+app.post('/api/keep-alive/ping', async (req, res) => {
+    try {
+        const result = await keepAliveService.triggerPing();
+        res.json({ success: true, result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // ============== INITIALIZATION ==============
 const initializeServer = async () => {
     try {
@@ -117,6 +133,14 @@ const initializeServer = async () => {
             console.log(`🚀 Server running on port ${PORT}`);
             console.log('📁 Modular server architecture loaded successfully!');
             console.log('📅 Event Scheduler active - Auto-reminders enabled!');
+
+            // Start Keep-Alive service (only in production)
+            if (process.env.SERVER_URL) {
+                keepAliveService.start(process.env.SERVER_URL);
+                console.log('💓 Keep-Alive service active - Server will stay awake!');
+            } else {
+                console.log('💤 Keep-Alive disabled (no SERVER_URL set - local dev mode)');
+            }
         });
     } catch (error) {
         console.error('❌ Server initialization failed:', error);
