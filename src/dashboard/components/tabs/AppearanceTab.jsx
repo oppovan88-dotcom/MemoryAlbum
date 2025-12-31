@@ -3,30 +3,52 @@ import { theme as defaultTheme } from '../../config';
 
 const { colors, gradients, radius, spacing, fontSize, fontWeight, shadows } = defaultTheme;
 
-// Color picker with preview
-const ColorInput = ({ label, value, onChange, description }) => (
+// Color picker with preview - mobile responsive
+const ColorInput = ({ label, value, onChange, description, isMobile }) => (
     <div style={{ marginBottom: spacing.lg }}>
-        <label style={{ display: 'block', marginBottom: spacing.xs, fontWeight: fontWeight.semibold, fontSize: fontSize.md }}>{label}</label>
-        {description && <p style={{ margin: `0 0 ${spacing.sm}px`, fontSize: fontSize.sm, color: colors.textSecondary }}>{description}</p>}
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md }}>
-            <input type="color" value={value} onChange={(e) => onChange(e.target.value)} style={{ width: 50, height: 40, border: 'none', borderRadius: radius.md, cursor: 'pointer' }} />
-            <input type="text" value={value} onChange={(e) => onChange(e.target.value)} style={{ flex: 1, padding: `${spacing.sm}px ${spacing.md}px`, borderRadius: radius.md, border: `1px solid ${colors.border}`, fontSize: '14px', fontFamily: 'monospace' }} />
-            <div style={{ width: 40, height: 40, background: value, borderRadius: radius.md, border: `1px solid ${colors.border}` }} />
+        <label style={{ display: 'block', marginBottom: spacing.xs, fontWeight: fontWeight.semibold, fontSize: isMobile ? fontSize.sm : fontSize.md }}>{label}</label>
+        {description && !isMobile && <p style={{ margin: `0 0 ${spacing.sm}px`, fontSize: fontSize.sm, color: colors.textSecondary }}>{description}</p>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+            <input type="color" value={value} onChange={(e) => onChange(e.target.value)} style={{ width: isMobile ? 40 : 50, height: isMobile ? 36 : 40, border: 'none', borderRadius: radius.md, cursor: 'pointer', flexShrink: 0 }} />
+            <input type="text" value={value} onChange={(e) => onChange(e.target.value)} style={{ flex: 1, padding: `${spacing.sm}px`, borderRadius: radius.md, border: `1px solid ${colors.border}`, fontSize: isMobile ? '12px' : '14px', fontFamily: 'monospace', minWidth: 0 }} />
+            <div style={{ width: isMobile ? 32 : 40, height: isMobile ? 32 : 40, background: value, borderRadius: radius.md, border: `1px solid ${colors.border}`, flexShrink: 0 }} />
         </div>
     </div>
 );
 
-// Navigation item editor
-const NavItemEditor = ({ item, index, onUpdate, onDelete, onMove, totalItems }) => (
-    <div style={{ display: 'flex', gap: spacing.sm, alignItems: 'center', padding: spacing.md, background: colors.light, borderRadius: radius.lg, marginBottom: spacing.sm }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <button onClick={() => onMove(index, 'up')} disabled={index === 0} style={{ padding: '4px 6px', border: 'none', background: index === 0 ? colors.border : colors.primaryDark, color: '#fff', borderRadius: 4, cursor: index === 0 ? 'not-allowed' : 'pointer', fontSize: '10px' }}>↑</button>
-            <button onClick={() => onMove(index, 'down')} disabled={index === totalItems - 1} style={{ padding: '4px 6px', border: 'none', background: index === totalItems - 1 ? colors.border : colors.primaryDark, color: '#fff', borderRadius: 4, cursor: index === totalItems - 1 ? 'not-allowed' : 'pointer', fontSize: '10px' }}>↓</button>
+// Navigation item editor - mobile responsive with stacked layout
+const NavItemEditor = ({ item, index, onUpdate, onDelete, onMove, totalItems, isMobile }) => (
+    <div style={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: spacing.sm,
+        padding: spacing.md,
+        background: colors.light,
+        borderRadius: radius.lg,
+        marginBottom: spacing.sm
+    }}>
+        {/* Top row on mobile: Icon, ID, Label */}
+        <div style={{ display: 'flex', gap: spacing.sm, alignItems: 'center', flex: 1 }}>
+            {!isMobile && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <button onClick={() => onMove(index, 'up')} disabled={index === 0} style={{ padding: '4px 6px', border: 'none', background: index === 0 ? colors.border : colors.primaryDark, color: '#fff', borderRadius: 4, cursor: index === 0 ? 'not-allowed' : 'pointer', fontSize: '10px' }}>↑</button>
+                    <button onClick={() => onMove(index, 'down')} disabled={index === totalItems - 1} style={{ padding: '4px 6px', border: 'none', background: index === totalItems - 1 ? colors.border : colors.primaryDark, color: '#fff', borderRadius: 4, cursor: index === totalItems - 1 ? 'not-allowed' : 'pointer', fontSize: '10px' }}>↓</button>
+                </div>
+            )}
+            <input type="text" value={item.icon} onChange={(e) => onUpdate(index, 'icon', e.target.value)} style={{ width: isMobile ? 40 : 50, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, textAlign: 'center', fontSize: '16px', flexShrink: 0 }} placeholder="📌" />
+            <input type="text" value={item.id} onChange={(e) => onUpdate(index, 'id', e.target.value)} style={{ width: isMobile ? 70 : 100, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '12px', flexShrink: 0 }} placeholder="tab_id" />
+            <input type="text" value={item.label} onChange={(e) => onUpdate(index, 'label', e.target.value)} style={{ flex: 1, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '14px', minWidth: 0 }} placeholder="Tab Label" />
+            {!isMobile && <button onClick={() => onDelete(index)} style={{ padding: `${spacing.sm}px ${spacing.md}px`, border: 'none', background: colors.danger, color: '#fff', borderRadius: radius.sm, cursor: 'pointer', fontSize: '12px', flexShrink: 0 }}>🗑️</button>}
         </div>
-        <input type="text" value={item.icon} onChange={(e) => onUpdate(index, 'icon', e.target.value)} style={{ width: 50, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, textAlign: 'center', fontSize: '16px' }} placeholder="📌" />
-        <input type="text" value={item.id} onChange={(e) => onUpdate(index, 'id', e.target.value)} style={{ width: 100, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '14px' }} placeholder="tab_id" />
-        <input type="text" value={item.label} onChange={(e) => onUpdate(index, 'label', e.target.value)} style={{ flex: 1, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '14px' }} placeholder="Tab Label" />
-        <button onClick={() => onDelete(index)} style={{ padding: `${spacing.sm}px ${spacing.md}px`, border: 'none', background: colors.danger, color: '#fff', borderRadius: radius.sm, cursor: 'pointer', fontSize: '12px' }}>🗑️</button>
+
+        {/* Bottom row on mobile: Move buttons & Delete */}
+        {isMobile && (
+            <div style={{ display: 'flex', gap: spacing.sm, justifyContent: 'flex-end' }}>
+                <button onClick={() => onMove(index, 'up')} disabled={index === 0} style={{ padding: '6px 10px', border: 'none', background: index === 0 ? colors.border : colors.primaryDark, color: '#fff', borderRadius: 4, cursor: index === 0 ? 'not-allowed' : 'pointer', fontSize: '12px' }}>↑ Up</button>
+                <button onClick={() => onMove(index, 'down')} disabled={index === totalItems - 1} style={{ padding: '6px 10px', border: 'none', background: index === totalItems - 1 ? colors.border : colors.primaryDark, color: '#fff', borderRadius: 4, cursor: index === totalItems - 1 ? 'not-allowed' : 'pointer', fontSize: '12px' }}>↓ Down</button>
+                <button onClick={() => onDelete(index)} style={{ padding: '6px 10px', border: 'none', background: colors.danger, color: '#fff', borderRadius: radius.sm, cursor: 'pointer', fontSize: '12px' }}>🗑️ Delete</button>
+            </div>
+        )}
     </div>
 );
 
@@ -80,18 +102,28 @@ const AppearanceTab = ({ appearance, setAppearance, isMobile, onSave, saving }) 
             </div>
 
             {/* Section Tabs */}
-            <div style={{ display: 'flex', gap: spacing.xs, padding: `${spacing.lg}px ${spacing.xxl}px`, borderBottom: `1px solid ${colors.borderLight}`, overflowX: 'auto' }}>
+            <div style={{
+                display: 'flex',
+                gap: spacing.xs,
+                padding: isMobile ? `${spacing.md}px ${spacing.lg}px` : `${spacing.lg}px ${spacing.xxl}px`,
+                borderBottom: `1px solid ${colors.borderLight}`,
+                overflowX: 'auto',
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+            }}>
                 {sections.map(section => (
                     <button key={section.id} onClick={() => setActiveSection(section.id)} style={{
-                        padding: `${spacing.sm}px ${spacing.lg}px`,
+                        padding: isMobile ? `${spacing.sm}px ${spacing.md}px` : `${spacing.sm}px ${spacing.lg}px`,
                         borderRadius: radius.lg,
                         border: 'none',
                         background: activeSection === section.id ? gradients.primary : colors.light,
                         color: activeSection === section.id ? colors.textWhite : colors.textSecondary,
                         fontWeight: fontWeight.semibold,
                         cursor: 'pointer',
-                        fontSize: fontSize.md,
+                        fontSize: isMobile ? fontSize.sm : fontSize.md,
                         whiteSpace: 'nowrap',
+                        flexShrink: 0,
                     }}>{section.label}</button>
                 ))}
             </div>
@@ -137,24 +169,24 @@ const AppearanceTab = ({ appearance, setAppearance, isMobile, onSave, saving }) 
                         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: spacing.xl }}>
                             <div>
                                 <h4 style={{ margin: `0 0 ${spacing.lg}px`, color: colors.textSecondary, fontSize: fontSize.md }}>Brand Colors</h4>
-                                <ColorInput label="Primary Color" value={appearance.colorPrimary} onChange={(v) => updateColor('colorPrimary', v)} description="Main brand color for buttons and highlights" />
-                                <ColorInput label="Primary Dark" value={appearance.colorPrimaryDark} onChange={(v) => updateColor('colorPrimaryDark', v)} description="Darker variant for gradients" />
-                                <ColorInput label="Secondary Color" value={appearance.colorSecondary} onChange={(v) => updateColor('colorSecondary', v)} description="Secondary accent color" />
-                                <ColorInput label="Accent Color" value={appearance.colorAccent} onChange={(v) => updateColor('colorAccent', v)} description="Special highlight color (pink)" />
+                                <ColorInput label="Primary Color" value={appearance.colorPrimary} onChange={(v) => updateColor('colorPrimary', v)} description="Main brand color for buttons and highlights" isMobile={isMobile} />
+                                <ColorInput label="Primary Dark" value={appearance.colorPrimaryDark} onChange={(v) => updateColor('colorPrimaryDark', v)} description="Darker variant for gradients" isMobile={isMobile} />
+                                <ColorInput label="Secondary Color" value={appearance.colorSecondary} onChange={(v) => updateColor('colorSecondary', v)} description="Secondary accent color" isMobile={isMobile} />
+                                <ColorInput label="Accent Color" value={appearance.colorAccent} onChange={(v) => updateColor('colorAccent', v)} description="Special highlight color (pink)" isMobile={isMobile} />
                             </div>
                             <div>
                                 <h4 style={{ margin: `0 0 ${spacing.lg}px`, color: colors.textSecondary, fontSize: fontSize.md }}>Status Colors</h4>
-                                <ColorInput label="Success Color" value={appearance.colorSuccess} onChange={(v) => updateColor('colorSuccess', v)} description="Success states and confirmations" />
-                                <ColorInput label="Warning Color" value={appearance.colorWarning} onChange={(v) => updateColor('colorWarning', v)} description="Warning states" />
-                                <ColorInput label="Danger Color" value={appearance.colorDanger} onChange={(v) => updateColor('colorDanger', v)} description="Error and delete actions" />
+                                <ColorInput label="Success Color" value={appearance.colorSuccess} onChange={(v) => updateColor('colorSuccess', v)} description="Success states and confirmations" isMobile={isMobile} />
+                                <ColorInput label="Warning Color" value={appearance.colorWarning} onChange={(v) => updateColor('colorWarning', v)} description="Warning states" isMobile={isMobile} />
+                                <ColorInput label="Danger Color" value={appearance.colorDanger} onChange={(v) => updateColor('colorDanger', v)} description="Error and delete actions" isMobile={isMobile} />
                             </div>
                         </div>
 
                         <h4 style={{ margin: `${spacing.xxl}px 0 ${spacing.lg}px`, color: colors.textSecondary, fontSize: fontSize.md }}>Background Colors</h4>
                         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: spacing.lg }}>
-                            <ColorInput label="Dark Background" value={appearance.colorDark} onChange={(v) => updateColor('colorDark', v)} />
-                            <ColorInput label="Darker Background" value={appearance.colorDarker} onChange={(v) => updateColor('colorDarker', v)} />
-                            <ColorInput label="Light Background" value={appearance.colorLight} onChange={(v) => updateColor('colorLight', v)} />
+                            <ColorInput label="Dark Background" value={appearance.colorDark} onChange={(v) => updateColor('colorDark', v)} isMobile={isMobile} />
+                            <ColorInput label="Darker Background" value={appearance.colorDarker} onChange={(v) => updateColor('colorDarker', v)} isMobile={isMobile} />
+                            <ColorInput label="Light Background" value={appearance.colorLight} onChange={(v) => updateColor('colorLight', v)} isMobile={isMobile} />
                         </div>
                     </div>
                 )}
@@ -168,7 +200,7 @@ const AppearanceTab = ({ appearance, setAppearance, isMobile, onSave, saving }) 
                         </div>
                         <p style={{ marginBottom: spacing.lg, color: colors.textSecondary, fontSize: fontSize.md }}>Drag to reorder, edit icons and labels. Note: Only existing tab components will work.</p>
                         {appearance.navItems?.map((item, index) => (
-                            <NavItemEditor key={item.id} item={item} index={index} onUpdate={updateNavItem} onDelete={deleteNavItem} onMove={moveNavItem} totalItems={appearance.navItems.length} />
+                            <NavItemEditor key={item.id} item={item} index={index} onUpdate={updateNavItem} onDelete={deleteNavItem} onMove={moveNavItem} totalItems={appearance.navItems.length} isMobile={isMobile} />
                         ))}
                     </div>
                 )}
