@@ -242,7 +242,7 @@ const AppearanceTab = ({ appearance, setAppearance, isMobile, onSave, saving }) 
                             <h3 style={{ margin: 0, color: colors.textPrimary, fontSize: fontSize.lg }}>Navigation Items</h3>
                             <button onClick={addNavItem} style={{ padding: `${spacing.xs}px ${spacing.md}px`, borderRadius: radius.md, border: 'none', background: gradients.secondary, color: '#fff', fontWeight: fontWeight.semibold, cursor: 'pointer', fontSize: fontSize.sm }}>➕ Add</button>
                         </div>
-                        <p style={{ marginBottom: spacing.md, color: colors.textSecondary, fontSize: fontSize.sm }}>Edit navigation tabs. Only built-in tabs (dashboard, memories, timeline, messages, settings, appearance) will work.</p>
+                        <p style={{ marginBottom: spacing.md, color: colors.textSecondary, fontSize: fontSize.sm }}>Edit navigation tabs. Only built-in tabs (dashboard, memories, timeline, events, messages, settings, appearance) will work.</p>
                         {(appearance.navItems || []).map((item, index) => (
                             <NavItemEditor key={item.id || index} item={item} index={index} onUpdate={updateNavItem} onDelete={deleteNavItem} onMove={moveNavItem} totalItems={(appearance.navItems || []).length} isMobile={isMobile} />
                         ))}

@@ -8,6 +8,9 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { connectDatabase } = require('./config/database');
 const { configureCloudinary } = require('./config/cloudinary');
 
+// Import services
+const { eventScheduler } = require('./services/eventScheduler');
+
 // Import routes
 const {
     authRoutes,
@@ -77,6 +80,21 @@ app.use('/api/events', eventsRoutes);
 // Telegram Routes
 app.use('/api/telegram', telegramRoutes);
 
+// Scheduler Status Route
+app.get('/api/scheduler/status', (req, res) => {
+    res.json(eventScheduler.getStatus());
+});
+
+// Scheduler Trigger Route (for testing)
+app.post('/api/scheduler/trigger', async (req, res) => {
+    try {
+        await eventScheduler.triggerCheck();
+        res.json({ success: true, message: 'Scheduler triggered manually' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // ============== INITIALIZATION ==============
 const initializeServer = async () => {
     try {
@@ -90,11 +108,15 @@ const initializeServer = async () => {
         await authRoutes.createDefaultAdmin();
         await timelineRoutes.createDefaultTimeline();
 
+        // Start Event Scheduler (for birthday/anniversary/event reminders)
+        eventScheduler.start();
+
         // Start Server
         const PORT = process.env.PORT || 5000;
         app.listen(PORT, () => {
             console.log(`🚀 Server running on port ${PORT}`);
             console.log('📁 Modular server architecture loaded successfully!');
+            console.log('📅 Event Scheduler active - Auto-reminders enabled!');
         });
     } catch (error) {
         console.error('❌ Server initialization failed:', error);
@@ -104,3 +126,4 @@ const initializeServer = async () => {
 
 // Start the server
 initializeServer();
+
