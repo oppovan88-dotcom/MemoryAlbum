@@ -279,21 +279,26 @@ async function notifyTelegram(type, event, daysUntil = null) {
     try {
         const settings = await TelegramSettings.findOne({ key: 'telegram' });
 
-        if (!settings || !settings.notificationsEnabled || !settings.botToken || !settings.chatId) {
+        // Use database settings or fallback to environment variables
+        const botToken = settings?.botToken || process.env.TELEGRAM_BOT_TOKEN;
+        const chatId = settings?.chatId || process.env.TELEGRAM_CHAT_ID;
+        const notificationsEnabled = settings?.notificationsEnabled !== false; // Default to true
+
+        if (!botToken || !chatId) {
             return { success: false, error: 'Telegram not configured' };
         }
 
-        telegramService.setToken(settings.botToken);
+        telegramService.setToken(botToken);
 
-        const template = settings.templates?.[type] || null;
+        const template = settings?.templates?.[type] || null;
 
         if (type === 'eventToday') {
-            return telegramService.sendEventCelebration(settings.chatId, event, template);
+            return telegramService.sendEventCelebration(chatId, event, template);
         } else if (type === 'eventReminder') {
-            return telegramService.sendEventReminder(settings.chatId, event, daysUntil, template);
+            return telegramService.sendEventReminder(chatId, event, daysUntil, template);
         } else if (type === 'eventCreated') {
             const message = `📌 *New Event Created!*\n\n${event.icon} *${event.title}*\n📅 ${new Date(event.eventDate).toLocaleDateString()}\n\n${event.description || ''}`;
-            return telegramService.sendMessage(settings.chatId, message);
+            return telegramService.sendMessage(chatId, message);
         }
 
         return { success: false, error: 'Unknown notification type' };
