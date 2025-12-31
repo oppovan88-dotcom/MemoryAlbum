@@ -143,25 +143,35 @@ const AppearanceTab = ({ appearance, setAppearance, isMobile, onSave, saving }) 
     ];
 
     return (
-        <div style={{ background: colors.white, borderRadius: radius.xxl, boxShadow: shadows.sm, overflow: 'hidden' }}>
+        <div style={{ background: colors.white, borderRadius: radius.xxl, boxShadow: shadows.sm, overflow: 'visible', maxWidth: '100%' }}>
             {/* Header */}
             <div style={{ padding: isMobile ? spacing.lg : `${spacing.xl}px ${spacing.xxl}px`, borderBottom: `1px solid ${colors.borderLight}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: spacing.md }}>
                 <h2 style={{ margin: 0, fontSize: isMobile ? fontSize.xl : fontSize.xxl, fontWeight: fontWeight.bold, color: colors.textPrimary }}>🎨 Appearance</h2>
                 <button onClick={onSave} disabled={saving} style={{ padding: `${spacing.sm}px ${spacing.lg}px`, borderRadius: radius.lg, border: 'none', background: gradients.primary, color: colors.textWhite, fontWeight: fontWeight.semibold, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1, fontSize: fontSize.md }}>{saving ? 'Saving...' : '💾 Save'}</button>
             </div>
 
-            {/* Section Tabs */}
-            <div style={{ display: 'flex', gap: spacing.xs, padding: isMobile ? `${spacing.sm}px ${spacing.md}px` : `${spacing.md}px ${spacing.xxl}px`, borderBottom: `1px solid ${colors.borderLight}`, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            {/* Section Tabs - Scrollable Container */}
+            <div style={{
+                display: 'flex',
+                gap: spacing.sm,
+                padding: `${spacing.md}px ${spacing.lg}px`,
+                borderBottom: `1px solid ${colors.borderLight}`,
+                overflowX: 'auto',
+                overflowY: 'hidden',
+                WebkitOverflowScrolling: 'touch',
+                width: '100%',
+                boxSizing: 'border-box',
+            }}>
                 {sections.map(section => (
                     <button key={section.id} onClick={() => setActiveSection(section.id)} style={{
-                        padding: `${spacing.xs}px ${isMobile ? spacing.sm : spacing.md}px`,
+                        padding: `${spacing.sm}px ${spacing.md}px`,
                         borderRadius: radius.md,
                         border: 'none',
                         background: activeSection === section.id ? gradients.primary : colors.light,
                         color: activeSection === section.id ? colors.textWhite : colors.textSecondary,
                         fontWeight: fontWeight.semibold,
                         cursor: 'pointer',
-                        fontSize: isMobile ? fontSize.xs : fontSize.sm,
+                        fontSize: fontSize.sm,
                         whiteSpace: 'nowrap',
                         flexShrink: 0,
                     }}>{section.label}</button>

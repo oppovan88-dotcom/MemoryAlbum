@@ -207,9 +207,9 @@ const Dashboard = ({ admin, onLogout }) => {
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: colors.light, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
             <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} admin={admin} onLogout={onLogout} isOpen={sidebarOpen} setIsOpen={setSidebarOpen} isMobile={isMobile} backendStatus={backendStatus} appearance={appearance} />
-            <div style={{ flex: 1, marginLeft: isMobile ? 0 : theme.sidebar.width, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flex: 1, marginLeft: isMobile ? 0 : theme.sidebar.width, display: 'flex', flexDirection: 'column', overflowX: 'hidden', maxWidth: isMobile ? '100vw' : `calc(100vw - ${theme.sidebar.width}px)` }}>
                 <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} title={getTitle()} isMobile={isMobile} onLogout={onLogout} appearance={appearance} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-                <main style={{ padding: isMobile ? theme.spacing.lg : `${theme.spacing.xxl + 4}px ${theme.spacing.xxxl}px`, flex: 1 }}>
+                <main style={{ padding: isMobile ? theme.spacing.lg : `${theme.spacing.xxl + 4}px ${theme.spacing.xxxl}px`, flex: 1, overflowX: 'hidden' }}>
                     {activeTab === 'dashboard' && <DashboardTab stats={stats} isMobile={isMobile} />}
                     {activeTab === 'memories' && <MemoriesTab filteredMemories={filteredMemories} memories={memories} isMobile={isMobile} onShowAddModal={() => setShowAddModal(true)} onEdit={(m) => { setEditMemory({ ...m }); setShowEditModal(true); }} onDelete={deleteMemory} onMove={moveMemoryItem} onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} onDragEnd={handleDragEnd} dragIndex={dragIndex} dragOverIndex={dragOverIndex} />}
                     {activeTab === 'messages' && <MessagesTab messages={messageList} isMobile={isMobile} onMarkAsRead={markAsRead} onDelete={deleteMessage} />}
