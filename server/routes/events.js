@@ -95,19 +95,21 @@ router.post('/', async (req, res) => {
         const event = new SpecialEvent(eventData);
         await event.save();
 
-        // Check if event is TODAY and has a time set
+        // Check if event is TODAY and has a time set (using Cambodia timezone)
         const now = new Date();
+        const khTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' }));
         const eventDate = new Date(event.eventDate);
+        const khEventDate = new Date(eventDate.toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' }));
 
-        // Check if it's the same day (compare year, month, day)
-        const isToday = eventDate.getFullYear() === now.getFullYear() &&
-            eventDate.getMonth() === now.getMonth() &&
-            eventDate.getDate() === now.getDate();
+        // Check if it's the same day in Cambodia
+        const isTodayInKH = khEventDate.getFullYear() === khTime.getFullYear() &&
+            khEventDate.getMonth() === khTime.getMonth() &&
+            khEventDate.getDate() === khTime.getDate();
 
         // If event is TODAY and has a time set, send "IT'S TIME" alert
-        if (isToday && event.eventTime) {
+        if (isTodayInKH && event.eventTime) {
             await notifyTelegram('eventNow', event);
-        } else if (isToday && !event.eventTime) {
+        } else if (isTodayInKH && !event.eventTime) {
             // Today but no specific time - also send IT'S TIME
             await notifyTelegram('eventNow', event);
         } else {

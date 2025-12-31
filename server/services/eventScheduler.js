@@ -10,6 +10,11 @@ class EventScheduler {
         this.lastCheck = null;
     }
 
+    // Helper to get current time in Cambodia
+    getKHNow() {
+        return new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' }));
+    }
+
     // Start the scheduler
     start() {
         if (this.isRunning) {
@@ -44,8 +49,9 @@ class EventScheduler {
     // Main task runner
     async runScheduledTasks() {
         try {
-            console.log(`📅 [${new Date().toISOString()}] Running scheduled event checks...`);
-            this.lastCheck = new Date();
+            const nowInKH = this.getKHNow();
+            console.log(`📅 [${nowInKH.toISOString()}] Running scheduled event checks (Cambodia Time)...`);
+            this.lastCheck = nowInKH;
 
             // Get Telegram settings
             const telegramSettings = await TelegramSettings.findOne({ key: 'telegram' });
@@ -215,7 +221,7 @@ class EventScheduler {
     // Mark passed non-recurring events as completed
     async markPassedEventsAsComplete() {
         try {
-            const now = new Date();
+            const now = this.getKHNow();
             const events = await SpecialEvent.find({
                 isActive: true,
                 isCompleted: false,
@@ -223,7 +229,7 @@ class EventScheduler {
             });
 
             for (const event of events) {
-                let eventDateTime = new Date(event.eventDate);
+                let eventDateTime = new Date(new Date(event.eventDate).toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' }));
 
                 // If eventTime is set, use it
                 if (event.eventTime) {
@@ -250,7 +256,7 @@ class EventScheduler {
     // Check all events and send appropriate reminders
     async checkAndSendReminders() {
         try {
-            const now = new Date();
+            const now = this.getKHNow();
             const events = await SpecialEvent.find({ isActive: true, reminderEnabled: true });
 
             for (const event of events) {
@@ -264,7 +270,8 @@ class EventScheduler {
     // Process reminders for a single event
     async processEventReminders(event, now) {
         try {
-            let eventDate = new Date(event.eventDate);
+            // Interpret event date in KH context
+            let eventDate = new Date(new Date(event.eventDate).toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' }));
 
             // If eventTime is set, use it for exact time matching
             if (event.eventTime) {
