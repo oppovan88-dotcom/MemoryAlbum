@@ -1,13 +1,39 @@
 import React, { useState, useRef, useEffect } from "react";
 import { getThemeOptions } from "@/config/themes";
 
-const HEADER_HEIGHT = 60;
+// Responsive header height based on screen size
+const getHeaderHeight = (screenSize) => {
+  switch (screenSize) {
+    case 'xs': return 50;
+    case 'sm': return 52;
+    case 'md': return 56;
+    default: return 60;
+  }
+};
 
 const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
+  const [screenSize, setScreenSize] = useState('desktop');
   const audioRef = useRef(null);
   const dropdownRef = useRef(null);
+
+  // Detect screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 380) setScreenSize('xs');
+      else if (width < 500) setScreenSize('sm');
+      else if (width < 768) setScreenSize('md');
+      else setScreenSize('desktop');
+    };
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  const HEADER_HEIGHT = getHeaderHeight(screenSize);
+  const isMobile = screenSize === 'xs' || screenSize === 'sm';
 
   // Use dynamic appearance settings
   const appName = appearance?.appName || "Love Memory";
@@ -59,11 +85,20 @@ const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
     : "drop-shadow(0 1px 7px #ffb3d6a8)");
   const primaryColor = currentTheme?.colors?.primary || "#ff69b4";
 
+  // Responsive sizes
+  const sizes = {
+    xs: { iconSize: 18, titleSize: '0.9rem', buttonHeight: 26, buttonPadding: '0 8px', fontSize: '0.75rem', musicWidth: 36 },
+    sm: { iconSize: 20, titleSize: '1rem', buttonHeight: 28, buttonPadding: '0 10px', fontSize: '0.8rem', musicWidth: 40 },
+    md: { iconSize: 22, titleSize: '1.1rem', buttonHeight: 30, buttonPadding: '0 11px', fontSize: '0.85rem', musicWidth: 44 },
+    desktop: { iconSize: 26, titleSize: '1.28rem', buttonHeight: 32, buttonPadding: '0 12px', fontSize: '0.9rem', musicWidth: 48 },
+  };
+  const s = sizes[screenSize] || sizes.desktop;
+
   // Music button styles
   const musicButtonStyle = {
-    width: "48px",
-    height: "32px",
-    fontSize: "1.3rem",
+    width: `${s.musicWidth}px`,
+    height: `${s.buttonHeight}px`,
+    fontSize: isMobile ? '1rem' : '1.3rem',
     cursor: "pointer",
     borderRadius: "20px",
     border: `2px solid ${primaryColor}40`,
@@ -78,9 +113,9 @@ const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
 
   // Theme button styles
   const themeButtonStyle = {
-    height: "32px",
-    padding: "0 12px",
-    fontSize: "0.9rem",
+    height: `${s.buttonHeight}px`,
+    padding: s.buttonPadding,
+    fontSize: s.fontSize,
     cursor: "pointer",
     borderRadius: "20px",
     border: `2px solid ${primaryColor}40`,
@@ -90,15 +125,31 @@ const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "6px",
+    gap: isMobile ? "3px" : "6px",
     transition: "all 0.3s ease",
     fontFamily: "'Quicksand', sans-serif",
     fontWeight: 600,
-    marginRight: "8px",
+    marginRight: isMobile ? "4px" : "8px",
   };
 
-  // Dropdown styles
-  const dropdownStyle = {
+  // Dropdown styles - use fixed positioning on mobile for better UX
+  const dropdownStyle = isMobile ? {
+    position: "fixed",
+    top: `${HEADER_HEIGHT + 8}px`,
+    left: "50%",
+    transform: "translateX(-50%)",
+    background: nightMode ? "rgba(30, 20, 60, 0.98)" : "rgba(255, 255, 255, 0.98)",
+    border: border,
+    borderRadius: "14px",
+    boxShadow: `0 8px 32px ${primaryColor}40`,
+    padding: "8px",
+    width: "calc(100vw - 24px)",
+    maxWidth: "320px",
+    maxHeight: "60vh",
+    overflowY: "auto",
+    zIndex: 1001,
+    backdropFilter: "blur(12px)",
+  } : {
     position: "absolute",
     top: "100%",
     right: 0,
@@ -108,7 +159,8 @@ const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
     borderRadius: "16px",
     boxShadow: `0 8px 32px ${primaryColor}30`,
     padding: "8px",
-    minWidth: "200px",
+    minWidth: "240px",
+    maxWidth: "320px",
     maxHeight: "400px",
     overflowY: "auto",
     zIndex: 1001,
@@ -118,16 +170,16 @@ const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
   const themeOptionStyle = (isActive) => ({
     display: "flex",
     alignItems: "center",
-    gap: "10px",
-    padding: "10px 14px",
-    borderRadius: "10px",
+    gap: isMobile ? "6px" : "10px",
+    padding: isMobile ? "8px 10px" : "10px 14px",
+    borderRadius: isMobile ? "8px" : "10px",
     cursor: "pointer",
     transition: "all 0.2s ease",
     background: isActive
       ? `${primaryColor}30`
       : "transparent",
     border: isActive ? `2px solid ${primaryColor}` : "2px solid transparent",
-    marginBottom: "4px",
+    marginBottom: isMobile ? "2px" : "4px",
   });
 
   return (
@@ -153,14 +205,14 @@ const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
           borderBottom: border,
         }}
       >
-        <div className="container d-flex align-items-center justify-content-between">
+        <div className="container d-flex align-items-center justify-content-between" style={{ padding: isMobile ? '0 10px' : undefined }}>
           {/* Left side: Icon & Title */}
           <div className="d-flex align-items-center">
             <span
               style={{
-                fontSize: 26,
+                fontSize: s.iconSize,
                 color: iconColor,
-                marginRight: 12,
+                marginRight: isMobile ? 6 : 12,
                 filter: iconShadow,
                 animation: "pulseHeart 1.5s infinite",
                 display: "inline-block",
@@ -175,9 +227,9 @@ const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
               style={{
                 fontFamily: "'Quicksand', cursive, sans-serif",
                 fontWeight: 700,
-                fontSize: "1.28rem",
+                fontSize: s.titleSize,
                 color: titleColor,
-                letterSpacing: "1.3px",
+                letterSpacing: isMobile ? "0.5px" : "1.3px",
                 textShadow: nightMode
                   ? "0 2px 12px #45227988"
                   : "0 2px 8px #fff6",
@@ -197,31 +249,48 @@ const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
               aria-label="Change theme"
               aria-expanded={isThemeDropdownOpen}
             >
-              <span style={{ fontSize: "1.1rem" }}>
+              <span style={{ fontSize: isMobile ? "0.85rem" : "1.1rem" }}>
                 {currentTheme?.name?.split(' ')[0] || '🎨'}
               </span>
-              <span className="d-none d-sm-inline">Theme</span>
+              {!isMobile && <span>Theme</span>}
               <span style={{
                 transform: isThemeDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
                 transition: "transform 0.2s ease",
-                fontSize: "0.7rem",
+                fontSize: isMobile ? "0.5rem" : "0.7rem",
               }}>
                 ▼
               </span>
             </button>
 
+            {/* Mobile Backdrop */}
+            {isMobile && isThemeDropdownOpen && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: "rgba(0,0,0,0.4)",
+                  zIndex: 1000,
+                }}
+                onClick={() => setIsThemeDropdownOpen(false)}
+              />
+            )}
+
             {/* Theme Dropdown */}
             {isThemeDropdownOpen && (
               <div style={dropdownStyle}>
                 <div style={{
-                  padding: "8px 14px",
-                  fontSize: "0.8rem",
+                  padding: isMobile ? "10px 12px" : "8px 14px",
+                  fontSize: isMobile ? "0.75rem" : "0.8rem",
                   color: nightMode ? "#9ca3af" : "#6b7280",
                   fontWeight: 600,
                   textTransform: "uppercase",
                   letterSpacing: "1px",
                   borderBottom: `1px solid ${primaryColor}20`,
                   marginBottom: "8px",
+                  textAlign: isMobile ? "center" : "left",
                 }}>
                   Choose Theme
                 </div>
@@ -252,21 +321,23 @@ const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
                       }
                     }}
                   >
-                    <span style={{ fontSize: "1.2rem" }}>
+                    <span style={{ fontSize: isMobile ? "1rem" : "1.2rem" }}>
                       {theme.name.split(' ')[0]}
                     </span>
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
                         color: titleColor,
                         fontWeight: 600,
-                        fontSize: "0.9rem",
+                        fontSize: isMobile ? "0.8rem" : "0.9rem",
                         fontFamily: "'Quicksand', sans-serif",
                       }}>
                         {theme.name.split(' ').slice(1).join(' ')}
                       </div>
                       <div style={{
                         color: nightMode ? "#9ca3af" : "#6b7280",
-                        fontSize: "0.75rem",
+                        fontSize: isMobile ? "0.65rem" : "0.75rem",
+                        whiteSpace: "normal",
+                        wordBreak: "break-word",
                       }}>
                         {theme.description}
                       </div>
@@ -274,7 +345,7 @@ const Header = ({ nightMode, currentTheme, setTheme, appearance }) => {
                     {currentTheme?.id === theme.id && (
                       <span style={{
                         color: primaryColor,
-                        fontSize: "1rem",
+                        fontSize: isMobile ? "0.85rem" : "1rem",
                       }}>
                         ✓
                       </span>

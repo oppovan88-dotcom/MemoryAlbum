@@ -69,18 +69,31 @@ const NewYear = ({ nightMode }) => {
 
     const s = {
         mobile: {
-            minHeight: 380,
-            titleSize: "2.2rem",
-            countdownSize: "1.5rem",
-            labelSize: "0.6rem",
-            gap: "10px",
+            minHeight: 340,
+            titleSize: "1.8rem",
+            countdownSize: "1.3rem",
+            labelSize: "0.55rem",
+            gap: "8px",
+            messageSize: "0.75rem",
+            messagePadding: "10px 16px",
         },
         tablet: {
-            minHeight: 400,
-            titleSize: "3rem",
-            countdownSize: "2rem",
-            labelSize: "0.8rem",
-            gap: "20px",
+            minHeight: 380,
+            titleSize: "2.5rem",
+            countdownSize: "1.8rem",
+            labelSize: "0.7rem",
+            gap: "14px",
+            messageSize: "0.85rem",
+            messagePadding: "12px 22px",
+        },
+        laptop: {
+            minHeight: 420,
+            titleSize: "3.5rem",
+            countdownSize: "2.5rem",
+            labelSize: "0.9rem",
+            gap: "25px",
+            messageSize: "0.9rem",
+            messagePadding: "15px 28px",
         },
         desktop: {
             minHeight: 450,
@@ -88,18 +101,20 @@ const NewYear = ({ nightMode }) => {
             countdownSize: "3rem",
             labelSize: "1rem",
             gap: "30px",
+            messageSize: "0.9rem",
+            messagePadding: "15px 30px",
         }
-    }[screen === "mobile" ? "mobile" : screen === "tablet" ? "tablet" : "desktop"];
+    }[screen];
 
     const TimeUnit = ({ value, label }) => (
         <div style={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: screen === "mobile" ? "10px" : "15px",
+            padding: screen === "mobile" ? "8px 6px" : screen === "tablet" ? "10px" : "15px",
             background: "rgba(255, 255, 255, 0.1)",
-            borderRadius: "12px",
-            minWidth: screen === "mobile" ? "65px" : "90px",
+            borderRadius: screen === "mobile" ? "10px" : "12px",
+            minWidth: screen === "mobile" ? "55px" : screen === "tablet" ? "70px" : "90px",
             border: "1px solid rgba(255, 255, 255, 0.2)",
             backdropFilter: "blur(5px)",
         }}>
@@ -113,8 +128,8 @@ const NewYear = ({ nightMode }) => {
                 fontSize: s.labelSize,
                 color: "rgba(255,255,255,0.8)",
                 textTransform: "uppercase",
-                letterSpacing: "1px",
-                marginTop: "4px",
+                letterSpacing: screen === "mobile" ? "0.5px" : "1px",
+                marginTop: screen === "mobile" ? "2px" : "4px",
             }}>{label}</span>
         </div>
     );
@@ -145,27 +160,28 @@ const NewYear = ({ nightMode }) => {
             {/* Animated Background Sparkles */}
             <div className="sparkles" />
 
-            <div style={{ position: "relative", zIndex: 2, padding: screen === "mobile" ? "15px" : "20px" }}>
-                <div style={{ fontSize: "2rem", marginBottom: "10px" }}>🥂✨🎊</div>
+            <div style={{ position: "relative", zIndex: 2, padding: screen === "mobile" ? "12px 8px" : "20px" }}>
+                <div style={{ fontSize: screen === "mobile" ? "1.5rem" : "2rem", marginBottom: screen === "mobile" ? "6px" : "10px" }}>🥂✨🎊</div>
 
                 <h1 style={{
                     fontFamily: "'Playfair Display', serif",
                     fontSize: s.titleSize,
                     fontWeight: 900,
-                    margin: "0 0 20px",
+                    margin: screen === "mobile" ? "0 0 12px" : "0 0 20px",
                     background: "linear-gradient(to bottom, #fff, #ddd)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     textShadow: "0 10px 20px rgba(0,0,0,0.3)",
+                    lineHeight: 1.2,
                 }}>
                     HAPPY NEW YEAR 2026
                 </h1>
 
                 <p style={{
-                    fontSize: "1.1rem",
+                    fontSize: screen === "mobile" ? "0.85rem" : "1.1rem",
                     opacity: 0.9,
-                    marginBottom: "30px",
-                    letterSpacing: "2px",
+                    marginBottom: screen === "mobile" ? "16px" : "30px",
+                    letterSpacing: screen === "mobile" ? "1px" : "2px",
                 }}>THE COUNTDOWN BEGINS</p>
 
                 <div style={{
@@ -181,14 +197,15 @@ const NewYear = ({ nightMode }) => {
                 </div>
 
                 <div style={{
-                    marginTop: "40px",
-                    padding: "15px 30px",
+                    marginTop: screen === "mobile" ? "20px" : "40px",
+                    padding: s.messagePadding,
                     background: "rgba(255, 255, 255, 0.15)",
                     borderRadius: "50px",
                     border: "1px solid rgba(255, 255, 255, 0.3)",
                     display: "inline-block",
+                    maxWidth: screen === "mobile" ? "90%" : "auto",
                 }}>
-                    <span style={{ fontSize: "0.9rem", fontWeight: "600" }}>
+                    <span style={{ fontSize: s.messageSize, fontWeight: "600" }}>
                         ✨ Cheers to a year of health, wealth, and memories ✨
                     </span>
                 </div>

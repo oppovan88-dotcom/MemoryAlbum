@@ -45,6 +45,21 @@ const calculateZodiac = (birthDate) => {
 export default function Relationship({ nightMode }) {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [screenSize, setScreenSize] = useState('desktop');
+
+  // Detect screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 380) setScreenSize('xs');
+      else if (width < 500) setScreenSize('sm');
+      else if (width < 768) setScreenSize('md');
+      else setScreenSize('desktop');
+    };
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   useEffect(() => {
     AOS.init({
@@ -113,15 +128,69 @@ export default function Relationship({ nightMode }) {
   const badgeColor = "#fff";
   const nameColor = bubbleColor;
 
+  // Responsive sizing based on screen size - smaller for horizontal mobile layout
+  const sizes = {
+    xs: { // Very small phones (< 380px) - COMPACT for horizontal
+      imgSize: 50,
+      imgBorder: 2,
+      nameSize: '0.9rem',
+      badgeSize: 9,
+      badgePadding: '0.1em 0.25em',
+      heartSize: '28px',
+      headingSize: '1.3rem',
+      taglineSize: '0.6rem',
+      sinceSize: '0.55rem',
+      daysSize: '0.5rem',
+    },
+    sm: { // Small phones (380-500px) - COMPACT for horizontal
+      imgSize: 60,
+      imgBorder: 3,
+      nameSize: '1rem',
+      badgeSize: 10,
+      badgePadding: '0.12em 0.3em',
+      heartSize: '32px',
+      headingSize: '1.4rem',
+      taglineSize: '0.7rem',
+      sinceSize: '0.6rem',
+      daysSize: '0.55rem',
+    },
+    md: { // Medium devices (500-768px)
+      imgSize: 80,
+      imgBorder: 4,
+      nameSize: '1.3rem',
+      badgeSize: 13,
+      badgePadding: '0.2em 0.5em',
+      heartSize: '42px',
+      headingSize: '1.8rem',
+      taglineSize: '0.85rem',
+      sinceSize: '0.8rem',
+      daysSize: '0.75rem',
+    },
+    desktop: { // Desktop (> 768px)
+      imgSize: 120,
+      imgBorder: 6,
+      nameSize: '2rem',
+      badgeSize: 18,
+      badgePadding: '0.35em 0.8em',
+      heartSize: '60px',
+      headingSize: '2.5rem',
+      taglineSize: '1.1rem',
+      sinceSize: '1rem',
+      daysSize: '1rem',
+    }
+  };
+  const s = sizes[screenSize] || sizes.desktop;
+
   // Text style for single line text below images
   const singleLineTextStyle = {
     color: bubbleColor,
     fontFamily: "'Caveat', cursive",
-    fontSize: "1.1rem",
-    whiteSpace: "nowrap",
-    marginTop: "8px",
+    fontSize: s.taglineSize,
+    whiteSpace: screenSize === 'xs' || screenSize === 'sm' ? 'normal' : 'nowrap',
+    marginTop: screenSize === 'xs' ? '2px' : screenSize === 'sm' ? '4px' : '8px',
     fontWeight: 600,
     textAlign: "center",
+    lineHeight: 1.1,
   };
 
   return (
@@ -142,7 +211,7 @@ export default function Relationship({ nightMode }) {
         style={{
           fontFamily: "'Quicksand', cursive, sans-serif",
           fontWeight: 700,
-          fontSize: "2.5rem",
+          fontSize: s.headingSize,
           letterSpacing: "1px",
           color: headingColor,
           textShadow: nightMode
@@ -160,7 +229,7 @@ export default function Relationship({ nightMode }) {
         </span>
       </h2>
       <div className="container-fluid py-4">
-        <div className="row flex-nowrap justify-content-center align-items-end relationship-row-scroll">
+        <div className="row justify-content-center align-items-center relationship-row-scroll" style={{ gap: '0' }}>
           {/* Person 1 */}
           <div
             className="col-12 col-md-4 d-flex flex-column align-items-center px-3 py-3"
@@ -172,10 +241,10 @@ export default function Relationship({ nightMode }) {
               alt={settings.person1Name}
               className="rounded-circle shadow"
               style={{
-                width: 120,
-                height: 120,
+                width: s.imgSize,
+                height: s.imgSize,
                 objectFit: "cover",
-                border: "6px solid #fff",
+                border: `${s.imgBorder}px solid #fff`,
                 background: "#fff",
                 boxShadow: shadow,
               }}
@@ -184,32 +253,34 @@ export default function Relationship({ nightMode }) {
               style={{
                 color: nameColor,
                 fontFamily: "'Caveat', cursive",
-                fontSize: "2rem",
+                fontSize: s.nameSize,
                 textShadow: "0 2px 8px #fff8",
-                margin: "16px 0 8px 0",
+                margin: "12px 0 6px 0",
                 fontWeight: 700,
               }}
             >
               {settings.person1Name}
             </div>
-            <div className="d-flex gap-2 mb-3">
+            <div className="d-flex gap-2 mb-2 flex-wrap justify-content-center">
               <span
-                className="badge rounded-pill px-3 py-2"
+                className="badge rounded-pill"
                 style={{
                   background: badgeBgRith,
                   color: badgeColor,
-                  fontSize: 18,
+                  fontSize: s.badgeSize,
+                  padding: s.badgePadding,
                   letterSpacing: 1,
                 }}
               >
                 {settings.person1Gender} {person1Age}
               </span>
               <span
-                className="badge rounded-pill px-3 py-2"
+                className="badge rounded-pill"
                 style={{
                   background: badgeBgPisces,
                   color: badgeColor,
-                  fontSize: 18,
+                  fontSize: s.badgeSize,
+                  padding: s.badgePadding,
                   letterSpacing: 1,
                 }}
               >
@@ -227,19 +298,19 @@ export default function Relationship({ nightMode }) {
           </div>
           {/* Center Heart/Date */}
           <div
-            className="col-12 col-md-4 d-flex flex-column align-items-center justify-content-center py-4"
+            className="col-12 col-md-4 d-flex flex-column align-items-center justify-content-center py-3"
             data-aos="zoom-in"
             data-aos-delay="250"
           >
             <span
               style={{
-                fontSize: "60px",
+                fontSize: s.heartSize,
                 color: heartColor,
                 textShadow: nightMode
                   ? "0 4px 28px #7f53ff77"
                   : "0 4px 20px #fff6",
-                marginBottom: 10,
-                marginTop: 6,
+                marginBottom: 8,
+                marginTop: 4,
                 animation: "beat 1.2s infinite",
                 display: "block",
               }}
@@ -249,21 +320,21 @@ export default function Relationship({ nightMode }) {
               💖
             </span>
             <div className="since-cute" style={{ textAlign: "center" }}>
-              <span className="since-date" style={{ fontWeight: 700 }}>
+              <span className="since-date" style={{ fontWeight: 700, fontSize: s.sinceSize }}>
                 {since}
               </span>
               <br />
               <span
                 className="since-days"
                 style={{
-                  fontSize: "1rem",
+                  fontSize: s.daysSize,
                   color: nightMode ? "#d6ccff" : "#a376c8",
                 }}
               >
                 ({days} days)
               </span>
             </div>
-            <div style={{ fontSize: "1.8rem", marginTop: 8 }}>🧑‍🤝‍🧑</div>
+            <div style={{ fontSize: screenSize === 'xs' ? '1.3rem' : '1.8rem', marginTop: 6 }}>🧑‍🤝‍🧑</div>
           </div>
           {/* Person 2 */}
           <div
@@ -276,10 +347,10 @@ export default function Relationship({ nightMode }) {
               alt={settings.person2Name}
               className="rounded-circle shadow"
               style={{
-                width: 120,
-                height: 120,
+                width: s.imgSize,
+                height: s.imgSize,
                 objectFit: "cover",
-                border: "6px solid #fff",
+                border: `${s.imgBorder}px solid #fff`,
                 background: "#fff",
                 boxShadow: shadow,
               }}
@@ -288,32 +359,34 @@ export default function Relationship({ nightMode }) {
               style={{
                 color: nameColor,
                 fontFamily: "'Caveat', cursive",
-                fontSize: "2rem",
+                fontSize: s.nameSize,
                 textShadow: "0 2px 8px #fff8",
-                margin: "16px 0 8px 0",
+                margin: "12px 0 6px 0",
                 fontWeight: 700,
               }}
             >
               {settings.person2Name}
             </div>
-            <div className="d-flex gap-2 mb-3">
+            <div className="d-flex gap-2 mb-2 flex-wrap justify-content-center">
               <span
-                className="badge rounded-pill px-3 py-2"
+                className="badge rounded-pill"
                 style={{
                   background: badgeBgChanry,
                   color: badgeColor,
-                  fontSize: 18,
+                  fontSize: s.badgeSize,
+                  padding: s.badgePadding,
                   letterSpacing: 1,
                 }}
               >
                 {settings.person2Gender} {person2Age}
               </span>
               <span
-                className="badge rounded-pill px-3 py-2"
+                className="badge rounded-pill"
                 style={{
                   background: badgeBgAries,
                   color: badgeColor,
-                  fontSize: 18,
+                  fontSize: s.badgeSize,
+                  padding: s.badgePadding,
                   letterSpacing: 1,
                 }}
               >

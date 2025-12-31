@@ -4,6 +4,7 @@
   height: 200px;
   object-fit: cover;
 }
+
 @media (min-width: 992px) {
   .carousel-img-fit {
     height: 350px;
@@ -18,10 +19,12 @@
   padding: 1rem 0;
   scroll-behavior: smooth;
 }
+
 .memory-card {
   min-width: 300px;
   flex: 0 0 auto;
 }
+
 .memory-img {
   width: 100%;
   object-fit: cover;
@@ -41,7 +44,7 @@
 
 /* Footer container styles */
 .footer {
-  background: rgba(255,255,255,0.93);
+  background: rgba(255, 255, 255, 0.93);
   border-top: 1.5px solid #ffd6e6;
   box-shadow: 0 -2px 24px #ff69b417;
   position: relative;
@@ -67,9 +70,19 @@
 }
 
 @keyframes footerHeartBeat {
-  0%, 100% { transform: scale(1);}
-  30% { transform: scale(1.25);}
-  60% { transform: scale(0.95);}
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  30% {
+    transform: scale(1.25);
+  }
+
+  60% {
+    transform: scale(0.95);
+  }
 }
 
 .footer-copyright {
@@ -101,14 +114,60 @@
   scrollbar-color: #ffb3c6 #fff;
 }
 
-.relationship-main-card .col-12,
-.relationship-main-card .col-md-4 {
-  min-width: 270px;
-  max-width: 340px;
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* Desktop: horizontal layout */
+@media (min-width: 768px) {
+
+  .relationship-main-card .col-12,
+  .relationship-main-card .col-md-4 {
+    min-width: 270px;
+    max-width: 340px;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* Tablet and larger mobile: still horizontal but smaller */
+@media (min-width: 500px) and (max-width: 767px) {
+
+  .relationship-main-card .col-12,
+  .relationship-main-card .col-md-4 {
+    min-width: 150px;
+    max-width: 200px;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .relationship-row-scroll {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+  }
+}
+
+/* Small mobile: HORIZONTAL inline layout (same as laptop, just smaller) */
+@media (max-width: 499px) {
+  .relationship-row-scroll {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    gap: 4px;
+    justify-content: center;
+    padding: 0 5px;
+  }
+
+  .relationship-main-card .col-12,
+  .relationship-main-card .col-md-4 {
+    min-width: 100px !important;
+    max-width: 120px !important;
+    flex: 0 0 auto !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 2px !important;
+  }
 }
 
 .relationship-bubble {
@@ -138,125 +197,125 @@
 }
 
 @keyframes beat {
-  0%, 100% { transform: scale(1);}
-  20% { transform: scale(1.13);}
-  40% { transform: scale(0.96);}
-  60% { transform: scale(1.12);}
-  80% { transform: scale(0.98);}
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  20% {
+    transform: scale(1.13);
+  }
+
+  40% {
+    transform: scale(0.96);
+  }
+
+  60% {
+    transform: scale(1.12);
+  }
+
+  80% {
+    transform: scale(0.98);
+  }
 }
 
 @media (max-width: 900px) {
   .relationship-main-card {
     padding: 0.6rem 0.2rem;
   }
-  .relationship-main-card .col-12,
-  .relationship-main-card .col-md-4 {
-    min-width: 220px;
-    max-width: 300px;
-  }
 }
-@media (max-width: 600px) {
+
+/* Small mobile: HORIZONTAL inline with smaller sizes */
+@media (max-width: 499px) {
   .relationship-main-card {
-    border-radius: 0.6rem;
-    padding: 0.2rem 0.01rem;
+    border-radius: 1rem;
+    padding: 0.3rem;
+    width: 100%;
+    margin: 8px auto;
   }
-  .relationship-main-card .col-12,
-  .relationship-main-card .col-md-4 {
-    min-width: 105px;
-    max-width: 120px;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-  .relationship-bubble {
-    font-size: 0.75rem;
-    max-width: 88vw;
-    padding-left: 2px;
-    padding-right: 2px;
-  }
-  .since-cute {
-    padding: 4px 0.8vw;
-    font-size: 0.74rem;
-  }
-  img.rounded-circle {
-    width: 70px !important;
-    height: 70px !important;
-  }
-  .fw-bold.mb-4 {
-    font-size: 1.45rem !important;
-    margin-bottom: 0.5rem !important;
-    line-height: 1.1;
-  }
-  .badge {
-    font-size: 0.65rem !important;
-    padding: 0.1em 0.5em !important;
-  }
-}
-@media (max-width: 400px) {
-  .relationship-main-card {
-    border-radius: 0.5rem;
-    padding: 0 !important;
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
-  .relationship-main-card .col-12,
-  .relationship-main-card .col-md-4 {
-    min-width: 80px;
-    max-width: 100px;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    margin: 0 !important;
-    flex: 1 1 auto;
-  }
+
   .relationship-bubble {
     font-size: 0.7rem;
-    max-width: 90vw;
-    padding: 2px 4px !important;
-    border-radius: 0.7rem;
-    margin: 0 auto !important;
-    text-align: center;
+    max-width: 100px;
+    padding: 4px 6px;
   }
+
   .since-cute {
-    padding: 2px 4px !important;
-    font-size: 0.65rem;
-    border-radius: 0.7rem;
-    margin-bottom: 0 !important;
-    text-align: center;
+    padding: 4px 8px;
+    font-size: 0.7rem;
   }
+
   img.rounded-circle {
-    width: 64px !important;
-    height: 64px !important;
+    width: 60px !important;
+    height: 60px !important;
     border-width: 3px !important;
-    margin: 0 auto !important;
-    display: block;
   }
+
   .fw-bold.mb-4 {
-    font-size: 1.1rem !important;
-    margin-bottom: 4px !important;
+    font-size: 1.3rem !important;
+    margin-bottom: 0.5rem !important;
     line-height: 1.2;
-    letter-spacing: 0.15px;
   }
-  .badge,
-  .badge.rounded-pill,
-  .badge.px-3.py-2 {
-    font-size: 0.65rem !important;
-    padding: 0.1em 0.4em !important;
-    border-radius: 0.8em !important;
-    margin: 0 1px !important;
-  }
-  .relationship-main-card .d-flex.flex-column.align-items-center {
-    padding: 0 !important;
-    margin: 0 auto !important;
-  }
-  .relationship-row-scroll {
-    gap: 1px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow-x: auto;
+
+  .badge {
+    font-size: 0.55rem !important;
+    padding: 0.15em 0.4em !important;
   }
 }
 
+/* Very narrow screens (foldables, etc) - HORIZONTAL with even smaller sizes */
+@media (max-width: 380px) {
+  .relationship-main-card {
+    border-radius: 0.6rem;
+    padding: 0.2rem !important;
+    max-width: 100vw;
+    overflow-x: auto;
+  }
 
-html, body {
+  .relationship-main-card .col-12,
+  .relationship-main-card .col-md-4 {
+    min-width: 85px !important;
+    max-width: 105px !important;
+  }
+
+  .relationship-bubble {
+    font-size: 0.6rem;
+    max-width: 90px;
+    padding: 3px 5px !important;
+  }
+
+  .since-cute {
+    padding: 3px 6px !important;
+    font-size: 0.6rem;
+  }
+
+  img.rounded-circle {
+    width: 50px !important;
+    height: 50px !important;
+    border-width: 2px !important;
+  }
+
+  .fw-bold.mb-4 {
+    font-size: 1.1rem !important;
+    margin-bottom: 0.3rem !important;
+  }
+
+  .badge,
+  .badge.rounded-pill {
+    font-size: 0.5rem !important;
+    padding: 0.1em 0.3em !important;
+    margin: 0 1px !important;
+  }
+
+  .relationship-row-scroll {
+    gap: 2px !important;
+    padding: 0 2px;
+  }
+}
+
+html,
+body {
   overflow-x: hidden !important;
   margin: 0;
   padding: 0;
@@ -282,19 +341,37 @@ html, body {
 
 /* Heart icon animations */
 @keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes galaxyGradientMove {
-  0% { filter: hue-rotate(0deg) blur(0px);}
-  100% { filter: hue-rotate(40deg) blur(1px);}
+  0% {
+    filter: hue-rotate(0deg) blur(0px);
+  }
+
+  100% {
+    filter: hue-rotate(40deg) blur(1px);
+  }
 }
 
 @keyframes floatHeart {
-  from { transform: translateY(100vh) rotate(0deg); }
-  to { transform: translateY(-30vh) rotate(360deg); }
+  from {
+    transform: translateY(100vh) rotate(0deg);
+  }
+
+  to {
+    transform: translateY(-30vh) rotate(360deg);
+  }
 }
 
 /* Floating hearts container styling */
@@ -359,22 +436,29 @@ html, body {
 
 /* Night mode heart icon backgrounds and colors */
 .night .floating-bg-heart {
-  background-color: rgba(111, 81, 255, 0.3); /* purple glow */
+  background-color: rgba(111, 81, 255, 0.3);
+  /* purple glow */
   box-shadow: 0 0 12px 5px rgba(111, 81, 255, 0.5);
   color: #b993ff;
 }
 
 /* Light mode heart icon backgrounds and colors - 🎄 Christmas Theme 🎄 */
 .light .floating-bg-heart {
-  background-color: rgba(255, 215, 0, 0.35); /* golden glow */
+  background-color: rgba(255, 215, 0, 0.35);
+  /* golden glow */
   box-shadow: 0 0 15px 6px rgba(255, 215, 0, 0.5), 0 0 30px 10px rgba(196, 30, 58, 0.3);
   color: #ffd700;
 }
 
 /* Star twinkle animation */
 @keyframes starTwinkle {
-  0% { opacity: 0.4; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0.4;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 /* Music button styling - 🎄 Christmas Theme 🎄 */
@@ -416,6 +500,7 @@ html, body {
     transform: translateY(0) rotate(0deg);
     opacity: 1;
   }
+
   100% {
     transform: translateY(100vh) rotate(360deg);
     opacity: 0.3;
@@ -428,9 +513,11 @@ html, body {
     transform: translateY(0) scale(1);
     opacity: 0.6;
   }
+
   50% {
     opacity: 0.8;
   }
+
   100% {
     transform: translateY(-100vh) scale(0.5);
     opacity: 0;
@@ -443,16 +530,20 @@ html, body {
     transform: translateY(0) translateX(0) rotate(0deg);
     opacity: 1;
   }
+
   25% {
     transform: translateY(25vh) translateX(30px) rotate(90deg);
   }
+
   50% {
     transform: translateY(50vh) translateX(-20px) rotate(180deg);
     opacity: 0.8;
   }
+
   75% {
     transform: translateY(75vh) translateX(25px) rotate(270deg);
   }
+
   100% {
     transform: translateY(100vh) translateX(10px) rotate(360deg);
     opacity: 0;
@@ -465,19 +556,24 @@ html, body {
     transform: translateY(0) translateX(0) rotate(0deg);
     opacity: 1;
   }
+
   20% {
     transform: translateY(20vh) translateX(-25px) rotate(45deg);
   }
+
   40% {
     transform: translateY(40vh) translateX(20px) rotate(90deg);
   }
+
   60% {
     transform: translateY(60vh) translateX(-15px) rotate(180deg);
     opacity: 0.7;
   }
+
   80% {
     transform: translateY(80vh) translateX(20px) rotate(270deg);
   }
+
   100% {
     transform: translateY(100vh) translateX(0) rotate(360deg);
     opacity: 0;
@@ -486,10 +582,13 @@ html, body {
 
 /* Sparkle glow animation for Luxury theme */
 @keyframes sparkleGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.2;
     transform: scale(0.8);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.2);
@@ -498,18 +597,23 @@ html, body {
 
 /* Aurora wave animation */
 @keyframes auroraWave {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) scaleY(1);
     opacity: 0.5;
   }
+
   25% {
     transform: translateY(-20px) scaleY(1.1);
     opacity: 0.7;
   }
+
   50% {
     transform: translateY(0) scaleY(0.9);
     opacity: 0.6;
   }
+
   75% {
     transform: translateY(20px) scaleY(1.05);
     opacity: 0.8;
@@ -599,4 +703,3 @@ html, body {
 .theme-dropdown-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(128, 128, 128, 0.5);
 }
-
