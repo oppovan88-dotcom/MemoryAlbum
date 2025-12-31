@@ -137,7 +137,6 @@ const AppearanceTab = ({ appearance, setAppearance, isMobile, onSave, saving }) 
         { id: 'colors', label: '🎨 Colors' },
         { id: 'navigation', label: '📍 Navigation' },
         { id: 'stats', label: '📊 Stats Cards' },
-        { id: 'icons', label: '😀 Icons' },
     ];
 
     return (
@@ -250,22 +249,6 @@ const AppearanceTab = ({ appearance, setAppearance, isMobile, onSave, saving }) 
                         {(appearance.statsCards || []).map((card, index) => (
                             <StatsCardEditor key={card.key || index} card={card} index={index} onUpdate={updateStatsCard} onDelete={deleteStatsCard} isMobile={isMobile} />
                         ))}
-                    </div>
-                )}
-
-                {/* Icons Section */}
-                {activeSection === 'icons' && (
-                    <div>
-                        <h3 style={{ margin: `0 0 ${spacing.lg}px`, color: colors.textPrimary, fontSize: fontSize.lg }}>App Icons</h3>
-                        <p style={{ marginBottom: spacing.md, color: colors.textSecondary, fontSize: fontSize.sm }}>Customize emoji icons used throughout the app.</p>
-                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: spacing.sm }}>
-                            {Object.entries(appearance.icons || {}).map(([key, value]) => (
-                                <div key={key} style={{ padding: spacing.sm, background: colors.light, borderRadius: radius.md }}>
-                                    <label style={{ display: 'block', marginBottom: spacing.xs, fontWeight: fontWeight.medium, fontSize: fontSize.xs, textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')}</label>
-                                    <input type="text" value={value || ''} onChange={(e) => updateIcon(key, e.target.value)} style={{ width: '100%', padding: spacing.xs, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '18px', textAlign: 'center', boxSizing: 'border-box' }} />
-                                </div>
-                            ))}
-                        </div>
                     </div>
                 )}
             </div>
