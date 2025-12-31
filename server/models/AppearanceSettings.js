@@ -122,6 +122,43 @@ const appearanceSettingsSchema = new mongoose.Schema({
         ])
     },
 
+    // ============ Social Links ============
+    socialLinks: {
+        type: String, default: JSON.stringify([
+            { name: 'Facebook', url: '', icon: '📘' },
+            { name: 'Instagram', url: '', icon: '📷' },
+            { name: 'TikTok', url: '', icon: '🎵' },
+            { name: 'YouTube', url: '', icon: '▶️' },
+        ])
+    },
+
+    // ============ Footer Content ============
+    footerText: { type: String, default: 'Made with ❤️ by Us' },
+    footerYear: { type: String, default: '2024' },
+    footerLinks: {
+        type: String, default: JSON.stringify([
+            { label: 'Privacy', url: '/privacy' },
+            { label: 'Terms', url: '/terms' },
+        ])
+    },
+
+    // ============ Homepage Content ============
+    heroTitle: { type: String, default: 'Our Love Story' },
+    heroSubtitle: { type: String, default: 'A journey through our memories together' },
+    heroButtonText: { type: String, default: 'View Memories' },
+    heroBackgroundUrl: { type: String, default: '' },
+    homepageWelcome: { type: String, default: 'Welcome to our memory album!' },
+
+    // ============ About Section ============
+    aboutTitle: { type: String, default: 'About Us' },
+    aboutDescription: { type: String, default: 'Two hearts, one love story.' },
+    showAboutSection: { type: Boolean, default: true },
+
+    // ============ Contact Section ============
+    contactEmail: { type: String, default: '' },
+    contactPhone: { type: String, default: '' },
+    showContactSection: { type: Boolean, default: true },
+
     updatedAt: { type: Date, default: Date.now }
 });
 

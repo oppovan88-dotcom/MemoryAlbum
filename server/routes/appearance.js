@@ -4,7 +4,7 @@ const router = express.Router();
 const AppearanceSettings = require('../models/AppearanceSettings');
 
 // JSON fields that need to be parsed/stringified
-const jsonFields = ['navItems', 'statsCards', 'icons', 'messages', 'settingsFields', 'timeOptions'];
+const jsonFields = ['navItems', 'statsCards', 'icons', 'messages', 'settingsFields', 'timeOptions', 'socialLinks', 'footerLinks'];
 
 // Parse JSON fields from database to objects
 const parseJsonFields = (settings) => {

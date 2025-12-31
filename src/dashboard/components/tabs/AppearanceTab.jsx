@@ -137,6 +137,9 @@ const AppearanceTab = ({ appearance, setAppearance, isMobile, onSave, saving }) 
         { id: 'colors', label: '🎨 Colors' },
         { id: 'navigation', label: '📍 Navigation' },
         { id: 'stats', label: '📊 Stats Cards' },
+        { id: 'homepage', label: '🏠 Homepage' },
+        { id: 'social', label: '📱 Social' },
+        { id: 'footer', label: '📝 Footer' },
     ];
 
     return (
@@ -177,8 +180,6 @@ const AppearanceTab = ({ appearance, setAppearance, isMobile, onSave, saving }) 
                             <div style={{ gridColumn: isMobile ? '1' : '1 / -1' }}>
                                 <TextInput label="Description" value={appearance.appDescription} onChange={(v) => updateField('appDescription', v)} placeholder="Admin Dashboard" />
                             </div>
-                            <TextInput label="Logo URL (optional)" value={appearance.appLogoUrl} onChange={(v) => updateField('appLogoUrl', v)} placeholder="https://..." />
-                            <TextInput label="Favicon URL (optional)" value={appearance.appFaviconUrl} onChange={(v) => updateField('appFaviconUrl', v)} placeholder="https://..." />
                         </div>
 
                         {/* Preview */}
@@ -249,6 +250,122 @@ const AppearanceTab = ({ appearance, setAppearance, isMobile, onSave, saving }) 
                         {(appearance.statsCards || []).map((card, index) => (
                             <StatsCardEditor key={card.key || index} card={card} index={index} onUpdate={updateStatsCard} onDelete={deleteStatsCard} isMobile={isMobile} />
                         ))}
+                    </div>
+                )}
+
+                {/* Homepage Section */}
+                {activeSection === 'homepage' && (
+                    <div>
+                        <h3 style={{ margin: `0 0 ${spacing.lg}px`, color: colors.textPrimary, fontSize: fontSize.lg }}>Homepage Content</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: spacing.md }}>
+                            <TextInput label="Hero Title" value={appearance.heroTitle} onChange={(v) => updateField('heroTitle', v)} placeholder="Our Love Story" />
+                            <TextInput label="Button Text" value={appearance.heroButtonText} onChange={(v) => updateField('heroButtonText', v)} placeholder="View Memories" />
+                            <div style={{ gridColumn: isMobile ? '1' : '1 / -1' }}>
+                                <TextInput label="Hero Subtitle" value={appearance.heroSubtitle} onChange={(v) => updateField('heroSubtitle', v)} placeholder="A journey through our memories together" />
+                            </div>
+                            <div style={{ gridColumn: isMobile ? '1' : '1 / -1' }}>
+                                <TextInput label="Hero Background URL" value={appearance.heroBackgroundUrl} onChange={(v) => updateField('heroBackgroundUrl', v)} placeholder="https://..." />
+                            </div>
+                            <div style={{ gridColumn: isMobile ? '1' : '1 / -1' }}>
+                                <TextInput label="Welcome Message" value={appearance.homepageWelcome} onChange={(v) => updateField('homepageWelcome', v)} placeholder="Welcome to our memory album!" />
+                            </div>
+                        </div>
+
+                        <h4 style={{ margin: `${spacing.xl}px 0 ${spacing.md}px`, color: colors.textSecondary, fontSize: fontSize.md }}>About Section</h4>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: spacing.md }}>
+                            <TextInput label="About Title" value={appearance.aboutTitle} onChange={(v) => updateField('aboutTitle', v)} placeholder="About Us" />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, marginTop: spacing.xl }}>
+                                <input type="checkbox" checked={appearance.showAboutSection !== false} onChange={(e) => updateField('showAboutSection', e.target.checked)} id="showAbout" />
+                                <label htmlFor="showAbout" style={{ fontSize: fontSize.sm }}>Show About Section</label>
+                            </div>
+                            <div style={{ gridColumn: isMobile ? '1' : '1 / -1' }}>
+                                <TextInput label="About Description" value={appearance.aboutDescription} onChange={(v) => updateField('aboutDescription', v)} placeholder="Two hearts, one love story." />
+                            </div>
+                        </div>
+
+                        <h4 style={{ margin: `${spacing.xl}px 0 ${spacing.md}px`, color: colors.textSecondary, fontSize: fontSize.md }}>Contact Section</h4>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: spacing.md }}>
+                            <TextInput label="Contact Email" value={appearance.contactEmail} onChange={(v) => updateField('contactEmail', v)} placeholder="email@example.com" />
+                            <TextInput label="Contact Phone" value={appearance.contactPhone} onChange={(v) => updateField('contactPhone', v)} placeholder="+855 ..." />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+                                <input type="checkbox" checked={appearance.showContactSection !== false} onChange={(e) => updateField('showContactSection', e.target.checked)} id="showContact" />
+                                <label htmlFor="showContact" style={{ fontSize: fontSize.sm }}>Show Contact Section</label>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Social Links Section */}
+                {activeSection === 'social' && (
+                    <div>
+                        <h3 style={{ margin: `0 0 ${spacing.lg}px`, color: colors.textPrimary, fontSize: fontSize.lg }}>Social Media Links</h3>
+                        <p style={{ marginBottom: spacing.md, color: colors.textSecondary, fontSize: fontSize.sm }}>Add your social media profile links.</p>
+                        <div style={{ display: 'grid', gap: spacing.md }}>
+                            {(appearance.socialLinks || []).map((link, index) => (
+                                <div key={index} style={{ display: 'flex', gap: spacing.sm, alignItems: 'center', padding: spacing.md, background: colors.light, borderRadius: radius.lg }}>
+                                    <input type="text" value={link.icon || ''} onChange={(e) => {
+                                        const newLinks = [...(appearance.socialLinks || [])];
+                                        newLinks[index] = { ...newLinks[index], icon: e.target.value };
+                                        setAppearance({ ...appearance, socialLinks: newLinks });
+                                    }} style={{ width: 50, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, textAlign: 'center', fontSize: '18px' }} />
+                                    <input type="text" value={link.name || ''} onChange={(e) => {
+                                        const newLinks = [...(appearance.socialLinks || [])];
+                                        newLinks[index] = { ...newLinks[index], name: e.target.value };
+                                        setAppearance({ ...appearance, socialLinks: newLinks });
+                                    }} style={{ width: 100, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '14px' }} placeholder="Name" />
+                                    <input type="text" value={link.url || ''} onChange={(e) => {
+                                        const newLinks = [...(appearance.socialLinks || [])];
+                                        newLinks[index] = { ...newLinks[index], url: e.target.value };
+                                        setAppearance({ ...appearance, socialLinks: newLinks });
+                                    }} style={{ flex: 1, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '14px' }} placeholder="https://..." />
+                                    <button onClick={() => {
+                                        const newLinks = (appearance.socialLinks || []).filter((_, i) => i !== index);
+                                        setAppearance({ ...appearance, socialLinks: newLinks });
+                                    }} style={{ padding: spacing.sm, border: 'none', background: colors.danger, color: '#fff', borderRadius: radius.sm, cursor: 'pointer' }}>🗑️</button>
+                                </div>
+                            ))}
+                        </div>
+                        <button onClick={() => {
+                            const newLinks = [...(appearance.socialLinks || []), { name: 'New Link', url: '', icon: '🔗' }];
+                            setAppearance({ ...appearance, socialLinks: newLinks });
+                        }} style={{ marginTop: spacing.md, padding: `${spacing.sm}px ${spacing.lg}px`, borderRadius: radius.md, border: 'none', background: gradients.secondary, color: '#fff', fontWeight: fontWeight.semibold, cursor: 'pointer', fontSize: fontSize.sm }}>➕ Add Social Link</button>
+                    </div>
+                )}
+
+                {/* Footer Section */}
+                {activeSection === 'footer' && (
+                    <div>
+                        <h3 style={{ margin: `0 0 ${spacing.lg}px`, color: colors.textPrimary, fontSize: fontSize.lg }}>Footer Content</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: spacing.md }}>
+                            <TextInput label="Footer Text" value={appearance.footerText} onChange={(v) => updateField('footerText', v)} placeholder="Made with ❤️" />
+                            <TextInput label="Copyright Year" value={appearance.footerYear} onChange={(v) => updateField('footerYear', v)} placeholder="2024" />
+                        </div>
+
+                        <h4 style={{ margin: `${spacing.xl}px 0 ${spacing.md}px`, color: colors.textSecondary, fontSize: fontSize.md }}>Footer Links</h4>
+                        <div style={{ display: 'grid', gap: spacing.sm }}>
+                            {(appearance.footerLinks || []).map((link, index) => (
+                                <div key={index} style={{ display: 'flex', gap: spacing.sm, alignItems: 'center', padding: spacing.sm, background: colors.light, borderRadius: radius.md }}>
+                                    <input type="text" value={link.label || ''} onChange={(e) => {
+                                        const newLinks = [...(appearance.footerLinks || [])];
+                                        newLinks[index] = { ...newLinks[index], label: e.target.value };
+                                        setAppearance({ ...appearance, footerLinks: newLinks });
+                                    }} style={{ width: 100, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '14px' }} placeholder="Label" />
+                                    <input type="text" value={link.url || ''} onChange={(e) => {
+                                        const newLinks = [...(appearance.footerLinks || [])];
+                                        newLinks[index] = { ...newLinks[index], url: e.target.value };
+                                        setAppearance({ ...appearance, footerLinks: newLinks });
+                                    }} style={{ flex: 1, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '14px' }} placeholder="/page or https://..." />
+                                    <button onClick={() => {
+                                        const newLinks = (appearance.footerLinks || []).filter((_, i) => i !== index);
+                                        setAppearance({ ...appearance, footerLinks: newLinks });
+                                    }} style={{ padding: spacing.sm, border: 'none', background: colors.danger, color: '#fff', borderRadius: radius.sm, cursor: 'pointer' }}>🗑️</button>
+                                </div>
+                            ))}
+                        </div>
+                        <button onClick={() => {
+                            const newLinks = [...(appearance.footerLinks || []), { label: 'New Link', url: '/' }];
+                            setAppearance({ ...appearance, footerLinks: newLinks });
+                        }} style={{ marginTop: spacing.md, padding: `${spacing.sm}px ${spacing.lg}px`, borderRadius: radius.md, border: 'none', background: gradients.secondary, color: '#fff', fontWeight: fontWeight.semibold, cursor: 'pointer', fontSize: fontSize.sm }}>➕ Add Footer Link</button>
                     </div>
                 )}
             </div>
