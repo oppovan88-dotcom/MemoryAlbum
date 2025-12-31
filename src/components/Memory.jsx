@@ -23,7 +23,7 @@ const localMemories = [
 ];
 
 // ---- MAIN COMPONENT ----
-const Memory = ({ nightMode }) => {
+const Memory = ({ nightMode, currentTheme }) => {
   const [memories, setMemories] = useState(localMemories);
   const [viewerIdx, setViewerIdx] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -111,32 +111,32 @@ const Memory = ({ nightMode }) => {
     return () => window.removeEventListener("keydown", handleKey);
   }, [viewerIdx, memories.length]);
 
-  // 🎄 Christmas Theme Colors
-  const christmasColors = {
-    primary: nightMode ? "#b993ff" : "#c41e3a", // Red for light, purple for night
-    secondary: nightMode ? "#7f53ff" : "#228b22", // Green for light
-    gold: "#ffd700",
+  // Get theme colors with fallbacks
+  const primaryColor = currentTheme?.colors?.primary || (nightMode ? "#b993ff" : "#ff69b4");
+  const secondaryColor = currentTheme?.colors?.secondary || (nightMode ? "#7f53ff" : "#d72660");
+  const accentColor = currentTheme?.colors?.accent || (nightMode ? "#bfa7fc" : "#ffd700");
+  const titleColor = currentTheme?.colors?.titleColor || primaryColor;
+
+  // Theme-based colors for cards
+  const themeColors = {
+    primary: primaryColor,
+    secondary: secondaryColor,
+    gold: accentColor,
     cardBg: nightMode
-      ? "rgba(30, 30, 60, 0.85)"
-      : "rgba(255, 255, 255, 0.92)",
-    cardBorder: nightMode
-      ? "rgba(185, 147, 255, 0.4)"
-      : "rgba(196, 30, 58, 0.3)",
-    cardShadow: nightMode
-      ? "0 8px 30px rgba(127, 83, 255, 0.25)"
-      : "0 8px 30px rgba(196, 30, 58, 0.2)",
-    cardHoverShadow: nightMode
-      ? "0 16px 42px rgba(185, 147, 255, 0.4)"
-      : "0 16px 42px rgba(196, 30, 58, 0.35)",
+      ? `rgba(30, 30, 60, 0.85)`
+      : `rgba(255, 255, 255, 0.92)`,
+    cardBorder: `${primaryColor}40`,
+    cardShadow: `0 8px 30px ${primaryColor}25`,
+    cardHoverShadow: `0 16px 42px ${primaryColor}40`,
   };
 
   return (
     <div className="container pb-3">
-      {/* 🎄 Christmas Themed Title */}
+      {/* Theme-Styled Title */}
       <div className="text-center mb-4" style={{ marginTop: 26 }}>
         {/* Decorative top ornaments */}
         <div style={{ marginBottom: 8 }}>
-          <span style={{ fontSize: 22, filter: "drop-shadow(0 2px 8px rgba(255, 215, 0, 0.5))" }}>
+          <span style={{ fontSize: 22, filter: `drop-shadow(0 2px 8px ${accentColor}80)` }}>
             ✨
           </span>
         </div>
@@ -145,14 +145,10 @@ const Memory = ({ nightMode }) => {
           style={{
             display: "inline-block",
             padding: "12px 28px",
-            background: nightMode
-              ? "linear-gradient(135deg, rgba(127, 83, 255, 0.2) 0%, rgba(185, 147, 255, 0.15) 100%)"
-              : "linear-gradient(135deg, rgba(196, 30, 58, 0.15) 0%, rgba(34, 139, 34, 0.1) 100%)",
+            background: `linear-gradient(135deg, ${primaryColor}20 0%, ${secondaryColor}15 100%)`,
             borderRadius: 20,
-            border: `2px solid ${nightMode ? "rgba(185, 147, 255, 0.3)" : "rgba(196, 30, 58, 0.25)"}`,
-            boxShadow: nightMode
-              ? "0 4px 20px rgba(185, 147, 255, 0.2)"
-              : "0 4px 20px rgba(196, 30, 58, 0.15)",
+            border: `2px solid ${primaryColor}40`,
+            boxShadow: `0 4px 20px ${primaryColor}25`,
           }}
         >
           <span
@@ -161,17 +157,15 @@ const Memory = ({ nightMode }) => {
               fontWeight: 700,
               fontSize: "1.25rem",
               letterSpacing: "1.5px",
-              background: nightMode
-                ? "linear-gradient(90deg, #b993ff, #7f53ff, #b993ff)"
-                : "linear-gradient(90deg, #c41e3a, #228b22, #c41e3a)",
+              background: `linear-gradient(90deg, ${primaryColor}, ${secondaryColor}, ${primaryColor})`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
             }}
           >
-            <span style={{ fontSize: 20, marginRight: 8 }}>🎄</span>
+            <span style={{ fontSize: 20, marginRight: 8 }}>💖</span>
             Top Memory Album
-            <span style={{ fontSize: 20, marginLeft: 8 }}>🎄</span>
+            <span style={{ fontSize: 20, marginLeft: 8 }}>💖</span>
           </span>
         </div>
 
@@ -181,11 +175,11 @@ const Memory = ({ nightMode }) => {
             style={{
               fontFamily: "'Quicksand', sans-serif",
               fontSize: "0.85rem",
-              color: nightMode ? "rgba(185, 147, 255, 0.8)" : "rgba(196, 30, 58, 0.7)",
+              color: `${primaryColor}cc`,
               letterSpacing: 1,
             }}
           >
-            ❄️ Our precious moments together ❄️
+            ✨ Our precious moments together ✨
           </span>
         </div>
       </div>
@@ -207,9 +201,9 @@ const Memory = ({ nightMode }) => {
                 style={{
                   borderRadius: "18px",
                   overflow: "hidden",
-                  background: christmasColors.cardBg,
-                  boxShadow: christmasColors.cardShadow,
-                  border: `2px solid ${christmasColors.cardBorder}`,
+                  background: themeColors.cardBg,
+                  boxShadow: themeColors.cardShadow,
+                  border: `2px solid ${themeColors.cardBorder}`,
                   transition: "transform 0.2s ease, box-shadow 0.25s ease",
                   height: 186,
                   display: "flex",
@@ -219,16 +213,16 @@ const Memory = ({ nightMode }) => {
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-8px) scale(1.03)";
-                  e.currentTarget.style.boxShadow = christmasColors.cardHoverShadow;
-                  e.currentTarget.style.borderColor = christmasColors.gold;
+                  e.currentTarget.style.boxShadow = themeColors.cardHoverShadow;
+                  e.currentTarget.style.borderColor = themeColors.gold;
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.boxShadow = christmasColors.cardShadow;
-                  e.currentTarget.style.borderColor = christmasColors.cardBorder;
+                  e.currentTarget.style.boxShadow = themeColors.cardShadow;
+                  e.currentTarget.style.borderColor = themeColors.cardBorder;
                 }}
               >
-                {/* Christmas Corner Ribbon */}
+                {/* Corner decoration */}
                 <div
                   style={{
                     position: "absolute",
@@ -236,11 +230,11 @@ const Memory = ({ nightMode }) => {
                     right: 8,
                     fontSize: 16,
                     zIndex: 3,
-                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                    filter: `drop-shadow(0 2px 4px ${primaryColor}40)`,
                     animation: "gentlePulse 2s ease-in-out infinite",
                   }}
                 >
-                  {idx % 3 === 0 ? "🎁" : idx % 3 === 1 ? "⭐" : "❄️"}
+                  {idx % 3 === 0 ? "💖" : idx % 3 === 1 ? "⭐" : "✨"}
                 </div>
 
                 <img
@@ -283,16 +277,16 @@ const Memory = ({ nightMode }) => {
           className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
           style={{
             background: nightMode
-              ? "rgba(15, 22, 40, 0.96)"
-              : "rgba(26, 71, 42, 0.95)",
+              ? `rgba(15, 22, 40, 0.96)`
+              : `${primaryColor}15`,
             backdropFilter: "blur(8px) saturate(1.2)",
             zIndex: 2000,
           }}
           onClick={() => setViewerIdx(null)}
         >
-          {/* Snowflakes in modal */}
+          {/* Sparkles in modal */}
           <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-            {[...Array(20)].map((_, i) => (
+            {[...Array(15)].map((_, i) => (
               <span
                 key={i}
                 style={{
@@ -302,9 +296,10 @@ const Memory = ({ nightMode }) => {
                   fontSize: `${8 + Math.random() * 12}px`,
                   opacity: 0.6,
                   animation: `modalSnowfall ${8 + Math.random() * 8}s linear ${Math.random() * 5}s infinite`,
+                  color: primaryColor,
                 }}
               >
-                ❄
+                ✨
               </span>
             ))}
           </div>
@@ -323,15 +318,15 @@ const Memory = ({ nightMode }) => {
                 zIndex: 2,
                 fontSize: "1.8rem",
                 color: "#fff",
-                background: "rgba(196, 30, 58, 0.8)",
+                background: `${primaryColor}cc`,
                 borderRadius: "50%",
                 width: 44,
                 height: 44,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                border: "2px solid rgba(255, 215, 0, 0.5)",
-                boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
+                border: `2px solid ${accentColor}80`,
+                boxShadow: `0 4px 15px ${primaryColor}40`,
               }}
               aria-label="Close"
               onClick={() => setViewerIdx(null)}
@@ -352,9 +347,9 @@ const Memory = ({ nightMode }) => {
                 height: 48,
                 fontWeight: 700,
                 fontSize: 22,
-                boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
-                border: "2px solid rgba(255, 215, 0, 0.5)",
-                background: nightMode ? "rgba(127, 83, 255, 0.9)" : "rgba(34, 139, 34, 0.9)",
+                boxShadow: `0 4px 15px ${primaryColor}40`,
+                border: `2px solid ${accentColor}80`,
+                background: `${primaryColor}e6`,
                 color: "#fff",
                 transition: "all 0.2s ease",
               }}
@@ -377,9 +372,9 @@ const Memory = ({ nightMode }) => {
                 height: 48,
                 fontWeight: 700,
                 fontSize: 22,
-                boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
-                border: "2px solid rgba(255, 215, 0, 0.5)",
-                background: nightMode ? "rgba(127, 83, 255, 0.9)" : "rgba(34, 139, 34, 0.9)",
+                boxShadow: `0 4px 15px ${primaryColor}40`,
+                border: `2px solid ${accentColor}80`,
+                background: `${primaryColor}e6`,
                 color: "#fff",
                 transition: "all 0.2s ease",
               }}
@@ -403,10 +398,10 @@ const Memory = ({ nightMode }) => {
                   transform: "translateX(-50%)",
                   fontSize: 28,
                   zIndex: 5,
-                  filter: "drop-shadow(0 2px 8px rgba(255, 215, 0, 0.6))",
+                  filter: `drop-shadow(0 2px 8px ${accentColor}99)`,
                 }}
               >
-                ⭐
+                ✨
               </div>
 
               <img
@@ -419,10 +414,8 @@ const Memory = ({ nightMode }) => {
                   height: "60vh",
                   objectFit: "cover",
                   borderRadius: "22px",
-                  boxShadow: nightMode
-                    ? "0 8px 40px rgba(185, 147, 255, 0.4)"
-                    : "0 8px 40px rgba(196, 30, 58, 0.4)",
-                  border: `4px solid ${nightMode ? "rgba(185, 147, 255, 0.5)" : "rgba(255, 215, 0, 0.6)"}`,
+                  boxShadow: `0 8px 40px ${primaryColor}66`,
+                  border: `4px solid ${primaryColor}80`,
                   transition: "all 0.3s ease",
                 }}
               />
@@ -432,11 +425,9 @@ const Memory = ({ nightMode }) => {
                 style={{
                   marginTop: 16,
                   padding: "8px 20px",
-                  background: nightMode
-                    ? "rgba(127, 83, 255, 0.3)"
-                    : "rgba(196, 30, 58, 0.2)",
+                  background: `${primaryColor}40`,
                   borderRadius: 20,
-                  border: `1px solid ${nightMode ? "rgba(185, 147, 255, 0.4)" : "rgba(255, 215, 0, 0.5)"}`,
+                  border: `1px solid ${accentColor}66`,
                 }}
               >
                 <span

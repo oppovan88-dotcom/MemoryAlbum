@@ -5,26 +5,24 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://memoryalbum-wi0j.onrender.com/api';
 
-const BlueTick = ({ nightMode }) => (
+const BlueTick = ({ nightMode, primaryColor }) => (
   <span
     role="img"
     aria-label="success"
     style={{
-      color: nightMode ? "#b993ff" : "#249af7",
+      color: primaryColor || (nightMode ? "#b993ff" : "#249af7"),
       fontWeight: "bold",
       fontSize: 17,
       verticalAlign: "middle",
       marginLeft: 6,
-      filter: nightMode
-        ? "drop-shadow(0 1px 4px #b993ff88)"
-        : "drop-shadow(0 1px 2px #9cd4ff77)",
+      filter: `drop-shadow(0 1px 4px ${primaryColor}88)`,
     }}
   >
     ✔️
   </span>
 );
 
-function Plan({ nightMode }) {
+function Plan({ nightMode, currentTheme }) {
   const [planItems, setPlanItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [timelineTitle, setTimelineTitle] = useState('Love Timeline');
@@ -60,17 +58,20 @@ function Plan({ nightMode }) {
     fetchData();
   }, []);
 
-  // Card background: pink in light mode, galaxy in night mode
+  // Get theme colors with fallbacks
+  const primaryColor = currentTheme?.colors?.primary || (nightMode ? "#b993ff" : "#ff69b4");
+  const accentColor = currentTheme?.colors?.accent || (nightMode ? "#7f53ff" : "#fd2d6c");
+  const titleColor = currentTheme?.colors?.titleColor || primaryColor;
+
+  // Card styles based on theme
   const cardBg = nightMode
-    ? "linear-gradient(135deg, #221c3d 60%, #311c50 100%)"
-    : "linear-gradient(135deg, #fff0fa 70%, #ffd6e9 100%)";
-  const cardBorder = nightMode ? "2.5px solid #6d44b5" : "3px solid #ff69b4";
-  const cardShadow = nightMode ? "0 2px 12px #7f53ff33" : "0 2px 8px #ffe6ee22";
-  const cardShadowHover = nightMode
-    ? "0 6px 28px #b993ff44"
-    : "0 6px 20px #ffd6e480";
-  const timeColor = nightMode ? "#c3b2ff" : "#ff69b4";
-  const activityColor = nightMode ? "#b993ff" : "#fd2d6c";
+    ? `linear-gradient(135deg, ${accentColor}15 60%, ${primaryColor}20 100%)`
+    : `linear-gradient(135deg, ${primaryColor}10 70%, ${accentColor}15 100%)`;
+  const cardBorder = `2.5px solid ${primaryColor}`;
+  const cardShadow = `0 2px 12px ${primaryColor}33`;
+  const cardShadowHover = `0 6px 28px ${primaryColor}55`;
+  const timeColor = nightMode ? primaryColor : accentColor;
+  const activityColor = primaryColor;
   const detailsColor = nightMode ? "#b9b6d6" : "#474747";
 
   return (
@@ -86,13 +87,9 @@ function Plan({ nightMode }) {
             fontWeight: 800,
             fontSize: "1.35rem",
             letterSpacing: "1.5px",
-            color: nightMode ? "#b993ff" : "#ff69b4",
-            textShadow: nightMode
-              ? "0 2px 12px #7f53ff22"
-              : "0 2px 8px #ff69b410",
-            filter: nightMode
-              ? "drop-shadow(0 2px 10px #a07cff11)"
-              : "drop-shadow(0 2px 10px #fff3)",
+            color: titleColor,
+            textShadow: `0 2px 12px ${primaryColor}22`,
+            filter: `drop-shadow(0 2px 10px ${primaryColor}15)`,
             opacity: 0.97,
           }}
         >
@@ -103,7 +100,7 @@ function Plan({ nightMode }) {
               fontSize: 22,
               verticalAlign: "middle",
               marginRight: 7,
-              filter: nightMode ? "drop-shadow(0 0 8px #b993ff33)" : undefined,
+              filter: `drop-shadow(0 0 8px ${primaryColor}33)`,
             }}
           >
             💖
@@ -116,7 +113,7 @@ function Plan({ nightMode }) {
               fontSize: 19,
               verticalAlign: "middle",
               marginLeft: 7,
-              filter: nightMode ? "drop-shadow(0 0 6px #b993ff44)" : undefined,
+              filter: `drop-shadow(0 0 6px ${primaryColor}44)`,
             }}
           >
             ✨
@@ -128,7 +125,7 @@ function Plan({ nightMode }) {
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px 20px' }}>
           <div style={{ fontSize: '2rem', marginBottom: '16px' }}>💖✨</div>
-          <p style={{ color: nightMode ? '#b993ff' : '#ff69b4', fontSize: '1.1rem' }}>
+          <p style={{ color: primaryColor, fontSize: '1.1rem' }}>
             Loading {timelineTitle}...
           </p>
         </div>
@@ -138,7 +135,7 @@ function Plan({ nightMode }) {
           {planItems.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px' }}>
               <div style={{ fontSize: '3rem', marginBottom: '16px' }}>💕</div>
-              <p style={{ color: nightMode ? '#b993ff' : '#ff69b4', fontSize: '1.1rem' }}>
+              <p style={{ color: primaryColor, fontSize: '1.1rem' }}>
                 No moments yet! Check back soon 💖
               </p>
             </div>
@@ -197,7 +194,7 @@ function Plan({ nightMode }) {
                       }}
                     >
                       <span>{item.activity}</span>
-                      <BlueTick nightMode={nightMode} />
+                      <BlueTick nightMode={nightMode} primaryColor={primaryColor} />
                     </div>
                     <div
                       style={{

@@ -35,7 +35,7 @@ const Firework = ({ delay, color, left, top }) => (
     />
 );
 
-const NewYear = ({ nightMode }) => {
+const NewYear = ({ nightMode, currentTheme }) => {
     const screen = useResponsive();
     const [timeLeft, setTimeLeft] = useState({
         days: 0,
@@ -43,6 +43,13 @@ const NewYear = ({ nightMode }) => {
         minutes: 0,
         seconds: 0,
     });
+
+    // Get theme colors
+    const primaryColor = currentTheme?.colors?.primary || (nightMode ? "#b993ff" : "#db2777");
+    const accentColor = currentTheme?.colors?.accent || (nightMode ? "#7f53ff" : "#7c3aed");
+    const bgGradient = currentTheme?.colors?.background || (nightMode
+        ? "linear-gradient(135deg, #020617 0%, #1e1b4b 100%)"
+        : "linear-gradient(135deg, #7c3aed 0%, #db2777 100%)");
 
     useEffect(() => {
         const targetDate = new Date("January 1, 2026 00:00:00").getTime();
@@ -112,17 +119,17 @@ const NewYear = ({ nightMode }) => {
             flexDirection: "column",
             alignItems: "center",
             padding: screen === "mobile" ? "8px 6px" : screen === "tablet" ? "10px" : "15px",
-            background: "rgba(255, 255, 255, 0.1)",
+            background: `${primaryColor}20`,
             borderRadius: screen === "mobile" ? "10px" : "12px",
             minWidth: screen === "mobile" ? "55px" : screen === "tablet" ? "70px" : "90px",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
+            border: `1px solid ${primaryColor}40`,
             backdropFilter: "blur(5px)",
         }}>
             <span style={{
                 fontSize: s.countdownSize,
                 fontWeight: "bold",
                 color: "#fff",
-                textShadow: "0 0 10px rgba(255,255,255,0.5)",
+                textShadow: `0 0 10px ${primaryColor}80`,
             }}>{value.toString().padStart(2, '0')}</span>
             <span style={{
                 fontSize: s.labelSize,
@@ -144,10 +151,8 @@ const NewYear = ({ nightMode }) => {
                 maxWidth: 1000,
                 width: screen === "mobile" ? "96%" : "95%",
                 overflow: "hidden",
-                background: nightMode
-                    ? "linear-gradient(135deg, #020617 0%, #1e1b4b 100%)"
-                    : "linear-gradient(135deg, #7c3aed 0%, #db2777 100%)",
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+                background: bgGradient,
+                boxShadow: `0 25px 50px -12px ${primaryColor}40`,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",

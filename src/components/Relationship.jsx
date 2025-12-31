@@ -42,7 +42,7 @@ const calculateZodiac = (birthDate) => {
   return { sign: 'Unknown', emoji: '✨' };
 };
 
-export default function Relationship({ nightMode }) {
+export default function Relationship({ nightMode, currentTheme }) {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [screenSize, setScreenSize] = useState('desktop');
@@ -116,15 +116,20 @@ export default function Relationship({ nightMode }) {
     (Date.now() - new Date(since)) / (1000 * 60 * 60 * 24)
   );
 
-  // Colors based on night mode
-  const heartColor = nightMode ? "#b993ff" : "#ff69b4";
-  const headingColor = nightMode ? "#b993ff" : "#ff69b4";
-  const shadow = nightMode ? "0 2px 32px #8f6dfb26" : "0 2px 24px #ffb3c65c";
-  const bubbleColor = nightMode ? "#d3c6fc" : "#ea4c89";
-  const badgeBgRith = nightMode ? "#443264" : "#ffb3c6";
-  const badgeBgChanry = nightMode ? "#6958b9" : "#FFD6E0";
-  const badgeBgPisces = nightMode ? "#7f53ff" : "#A0C4FF";
-  const badgeBgAries = nightMode ? "#b993ff" : "#BDB2FF";
+  // Get theme colors with fallbacks
+  const primaryColor = currentTheme?.colors?.primary || (nightMode ? "#b993ff" : "#ff69b4");
+  const accentColor = currentTheme?.colors?.accent || (nightMode ? "#7f53ff" : "#ea4c89");
+  const titleColor = currentTheme?.colors?.titleColor || primaryColor;
+
+  // Colors based on theme
+  const heartColor = primaryColor;
+  const headingColor = titleColor;
+  const shadow = `0 2px 32px ${primaryColor}26`;
+  const bubbleColor = nightMode ? `${primaryColor}dd` : accentColor;
+  const badgeBgRith = `${primaryColor}60`;
+  const badgeBgChanry = `${accentColor}60`;
+  const badgeBgPisces = `${primaryColor}80`;
+  const badgeBgAries = `${accentColor}80`;
   const badgeColor = "#fff";
   const nameColor = bubbleColor;
 
