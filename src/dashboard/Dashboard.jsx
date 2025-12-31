@@ -3,7 +3,7 @@ import axios from 'axios';
 import { theme, appConfig, API_URL, CLOUDINARY } from './config';
 import { useResponsive } from './hooks/useResponsive';
 import { Sidebar, Header } from './components';
-import { DashboardTab, MemoriesTab, MessagesTab, TimelineTab, SettingsTab, AppearanceTab } from './components/tabs';
+import { DashboardTab, MemoriesTab, MessagesTab, TimelineTab, SettingsTab, AppearanceTab, EventsTab } from './components/tabs';
 import { AddMemoryModal, EditMemoryModal, AddTimelineModal, EditTimelineModal } from './components/modals';
 
 const { colors, shadows } = theme;
@@ -38,6 +38,9 @@ const Dashboard = ({ admin, onLogout }) => {
     const [editTimelineItem, setEditTimelineItem] = useState(null);
     const [timelineSaving, setTimelineSaving] = useState(false);
 
+    // Events state
+    const [events, setEvents] = useState([]);
+
     // Appearance state
     const [appearance, setAppearance] = useState(null);
     const [appearanceSaving, setAppearanceSaving] = useState(false);
@@ -66,6 +69,7 @@ const Dashboard = ({ admin, onLogout }) => {
                 axios.get(`${API_URL}/settings`),
                 axios.get(`${API_URL}/timeline`),
                 axios.get(`${API_URL}/appearance`),
+                axios.get(`${API_URL}/events`),
             ]);
             if (results[0].status === 'fulfilled') setStats(results[0].value.data);
             if (results[1].status === 'fulfilled') setMemories(results[1].value.data);
@@ -73,6 +77,7 @@ const Dashboard = ({ admin, onLogout }) => {
             if (results[3].status === 'fulfilled') setSettings(results[3].value.data);
             if (results[4].status === 'fulfilled') setTimelineItems(results[4].value.data);
             if (results[5].status === 'fulfilled') setAppearance(results[5].value.data);
+            if (results[6].status === 'fulfilled') setEvents(results[6].value.data);
         } catch (err) { console.error('Error fetching data:', err); }
         finally { setLoading(false); }
     };
@@ -214,6 +219,7 @@ const Dashboard = ({ admin, onLogout }) => {
                     {activeTab === 'memories' && <MemoriesTab filteredMemories={filteredMemories} memories={memories} isMobile={isMobile} onShowAddModal={() => setShowAddModal(true)} onEdit={(m) => { setEditMemory({ ...m }); setShowEditModal(true); }} onDelete={deleteMemory} onMove={moveMemoryItem} onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} onDragEnd={handleDragEnd} dragIndex={dragIndex} dragOverIndex={dragOverIndex} />}
                     {activeTab === 'messages' && <MessagesTab messages={messageList} isMobile={isMobile} onMarkAsRead={markAsRead} onDelete={deleteMessage} />}
                     {activeTab === 'timeline' && <TimelineTab timelineItems={timelineItems} isMobile={isMobile} onShowAddModal={() => setShowAddTimelineModal(true)} onEdit={(item) => { setEditTimelineItem({ ...item }); setShowEditTimelineModal(true); }} onDelete={deleteTimelineItem} onMove={moveTimelineItem} />}
+                    {activeTab === 'events' && <EventsTab events={events} setEvents={setEvents} isMobile={isMobile} onRefresh={fetchData} />}
                     {activeTab === 'settings' && <SettingsTab settings={settings} setSettings={setSettings} isMobile={isMobile} onSave={saveSettings} saving={settingsSaving} />}
                     {activeTab === 'appearance' && <AppearanceTab appearance={appearance} setAppearance={setAppearance} isMobile={isMobile} onSave={saveAppearance} saving={appearanceSaving} />}
                 </main>

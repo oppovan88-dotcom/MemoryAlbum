@@ -9,6 +9,8 @@ const uploadRoutes = require('./upload');
 const trackRoutes = require('./track');
 const healthRoutes = require('./health');
 const appearanceRoutes = require('./appearance');
+const eventsRoutes = require('./events');
+const telegramRoutes = require('./telegram');
 
 module.exports = {
     authRoutes,
@@ -20,6 +22,8 @@ module.exports = {
     uploadRoutes,
     trackRoutes,
     healthRoutes,
-    appearanceRoutes
+    appearanceRoutes,
+    eventsRoutes,
+    telegramRoutes
 };
 

@@ -27,6 +27,7 @@ export const appConfig = {
         { id: 'dashboard', icon: '📊', label: 'Dashboard' },
         { id: 'memories', icon: '📷', label: 'Memories' },
         { id: 'timeline', icon: '💖', label: 'Timeline' },
+        { id: 'events', icon: '🎉', label: 'Events' },
         { id: 'messages', icon: '💬', label: 'Messages' },
         { id: 'settings', icon: '⚙️', label: 'Settings' },
         { id: 'appearance', icon: '🎨', label: 'Appearance' },

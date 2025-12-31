@@ -6,6 +6,8 @@ const Visitor = require('./Visitor');
 const Stats = require('./Stats');
 const SiteSettings = require('./SiteSettings');
 const Timeline = require('./Timeline');
+const SpecialEvent = require('./SpecialEvent');
+const TelegramSettings = require('./TelegramSettings');
 
 module.exports = {
     Admin,
@@ -14,5 +16,7 @@ module.exports = {
     Visitor,
     Stats,
     SiteSettings,
-    Timeline
+    Timeline,
+    SpecialEvent,
+    TelegramSettings
 };

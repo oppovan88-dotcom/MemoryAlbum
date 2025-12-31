@@ -19,7 +19,9 @@ const {
     uploadRoutes,
     trackRoutes,
     healthRoutes,
-    appearanceRoutes
+    appearanceRoutes,
+    eventsRoutes,
+    telegramRoutes
 } = require('./routes');
 
 // Initialize Express App
@@ -68,6 +70,12 @@ app.use('/api/health', healthRoutes);
 
 // Appearance Routes
 app.use('/api/appearance', appearanceRoutes);
+
+// Special Events Routes
+app.use('/api/events', eventsRoutes);
+
+// Telegram Routes
+app.use('/api/telegram', telegramRoutes);
 
 // ============== INITIALIZATION ==============
 const initializeServer = async () => {
