@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
 router.get('/upcoming', async (req, res) => {
     try {
         const days = parseInt(req.query.days) || 30;
-        const events = await SpecialEvent.find({ isActive: true }).sort({ eventDate: 1 });
+        const events = await SpecialEvent.find({ isActive: true, isCompleted: false }).sort({ eventDate: 1 });
 
         const upcoming = events.filter(event => {
             const daysUntil = calculateDaysUntil(event.eventDate, event.isRecurring);
@@ -55,7 +55,7 @@ router.get('/today', async (req, res) => {
         const events = await SpecialEvent.find({ isActive: true });
 
         const todayEvents = events.filter(event => {
-            return calculateDaysUntil(event.eventDate, event.isRecurring) === 0;
+            return !event.isCompleted && calculateDaysUntil(event.eventDate, event.isRecurring) === 0;
         });
 
         res.json(todayEvents);
@@ -92,28 +92,60 @@ router.post('/', async (req, res) => {
         const lastEvent = await SpecialEvent.findOne().sort({ order: -1 });
         eventData.order = lastEvent ? lastEvent.order + 1 : 0;
 
-        const event = new SpecialEvent(eventData);
-        await event.save();
-
-        // Check if event is TODAY and has a time set (using Cambodia timezone)
+        // Check if event is TODAY (Cambodia Time)
         const now = new Date();
-        const khTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' }));
-        const eventDate = new Date(event.eventDate);
+        const khNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' }));
+        const eventDate = new Date(eventData.eventDate);
         const khEventDate = new Date(eventDate.toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' }));
 
         // Check if it's the same day in Cambodia
-        const isTodayInKH = khEventDate.getFullYear() === khTime.getFullYear() &&
-            khEventDate.getMonth() === khTime.getMonth() &&
-            khEventDate.getDate() === khTime.getDate();
+        const isTodayInKH = khEventDate.getFullYear() === khNow.getFullYear() &&
+            khEventDate.getMonth() === khNow.getMonth() &&
+            khEventDate.getDate() === khNow.getDate();
 
-        // If event is TODAY and has a time set, send "IT'S TIME" alert
-        if (isTodayInKH && event.eventTime) {
-            await notifyTelegram('eventNow', event);
-        } else if (isTodayInKH && !event.eventTime) {
-            // Today but no specific time - also send IT'S TIME
-            await notifyTelegram('eventNow', event);
+        // VALIDATION: Check if time is in the past
+        if (eventData.eventTime) {
+            const [hours, minutes] = eventData.eventTime.split(':').map(Number);
+            khEventDate.setHours(hours, minutes, 0, 0);
+
+            if (khEventDate < khNow) {
+                // But allow if it's within the last 5 minutes (grace period for creation)
+                const diffMs = khNow - khEventDate;
+                if (diffMs > 5 * 60 * 1000) {
+                    return res.status(400).json({ error: 'Cannot create event in the past!' });
+                }
+            }
+        } else if (khEventDate < khNow && !isTodayInKH) {
+            // If date is completely in the past (yesterday or older)
+            return res.status(400).json({ error: 'Cannot create event in the past!' });
+        }
+
+        const event = new SpecialEvent(eventData);
+        await event.save();
+
+        // NOTIFICATION LOGIC
+        if (isTodayInKH && eventData.eventTime) {
+            const [hours, minutes] = eventData.eventTime.split(':').map(Number);
+            khEventDate.setHours(hours, minutes, 0, 0);
+
+            // Calculate difference in minutes
+            const diffMs = khEventDate - khNow;
+            const diffMinutes = Math.ceil(diffMs / (1000 * 60));
+
+            // Only trigger "IT'S TIME" if it is starting RIGHT NOW (e.g. within -5 to +5 minutes)
+            if (diffMinutes <= 5 && diffMinutes >= -5) {
+                await notifyTelegram('eventNow', event);
+            } else {
+                // Even if it is today, if it is later, just say created. Scheduler will pick it up.
+                await notifyTelegram('eventCreated', event);
+            }
+        } else if (isTodayInKH && !eventData.eventTime) {
+            // Today but no time specific - Let scheduler handle it or just say created.
+            // If created today without time, standard is usually "All Day", scheduler handles morning reminder.
+            // But since we are creating it NOW, let's just say Created.
+            await notifyTelegram('eventCreated', event);
         } else {
-            // Future event - send normal "event created" notification
+            // Future event
             await notifyTelegram('eventCreated', event);
         }
 

@@ -6,7 +6,7 @@ class EventScheduler {
     constructor() {
         this.intervalId = null;
         this.isRunning = false;
-        this.checkIntervalMs = 60 * 60 * 1000; // Check every hour
+        this.checkIntervalMs = 1 * 60 * 1000; // Check every minute for precision
         this.lastCheck = null;
     }
 
@@ -33,7 +33,7 @@ class EventScheduler {
             this.runScheduledTasks();
         }, this.checkIntervalMs);
 
-        console.log('✅ Event Scheduler started - checking every hour');
+        console.log('✅ Event Scheduler started - checking every minute');
     }
 
     // Stop the scheduler
@@ -236,8 +236,8 @@ class EventScheduler {
                     const [hours, minutes] = event.eventTime.split(':').map(Number);
                     eventDateTime.setHours(hours, minutes, 0, 0);
                 } else {
-                    // Default to end of day if no time set
-                    eventDateTime.setHours(23, 59, 59, 0);
+                    // Default to 12 PM if no time set for completion check (end of day might be too late)
+                    eventDateTime.setHours(12, 0, 0, 0);
                 }
 
                 // If event time has passed, mark as completed
@@ -293,9 +293,13 @@ class EventScheduler {
 
             // Calculate time differences
             const diffMs = eventDate - now;
-            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
             const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
             const diffMinutes = Math.ceil(diffMs / (1000 * 60));
+
+            // Calculate calendar day difference (ignoring time)
+            const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+            const diffDays = Math.round((eventDateOnly - nowDate) / (1000 * 60 * 60 * 24));
 
             // Check each reminder interval
             const reminders = [
@@ -349,13 +353,14 @@ class EventScheduler {
 
         // Check based on reminder type
         if (reminder.type === 'start') {
-            // Event is starting now (within 30 minutes)
-            return diffMinutes >= -30 && diffMinutes <= 30;
+            // Event is starting now (Trigger within 0-5 minutes AFTER or AT start time)
+            // This prevents sending it before the actual time
+            return diffMinutes <= 0 && diffMinutes >= -5;
         } else if (reminder.type === 'hours') {
-            // 1 hour before (between 45-75 minutes before)
-            return diffMinutes >= 45 && diffMinutes <= 75;
+            // 1 hour before (between 55-65 minutes before)
+            return diffMinutes >= 55 && diffMinutes <= 65;
         } else {
-            // Days-based reminders (check if we're in the reminder day window)
+            // Days-based reminders (check if we're in the target calendar day)
             // Send between 8 AM and 10 AM if we're on the target day
             const hour = now.getHours();
             const isReminderDay = diffDays === reminder.days;
