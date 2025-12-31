@@ -56,8 +56,8 @@ const EventsTab = ({ events = [], setEvents, isMobile, onRefresh }) => {
 
     // Filter events
     const filteredEvents = events.filter(event => {
-        if (filter === 'upcoming') return event.daysUntil >= 0 && event.daysUntil <= 30;
-        if (filter === 'today') return event.daysUntil === 0;
+        if (filter === 'upcoming') return !event.isCompleted && event.daysUntil >= 0 && event.daysUntil <= 30;
+        if (filter === 'today') return !event.isCompleted && event.daysUntil === 0;
         if (filter === 'completed') return event.isCompleted;
         return true;
     });
@@ -328,8 +328,8 @@ const EventsTab = ({ events = [], setEvents, isMobile, onRefresh }) => {
             }}>
                 {[
                     { key: 'all', label: '📋 All', count: events.length },
-                    { key: 'upcoming', label: '📅 Upcoming', count: events.filter(e => e.daysUntil >= 0 && e.daysUntil <= 30).length },
-                    { key: 'today', label: '🔴 Today', count: events.filter(e => e.daysUntil === 0).length },
+                    { key: 'upcoming', label: '📅 Upcoming', count: events.filter(e => !e.isCompleted && e.daysUntil >= 0 && e.daysUntil <= 30).length },
+                    { key: 'today', label: '🔴 Today', count: events.filter(e => !e.isCompleted && e.daysUntil === 0).length },
                     { key: 'completed', label: '✅ Done', count: events.filter(e => e.isCompleted).length }
                 ].map(tab => (
                     <button
@@ -471,10 +471,10 @@ const EventsTab = ({ events = [], setEvents, isMobile, onRefresh }) => {
                                                 fontWeight: fontWeight.bold,
                                                 lineHeight: 1
                                             }}>
-                                                {isToday ? '🎉' : (isPast ? '✓' : event.daysUntil)}
+                                                {event.isCompleted ? '✅' : isToday ? '🎉' : (isPast ? '✓' : event.daysUntil)}
                                             </div>
                                             <div style={{ fontSize: fontSize.xs, marginTop: spacing.xs }}>
-                                                {isToday ? 'TODAY!' : (isPast ? 'Passed' : 'days left')}
+                                                {event.isCompleted ? 'Done' : isToday ? 'TODAY!' : (isPast ? 'Passed' : 'days left')}
                                             </div>
                                         </div>
                                         <div style={{
