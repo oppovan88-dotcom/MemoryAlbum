@@ -95,7 +95,7 @@ class TelegramService {
 
     // Send event reminder
     async sendEventReminder(chatId, event, daysLeft, template = null) {
-        const defaultTemplate = '🔔 *Reminder!*\n\n{icon} *{title}*\n📅 {date}\n⏰ {daysLeft} days left!\n\n{description}';
+        const defaultTemplate = '🔔 *Reminder!*\n\n{icon} *{title}*\n📅 {date}{time}\n⏰ {daysLeft} days left!\n\n{description}';
         const messageTemplate = template || defaultTemplate;
 
         const eventDate = new Date(event.eventDate).toLocaleDateString('en-US', {
@@ -105,10 +105,13 @@ class TelegramService {
             day: 'numeric'
         });
 
+        const timeStr = event.eventTime ? ` at ${event.eventTime}` : '';
+
         const message = messageTemplate
             .replace('{icon}', event.icon || '🎉')
             .replace('{title}', event.title)
             .replace('{date}', eventDate)
+            .replace('{time}', timeStr)
             .replace('{daysLeft}', daysLeft)
             .replace('{description}', event.description || '');
 
@@ -117,12 +120,15 @@ class TelegramService {
 
     // Send event day celebration
     async sendEventCelebration(chatId, event, template = null) {
-        const defaultTemplate = '🎉 *TODAY IS THE DAY!*\n\n{icon} *{title}*\n\n{specialMessage}';
+        const defaultTemplate = '🎉 *TODAY IS THE DAY!*\n\n{icon} *{title}*{time}\n\n{specialMessage}';
         const messageTemplate = template || defaultTemplate;
+
+        const timeStr = event.eventTime ? `\n⏰ Time: ${event.eventTime}` : '';
 
         const message = messageTemplate
             .replace('{icon}', event.icon || '🎉')
             .replace('{title}', event.title)
+            .replace('{time}', timeStr)
             .replace('{specialMessage}', event.celebrationMode?.specialMessage || 'Have a wonderful celebration! 🥳');
 
         return this.sendMessage(chatId, message);

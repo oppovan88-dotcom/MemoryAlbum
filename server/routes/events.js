@@ -297,7 +297,9 @@ async function notifyTelegram(type, event, daysUntil = null) {
         } else if (type === 'eventReminder') {
             return telegramService.sendEventReminder(chatId, event, daysUntil, template);
         } else if (type === 'eventCreated') {
-            const message = `📌 *New Event Created!*\n\n${event.icon} *${event.title}*\n📅 ${new Date(event.eventDate).toLocaleDateString()}\n\n${event.description || ''}`;
+            const dateStr = new Date(event.eventDate).toLocaleDateString();
+            const timeStr = event.eventTime ? ` ⏰ ${event.eventTime}` : '';
+            const message = `📌 *New Event Created!*\n\n${event.icon} *${event.title}*\n📅 ${dateStr}${timeStr}\n\n${event.description || ''}`;
             return telegramService.sendMessage(chatId, message);
         }
 
