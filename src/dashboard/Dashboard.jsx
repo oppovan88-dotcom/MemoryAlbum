@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { theme, appConfig, API_URL, CLOUDINARY } from './config';
 import { useResponsive } from './hooks/useResponsive';
-import { Sidebar, Header, MobileBottomNav } from './components';
+import { Sidebar, Header } from './components';
 import { DashboardTab, MemoriesTab, MessagesTab, TimelineTab, SettingsTab, AppearanceTab } from './components/tabs';
 import { AddMemoryModal, EditMemoryModal, AddTimelineModal, EditTimelineModal } from './components/modals';
 
@@ -187,6 +187,9 @@ const Dashboard = ({ admin, onLogout }) => {
     // Use dynamic navigation from appearance or fallback to config
     const navItems = appearance?.navItems || appConfig.navigation;
 
+    // Use dynamic icons from appearance or fallback to config
+    const dynamicIcons = appearance?.icons || icons;
+
     const getTitle = () => {
         const nav = navItems.find(n => n.id === activeTab);
         return nav?.label || 'Dashboard';
@@ -204,8 +207,8 @@ const Dashboard = ({ admin, onLogout }) => {
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: colors.light, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
             <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} admin={admin} onLogout={onLogout} isOpen={sidebarOpen} setIsOpen={setSidebarOpen} isMobile={isMobile} backendStatus={backendStatus} appearance={appearance} />
-            <div style={{ flex: 1, marginLeft: isMobile ? 0 : theme.sidebar.width, display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? 80 : 0 }}>
-                <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} title={getTitle()} isMobile={isMobile} onLogout={onLogout} appearance={appearance} />
+            <div style={{ flex: 1, marginLeft: isMobile ? 0 : theme.sidebar.width, display: 'flex', flexDirection: 'column' }}>
+                <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} title={getTitle()} isMobile={isMobile} onLogout={onLogout} appearance={appearance} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
                 <main style={{ padding: isMobile ? theme.spacing.lg : `${theme.spacing.xxl + 4}px ${theme.spacing.xxxl}px`, flex: 1 }}>
                     {activeTab === 'dashboard' && <DashboardTab stats={stats} isMobile={isMobile} />}
                     {activeTab === 'memories' && <MemoriesTab filteredMemories={filteredMemories} memories={memories} isMobile={isMobile} onShowAddModal={() => setShowAddModal(true)} onEdit={(m) => { setEditMemory({ ...m }); setShowEditModal(true); }} onDelete={deleteMemory} onMove={moveMemoryItem} onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} onDragEnd={handleDragEnd} dragIndex={dragIndex} dragOverIndex={dragOverIndex} />}
@@ -215,7 +218,6 @@ const Dashboard = ({ admin, onLogout }) => {
                     {activeTab === 'appearance' && <AppearanceTab appearance={appearance} setAppearance={setAppearance} isMobile={isMobile} onSave={saveAppearance} saving={appearanceSaving} />}
                 </main>
             </div>
-            {isMobile && <MobileBottomNav activeTab={activeTab} setActiveTab={setActiveTab} appearance={appearance} />}
             <AddMemoryModal show={showAddModal} onClose={() => setShowAddModal(false)} newMemory={newMemory} setNewMemory={setNewMemory} previewUrl={previewUrl} onFileSelect={handleFileSelect} onAdd={addMemory} saving={saving} uploadProgress={uploadProgress} isMobile={isMobile} />
             <EditMemoryModal show={showEditModal} onClose={() => setShowEditModal(false)} editMemory={editMemory} setEditMemory={setEditMemory} onUpdate={updateMemory} saving={saving} isMobile={isMobile} />
             <AddTimelineModal show={showAddTimelineModal} onClose={() => setShowAddTimelineModal(false)} newTimelineItem={newTimelineItem} setNewTimelineItem={setNewTimelineItem} onAdd={addTimelineItem} saving={timelineSaving} isMobile={isMobile} />

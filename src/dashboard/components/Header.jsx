@@ -2,7 +2,7 @@ import { theme, appConfig } from '../config';
 
 const { colors, gradients, radius, spacing, fontSize, fontWeight } = theme;
 
-const Header = ({ searchQuery, setSearchQuery, title, isMobile, onLogout, appearance }) => {
+const Header = ({ searchQuery, setSearchQuery, title, isMobile, onLogout, appearance, onToggleSidebar }) => {
     // Use dynamic appearance colors
     const primaryColor = appearance?.colorPrimary || colors.primary;
 
@@ -15,28 +15,52 @@ const Header = ({ searchQuery, setSearchQuery, title, isMobile, onLogout, appear
             background: colors.white,
             borderBottom: `1px solid ${colors.border}`,
             gap: spacing.sm,
-            flexWrap: isMobile ? 'nowrap' : 'wrap',
+            flexWrap: 'nowrap',
             minHeight: isMobile ? 56 : 'auto',
         }}>
-            <h1 style={{
-                margin: 0,
-                fontSize: isMobile ? fontSize.xl : fontSize.display,
-                fontWeight: fontWeight.bold,
-                color: colors.textPrimary,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                flex: isMobile ? '0 0 auto' : 'none',
-            }}>{title}</h1>
+            {/* Left side: Menu button (mobile) + Title */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md, flex: 1, minWidth: 0 }}>
+                {/* Hamburger Menu Button - Mobile Only */}
+                {isMobile && (
+                    <button
+                        onClick={onToggleSidebar}
+                        style={{
+                            padding: spacing.sm,
+                            borderRadius: radius.md,
+                            border: 'none',
+                            background: colors.dark,
+                            color: colors.textWhite,
+                            fontSize: '18px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 40,
+                            height: 40,
+                            flexShrink: 0,
+                        }}
+                    >☰</button>
+                )}
 
+                <h1 style={{
+                    margin: 0,
+                    fontSize: isMobile ? fontSize.lg : fontSize.display,
+                    fontWeight: fontWeight.bold,
+                    color: colors.textPrimary,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                }}>{title}</h1>
+            </div>
+
+            {/* Right side: Search + Actions */}
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: spacing.sm,
-                flex: isMobile ? 1 : 'none',
-                justifyContent: 'flex-end',
+                flexShrink: 0,
             }}>
-                {/* Search - hide on mobile or show smaller */}
+                {/* Search - Desktop */}
                 {!isMobile && (
                     <div style={{
                         display: 'flex',
@@ -66,40 +90,28 @@ const Header = ({ searchQuery, setSearchQuery, title, isMobile, onLogout, appear
                     </div>
                 )}
 
-                {/* Mobile: minimal search icon and logout */}
+                {/* Mobile: Search icon */}
                 {isMobile && (
-                    <>
-                        <button
-                            onClick={() => {
-                                const query = prompt('Search:');
-                                if (query !== null) setSearchQuery(query);
-                            }}
-                            style={{
-                                padding: spacing.sm,
-                                borderRadius: radius.md,
-                                border: `1px solid ${colors.border}`,
-                                background: colors.light,
-                                color: colors.textSecondary,
-                                fontSize: '16px',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                        >{appConfig.icons.search}</button>
-                        <button onClick={onLogout} style={{
+                    <button
+                        onClick={() => {
+                            const query = prompt('Search:');
+                            if (query !== null) setSearchQuery(query);
+                        }}
+                        style={{
                             padding: spacing.sm,
                             borderRadius: radius.md,
-                            border: 'none',
-                            background: colors.danger,
-                            color: colors.textWhite,
-                            fontSize: '14px',
+                            border: `1px solid ${colors.border}`,
+                            background: colors.light,
+                            color: colors.textSecondary,
+                            fontSize: '16px',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                        }}>{appConfig.icons.logout}</button>
-                    </>
+                            width: 36,
+                            height: 36,
+                        }}
+                    >{appConfig.icons.search}</button>
                 )}
             </div>
         </header>

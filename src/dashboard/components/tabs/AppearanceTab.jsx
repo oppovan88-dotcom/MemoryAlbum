@@ -28,16 +28,31 @@ const NavItemEditor = ({ item, index, onUpdate, onDelete, onMove, totalItems, is
         marginBottom: spacing.sm
     }}>
         {/* Top row on mobile: Icon, ID, Label */}
-        <div style={{ display: 'flex', gap: spacing.sm, alignItems: 'center', flex: 1 }}>
+        <div style={{ display: 'flex', gap: spacing.sm, alignItems: 'center', flex: 1, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
             {!isMobile && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <button onClick={() => onMove(index, 'up')} disabled={index === 0} style={{ padding: '4px 6px', border: 'none', background: index === 0 ? colors.border : colors.primaryDark, color: '#fff', borderRadius: 4, cursor: index === 0 ? 'not-allowed' : 'pointer', fontSize: '10px' }}>↑</button>
                     <button onClick={() => onMove(index, 'down')} disabled={index === totalItems - 1} style={{ padding: '4px 6px', border: 'none', background: index === totalItems - 1 ? colors.border : colors.primaryDark, color: '#fff', borderRadius: 4, cursor: index === totalItems - 1 ? 'not-allowed' : 'pointer', fontSize: '10px' }}>↓</button>
                 </div>
             )}
-            <input type="text" value={item.icon} onChange={(e) => onUpdate(index, 'icon', e.target.value)} style={{ width: isMobile ? 40 : 50, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, textAlign: 'center', fontSize: '16px', flexShrink: 0 }} placeholder="📌" />
-            <input type="text" value={item.id} onChange={(e) => onUpdate(index, 'id', e.target.value)} style={{ width: isMobile ? 70 : 100, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '12px', flexShrink: 0 }} placeholder="tab_id" />
-            <input type="text" value={item.label} onChange={(e) => onUpdate(index, 'label', e.target.value)} style={{ flex: 1, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '14px', minWidth: 0 }} placeholder="Tab Label" />
+            <input
+                type="text"
+                value={item.icon || ''}
+                onChange={(e) => onUpdate(index, 'icon', e.target.value)}
+                style={{
+                    width: isMobile ? 50 : 60,
+                    padding: spacing.sm,
+                    borderRadius: radius.sm,
+                    border: `1px solid ${colors.border}`,
+                    textAlign: 'center',
+                    fontSize: '20px',
+                    flexShrink: 0,
+                    boxSizing: 'border-box',
+                }}
+                placeholder="📌"
+            />
+            <input type="text" value={item.id || ''} onChange={(e) => onUpdate(index, 'id', e.target.value)} style={{ width: isMobile ? 80 : 100, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '12px', flexShrink: 0 }} placeholder="tab_id" />
+            <input type="text" value={item.label || ''} onChange={(e) => onUpdate(index, 'label', e.target.value)} style={{ flex: 1, padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: '14px', minWidth: isMobile ? 80 : 100 }} placeholder="Tab Label" />
             {!isMobile && <button onClick={() => onDelete(index)} style={{ padding: `${spacing.sm}px ${spacing.md}px`, border: 'none', background: colors.danger, color: '#fff', borderRadius: radius.sm, cursor: 'pointer', fontSize: '12px', flexShrink: 0 }}>🗑️</button>}
         </div>
 
