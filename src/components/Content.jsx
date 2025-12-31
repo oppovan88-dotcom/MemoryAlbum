@@ -11,7 +11,7 @@ const Content = ({ nightMode, currentTheme, appearance }) => {
     return (
         <div>
             {/* 🎆 Happy New Year 2026 Countdown Banner */}
-            <NewYear nightMode={nightMode} currentTheme={currentTheme} appearance={appearance} />
+            {/* <NewYear nightMode={nightMode} currentTheme={currentTheme} appearance={appearance} /> */}
 
             {/* 🎉 Upcoming Celebrations - Birthdays, Anniversary, Khmer New Year, etc. */}
             <UpcomingCelebrations nightMode={nightMode} currentTheme={currentTheme} appearance={appearance} />
