@@ -301,6 +301,191 @@ export const themes = {
         hasStars: true,
         cssClass: 'theme-aurora',
     },
+
+    // ============================================
+    // ANIME THEMES
+    // ============================================
+
+    // 11. Demon Slayer - Water Breathing
+    demonSlayer: {
+        id: 'demonSlayer',
+        name: '⚔️ Demon Slayer',
+        description: 'Water Breathing style',
+        isNight: true,
+        colors: {
+            background: 'radial-gradient(ellipse at 30% 20%, #00d4ff 0%, transparent 40%), radial-gradient(ellipse at 70% 80%, #1e3a5f 0%, transparent 50%), linear-gradient(135deg, #0a1628 0%, #1a3a52 30%, #0d2137 60%, #0a0f1a 100%)',
+            headerBg: 'rgba(10, 22, 40, 0.92)',
+            headerBorder: '1.5px solid #00d4ff',
+            headerShadow: '0 4px 22px rgba(0, 212, 255, 0.35)',
+            titleColor: '#00d4ff',
+            iconColor: '#00d4ff',
+            iconShadow: 'drop-shadow(0 1px 10px #00d4ff88)',
+            primary: '#00d4ff',
+            secondary: '#ff6b9d',
+            accent: '#7dd3fc',
+        },
+        floatingIcons: [
+            { icon: '⚔️', cls: 'h1' },
+            { icon: '💧', cls: 'h2' },
+            { icon: '🌊', cls: 'h3' },
+            { icon: '🔥', cls: 'h4' },
+            { icon: '🦋', cls: 'h5' },
+            { icon: '✨', cls: 'h6' },
+        ],
+        hasWaterBreathing: true,
+        hasStars: true,
+        cssClass: 'theme-demon-slayer',
+    },
+
+    // 12. Naruto - Chakra/Sage Mode
+    naruto: {
+        id: 'naruto',
+        name: '🍥 Naruto',
+        description: 'Sage Mode chakra energy',
+        isNight: true,
+        colors: {
+            background: 'radial-gradient(ellipse at 50% 30%, #ff8c00 0%, transparent 45%), radial-gradient(ellipse at 80% 70%, #ffd700 0%, transparent 40%), linear-gradient(135deg, #1a1a2e 0%, #2d2d44 40%, #1a1a2e 100%)',
+            headerBg: 'rgba(26, 26, 46, 0.92)',
+            headerBorder: '1.5px solid #ff8c00',
+            headerShadow: '0 4px 22px rgba(255, 140, 0, 0.35)',
+            titleColor: '#ff8c00',
+            iconColor: '#ffa500',
+            iconShadow: 'drop-shadow(0 1px 10px #ff8c0088)',
+            primary: '#ff8c00',
+            secondary: '#ff4757',
+            accent: '#ffd700',
+        },
+        floatingIcons: [
+            { icon: '🍥', cls: 'h1' },
+            { icon: '🌀', cls: 'h2' },
+            { icon: '🔥', cls: 'h3' },
+            { icon: '⚡', cls: 'h4' },
+            { icon: '🌙', cls: 'h5' },
+            { icon: '✨', cls: 'h6' },
+        ],
+        hasChakra: true,
+        cssClass: 'theme-naruto',
+    },
+
+    // 13. Attack on Titan - Survey Corps
+    attackOnTitan: {
+        id: 'attackOnTitan',
+        name: '⚔️ Attack on Titan',
+        description: 'Wings of Freedom',
+        isNight: true,
+        colors: {
+            background: 'radial-gradient(ellipse at 20% 80%, #8b0000 0%, transparent 45%), radial-gradient(ellipse at 80% 20%, #4a4a4a 0%, transparent 50%), linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 40%, #0f0f0f 100%)',
+            headerBg: 'rgba(20, 20, 20, 0.95)',
+            headerBorder: '1.5px solid #cc0000',
+            headerShadow: '0 4px 22px rgba(139, 0, 0, 0.4)',
+            titleColor: '#e8e8e8',
+            iconColor: '#cc0000',
+            iconShadow: 'drop-shadow(0 1px 10px #8b000088)',
+            primary: '#cc0000',
+            secondary: '#8b4513',
+            accent: '#c0c0c0',
+        },
+        floatingIcons: [
+            { icon: '🦅', cls: 'h1' },
+            { icon: '⚔️', cls: 'h2' },
+            { icon: '🔥', cls: 'h3' },
+            { icon: '💀', cls: 'h4' },
+            { icon: '🛡️', cls: 'h5' },
+            { icon: '⚡', cls: 'h6' },
+        ],
+        hasTitanFire: true,
+        cssClass: 'theme-attack-on-titan',
+    },
+
+    // 14. Dragon Ball - Super Saiyan Aura
+    dragonBall: {
+        id: 'dragonBall',
+        name: '🐉 Dragon Ball',
+        description: 'Super Saiyan power',
+        isNight: false,
+        colors: {
+            background: 'radial-gradient(ellipse at 50% 50%, #ffeb3b 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, #ff9800 0%, transparent 45%), linear-gradient(135deg, #1a237e 0%, #311b92 50%, #4a148c 100%)',
+            headerBg: 'rgba(26, 35, 126, 0.9)',
+            headerBorder: '1.5px solid #ffeb3b',
+            headerShadow: '0 4px 22px rgba(255, 235, 59, 0.4)',
+            titleColor: '#ffeb3b',
+            iconColor: '#ffc107',
+            iconShadow: 'drop-shadow(0 1px 12px #ffeb3b99)',
+            primary: '#ffeb3b',
+            secondary: '#ff9800',
+            accent: '#ffc107',
+        },
+        floatingIcons: [
+            { icon: '🐉', cls: 'h1' },
+            { icon: '⚡', cls: 'h2' },
+            { icon: '💪', cls: 'h3' },
+            { icon: '🔥', cls: 'h4' },
+            { icon: '⭐', cls: 'h5' },
+            { icon: '✨', cls: 'h6' },
+        ],
+        hasSaiyanAura: true,
+        cssClass: 'theme-dragon-ball',
+    },
+
+    // 15. One Piece - Grand Line Adventure
+    onePiece: {
+        id: 'onePiece',
+        name: '🏴‍☠️ One Piece',
+        description: 'Pirate King adventure',
+        isNight: false,
+        colors: {
+            background: 'linear-gradient(-45deg, #1e3c72, #2a5298, #00bcd4, #26c6da, #1e3c72, #0288d1)',
+            headerBg: 'rgba(30, 60, 114, 0.88)',
+            headerBorder: '1.5px solid #ffd700',
+            headerShadow: '0 4px 20px rgba(255, 215, 0, 0.35)',
+            titleColor: '#ffd700',
+            iconColor: '#ff4757',
+            iconShadow: 'drop-shadow(0 1px 8px #ff475788)',
+            primary: '#ff4757',
+            secondary: '#ffd700',
+            accent: '#00bcd4',
+        },
+        floatingIcons: [
+            { icon: '🏴‍☠️', cls: 'h1' },
+            { icon: '⚓', cls: 'h2' },
+            { icon: '🗝️', cls: 'h3' },
+            { icon: '🌊', cls: 'h4' },
+            { icon: '💎', cls: 'h5' },
+            { icon: '⭐', cls: 'h6' },
+        ],
+        hasBubbles: true,
+        cssClass: 'theme-one-piece',
+    },
+
+    // 16. Jujutsu Kaisen - Cursed Energy
+    jujutsuKaisen: {
+        id: 'jujutsuKaisen',
+        name: '👁️ Jujutsu Kaisen',
+        description: 'Cursed energy flows',
+        isNight: true,
+        colors: {
+            background: 'radial-gradient(ellipse at 30% 70%, #6b21a8 0%, transparent 45%), radial-gradient(ellipse at 70% 30%, #dc2626 0%, transparent 50%), linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 40%, #0d0d0d 100%)',
+            headerBg: 'rgba(10, 10, 10, 0.95)',
+            headerBorder: '1.5px solid #a855f7',
+            headerShadow: '0 4px 22px rgba(168, 85, 247, 0.4)',
+            titleColor: '#a855f7',
+            iconColor: '#dc2626',
+            iconShadow: 'drop-shadow(0 1px 10px #a855f788)',
+            primary: '#a855f7',
+            secondary: '#dc2626',
+            accent: '#ec4899',
+        },
+        floatingIcons: [
+            { icon: '👁️', cls: 'h1' },
+            { icon: '💀', cls: 'h2' },
+            { icon: '🔮', cls: 'h3' },
+            { icon: '⚡', cls: 'h4' },
+            { icon: '🖤', cls: 'h5' },
+            { icon: '✨', cls: 'h6' },
+        ],
+        hasCursedEnergy: true,
+        cssClass: 'theme-jujutsu-kaisen',
+    },
 };
 
 // Get theme by ID (with fallback to romance)

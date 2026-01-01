@@ -202,16 +202,16 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
     // Responsive sizes
     const s = {
         mobile: {
-            padding: "16px",
-            titleSize: "1.3rem",
-            cardPadding: "12px",
-            iconSize: "2rem",
-            nameSize: "0.9rem",
-            daysSize: "1.8rem",
-            detailSize: "0.7rem",
-            gap: "10px",
-            countdownSize: "0.9rem",
-            countdownLabelSize: "0.5rem",
+            padding: "10px",
+            titleSize: "1.1rem",
+            cardPadding: "8px",
+            iconSize: "1.5rem",
+            nameSize: "0.8rem",
+            daysSize: "1.4rem",
+            detailSize: "0.65rem",
+            gap: "6px",
+            countdownSize: "0.75rem",
+            countdownLabelSize: "0.45rem",
         },
         tablet: {
             padding: "20px",
@@ -259,6 +259,7 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
     const filteredCelebrations = celebrations.filter(c => {
         if (activeTab === "upcoming") return c.daysUntil <= 30;
         if (activeTab === "birthdays") return c.type === "birthday";
+        if (activeTab === "anniversary") return c.type === "anniversary";
         if (activeTab === "holidays") return c.type === "holiday" || c.type === "khmer";
         return true;
     });
@@ -269,10 +270,10 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: screen === "mobile" ? "6px 8px" : "10px 14px",
+            padding: screen === "mobile" ? "4px 6px" : "10px 14px",
             background: `${primaryColor}25`,
-            borderRadius: "10px",
-            minWidth: screen === "mobile" ? "45px" : "60px",
+            borderRadius: screen === "mobile" ? "6px" : "10px",
+            minWidth: screen === "mobile" ? "36px" : "60px",
             border: `1px solid ${primaryColor}40`,
         }}>
             <span style={{
@@ -305,16 +306,16 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
                     background: isFeatured
                         ? `linear-gradient(135deg, ${typeColor}15 0%, ${typeColor}25 100%)`
                         : cardBg,
-                    borderRadius: isFeatured ? "20px" : "16px",
-                    padding: isFeatured ? s.cardPadding : "12px 16px",
+                    borderRadius: screen === "mobile" ? (isFeatured ? "12px" : "10px") : (isFeatured ? "20px" : "16px"),
+                    padding: screen === "mobile" ? (isFeatured ? "10px" : "8px 10px") : (isFeatured ? s.cardPadding : "12px 16px"),
                     border: `1px solid ${typeColor}40`,
                     display: "flex",
                     alignItems: isFeatured ? "center" : "center",
                     flexDirection: isFeatured ? "column" : "row",
-                    gap: isFeatured ? "16px" : "12px",
+                    gap: screen === "mobile" ? (isFeatured ? "8px" : "8px") : (isFeatured ? "16px" : "12px"),
                     boxShadow: isFeatured
-                        ? `0 20px 40px -10px ${typeColor}30`
-                        : `0 4px 15px -3px ${typeColor}20`,
+                        ? `0 10px 20px -5px ${typeColor}30`
+                        : `0 2px 8px -2px ${typeColor}20`,
                     transform: isFeatured ? "scale(1)" : "scale(1)",
                     transition: "all 0.3s ease",
                     cursor: "pointer",
@@ -369,8 +370,8 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
 
                 {/* Icon */}
                 <div style={{
-                    fontSize: isFeatured ? s.iconSize : "1.8rem",
-                    filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
+                    fontSize: screen === "mobile" ? (isFeatured ? "1.5rem" : "1.4rem") : (isFeatured ? s.iconSize : "1.8rem"),
+                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
                 }}>
                     {celebration.icon}
                 </div>
@@ -408,8 +409,8 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
                         <div style={{
                             display: "flex",
                             justifyContent: "center",
-                            gap: "8px",
-                            marginTop: "12px",
+                            gap: screen === "mobile" ? "4px" : "8px",
+                            marginTop: screen === "mobile" ? "6px" : "12px",
                             flexWrap: "wrap",
                         }}>
                             <TimeUnit value={nearestTime.days} label="Days" />
@@ -424,10 +425,10 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
                 {!isFeatured && !celebration.isToday && (
                     <div style={{
                         textAlign: "right",
-                        minWidth: "70px",
+                        minWidth: screen === "mobile" ? "50px" : "70px",
                     }}>
                         <div style={{
-                            fontSize: "1.4rem",
+                            fontSize: screen === "mobile" ? "1.1rem" : "1.4rem",
                             fontWeight: "bold",
                             color: typeColor,
                             lineHeight: 1,
@@ -435,7 +436,7 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
                             {celebration.daysUntil}
                         </div>
                         <div style={{
-                            fontSize: "0.65rem",
+                            fontSize: screen === "mobile" ? "0.55rem" : "0.65rem",
                             color: subTextColor,
                             textTransform: "uppercase",
                         }}>
@@ -486,12 +487,12 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
     return (
         <div style={{
             maxWidth: "1000px",
-            margin: screen === "mobile" ? "10px auto" : "20px auto",
+            margin: screen === "mobile" ? "6px auto" : "20px auto",
             padding: s.padding,
             width: screen === "mobile" ? "96%" : "95%",
-            borderRadius: screen === "mobile" ? "20px" : "30px",
+            borderRadius: screen === "mobile" ? "14px" : "30px",
             background: bgGradient,
-            boxShadow: `0 25px 50px -12px ${primaryColor}25`,
+            boxShadow: `0 15px 30px -8px ${primaryColor}25`,
             position: "relative",
             overflow: "hidden",
         }}>
@@ -520,7 +521,7 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
             {/* Header */}
             <div style={{
                 textAlign: "center",
-                marginBottom: "20px",
+                marginBottom: screen === "mobile" ? "10px" : "20px",
                 position: "relative",
                 zIndex: 1,
             }}>
@@ -529,11 +530,11 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
                     fontSize: s.titleSize,
                     fontWeight: 700,
                     color: textColor,
-                    margin: "0 0 8px 0",
+                    margin: "0 0 4px 0",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: "8px",
+                    gap: screen === "mobile" ? "4px" : "8px",
                 }}>
                     <span>🎉</span>
                     Upcoming Celebrations
@@ -541,7 +542,7 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
                 </h2>
                 <p style={{
                     color: subTextColor,
-                    fontSize: screen === "mobile" ? "0.8rem" : "0.9rem",
+                    fontSize: screen === "mobile" ? "0.7rem" : "0.9rem",
                     margin: 0,
                 }}>
                     Never miss a special moment!
@@ -551,28 +552,28 @@ const UpcomingCelebrations = ({ nightMode, currentTheme }) => {
             {/* Tabs */}
             <div style={{
                 display: "flex",
-                gap: "8px",
-                marginBottom: "20px",
+                gap: screen === "mobile" ? "4px" : "8px",
+                marginBottom: screen === "mobile" ? "10px" : "20px",
                 overflowX: "auto",
-                paddingBottom: "8px",
+                paddingBottom: "6px",
                 justifyContent: screen === "mobile" ? "flex-start" : "center",
             }}>
                 <TabButton id="upcoming" label="Upcoming" icon="📅" />
+                <TabButton id="anniversary" label="💖" icon="" />
                 <TabButton id="birthdays" label="Birthdays" icon="🎂" />
                 <TabButton id="holidays" label="Holidays" icon="🎊" />
-                <TabButton id="all" label="All" icon="✨" />
             </div>
 
             {/* Featured nearest celebration */}
             {nearestCelebration && activeTab === "upcoming" && (
-                <div style={{ marginBottom: "20px" }}>
+                <div style={{ marginBottom: screen === "mobile" ? "10px" : "20px" }}>
                     <div style={{
-                        fontSize: "0.8rem",
+                        fontSize: screen === "mobile" ? "0.7rem" : "0.8rem",
                         color: subTextColor,
-                        marginBottom: "10px",
+                        marginBottom: screen === "mobile" ? "6px" : "10px",
                         display: "flex",
                         alignItems: "center",
-                        gap: "6px",
+                        gap: "4px",
                     }}>
                         <span>⭐</span>
                         <span>Coming Up Next</span>

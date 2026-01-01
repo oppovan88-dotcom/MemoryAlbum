@@ -258,6 +258,235 @@ function AuroraEffect() {
   );
 }
 
+// ============================================
+// ANIME THEMED EFFECTS
+// ============================================
+
+// Water Breathing effect for Demon Slayer theme
+function WaterBreathingEffect({ count = 15 }) {
+  const [waves, setWaves] = useState([]);
+  useEffect(() => {
+    setWaves(Array.from({ length: count }, () => ({
+      left: Math.random() * 100,
+      delay: Math.random() * 4,
+      duration: 3 + Math.random() * 3,
+      size: 20 + Math.random() * 40,
+    })));
+  }, [count]);
+  return (
+    <>
+      {waves.map((wave, idx) => (
+        <span
+          key={idx}
+          style={{
+            position: "absolute",
+            left: `${wave.left}%`,
+            top: "-50px",
+            fontSize: `${wave.size}px`,
+            animation: `waterBreathingFlow ${wave.duration}s ease-in-out infinite`,
+            animationDelay: `${wave.delay}s`,
+            pointerEvents: "none",
+            zIndex: 0,
+            opacity: 0.6,
+            filter: "blur(1px)",
+          }}
+        >
+          💧
+        </span>
+      ))}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `
+            radial-gradient(ellipse at 50% 100%, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 40%)
+          `,
+          animation: "waterBreathingPulse 4s ease-in-out infinite",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+    </>
+  );
+}
+
+// Chakra/Rasengan effect for Naruto theme
+function ChakraField({ count = 25 }) {
+  const [particles, setParticles] = useState([]);
+  useEffect(() => {
+    setParticles(Array.from({ length: count }, () => ({
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      delay: Math.random() * 3,
+      duration: 2 + Math.random() * 2,
+      size: 4 + Math.random() * 8,
+    })));
+  }, [count]);
+  return (
+    <>
+      {particles.map((particle, idx) => (
+        <span
+          key={idx}
+          style={{
+            position: "absolute",
+            left: `${particle.left}%`,
+            top: `${particle.top}%`,
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            borderRadius: "50%",
+            background: `radial-gradient(circle, #ff8c00 0%, #ffd700 50%, transparent 70%)`,
+            animation: `chakraPulse ${particle.duration}s ease-in-out infinite`,
+            animationDelay: `${particle.delay}s`,
+            pointerEvents: "none",
+            zIndex: 0,
+            boxShadow: "0 0 10px 3px rgba(255, 140, 0, 0.5)",
+          }}
+        />
+      ))}
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "200px",
+          height: "200px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(255, 140, 0, 0.2) 0%, transparent 70%)",
+          animation: "rasenganSpin 3s linear infinite",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+    </>
+  );
+}
+
+// Fire/Ember effect for Attack on Titan theme
+function TitanFireField({ count = 35 }) {
+  const [embers, setEmbers] = useState([]);
+  useEffect(() => {
+    setEmbers(Array.from({ length: count }, () => ({
+      left: Math.random() * 100,
+      delay: Math.random() * 5,
+      duration: 4 + Math.random() * 4,
+      size: 3 + Math.random() * 6,
+    })));
+  }, [count]);
+  return (
+    <>
+      {embers.map((ember, idx) => (
+        <span
+          key={idx}
+          style={{
+            position: "absolute",
+            left: `${ember.left}%`,
+            bottom: "-20px",
+            width: `${ember.size}px`,
+            height: `${ember.size}px`,
+            borderRadius: "50%",
+            background: `radial-gradient(circle, #ff4500 0%, #cc0000 60%, transparent 100%)`,
+            animation: `emberRise ${ember.duration}s ease-out infinite`,
+            animationDelay: `${ember.delay}s`,
+            pointerEvents: "none",
+            zIndex: 0,
+            boxShadow: "0 0 8px 2px rgba(255, 69, 0, 0.6)",
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+// Super Saiyan Aura effect for Dragon Ball theme
+function SaiyanAuraEffect() {
+  return (
+    <>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `
+            radial-gradient(ellipse at 50% 50%, rgba(255, 235, 59, 0.3) 0%, transparent 40%),
+            radial-gradient(ellipse at 30% 30%, rgba(255, 152, 0, 0.2) 0%, transparent 35%),
+            radial-gradient(ellipse at 70% 70%, rgba(255, 193, 7, 0.2) 0%, transparent 35%)
+          `,
+          animation: "saiyanAuraPulse 2s ease-in-out infinite",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          bottom: "20%",
+          transform: "translateX(-50%)",
+          width: "300px",
+          height: "400px",
+          background: "linear-gradient(to top, rgba(255, 235, 59, 0.4), transparent)",
+          filter: "blur(30px)",
+          animation: "saiyanFlame 0.5s ease-in-out infinite alternate",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+    </>
+  );
+}
+
+// Cursed Energy effect for Jujutsu Kaisen theme
+function CursedEnergyField({ count = 20 }) {
+  const [orbs, setOrbs] = useState([]);
+  useEffect(() => {
+    setOrbs(Array.from({ length: count }, () => ({
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      delay: Math.random() * 4,
+      duration: 3 + Math.random() * 3,
+      size: 10 + Math.random() * 20,
+    })));
+  }, [count]);
+  return (
+    <>
+      {orbs.map((orb, idx) => (
+        <span
+          key={idx}
+          style={{
+            position: "absolute",
+            left: `${orb.left}%`,
+            top: `${orb.top}%`,
+            width: `${orb.size}px`,
+            height: `${orb.size}px`,
+            borderRadius: "50%",
+            background: `radial-gradient(circle, rgba(168, 85, 247, 0.8) 0%, rgba(107, 33, 168, 0.4) 50%, transparent 70%)`,
+            animation: `cursedEnergyPulse ${orb.duration}s ease-in-out infinite`,
+            animationDelay: `${orb.delay}s`,
+            pointerEvents: "none",
+            zIndex: 0,
+            boxShadow: "0 0 15px 5px rgba(168, 85, 247, 0.4)",
+          }}
+        />
+      ))}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `
+            radial-gradient(ellipse at 30% 70%, rgba(107, 33, 168, 0.15) 0%, transparent 40%),
+            radial-gradient(ellipse at 70% 30%, rgba(220, 38, 38, 0.1) 0%, transparent 35%)
+          `,
+          animation: "cursedEnergyWave 6s ease-in-out infinite",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+    </>
+  );
+}
+
+
 function App() {
   // Check for admin route
   const checkIsAdmin = () => {
@@ -356,7 +585,7 @@ function App() {
           height: "100vh",
           pointerEvents: "none",
           overflow: "hidden",
-          background: currentTheme.colors.background,
+          backgroundImage: currentTheme.colors.background,
           backgroundSize: "400% 400%",
           animation: nightMode ? "galaxyGradientMove 30s ease-in-out infinite alternate" : "gradientMove 15s ease infinite",
         }}
@@ -381,6 +610,24 @@ function App() {
 
         {/* Aurora effect */}
         {currentTheme.hasAurora && <AuroraEffect />}
+
+        {/* ===== ANIME THEME EFFECTS ===== */}
+
+        {/* Water Breathing for Demon Slayer theme */}
+        {currentTheme.hasWaterBreathing && <WaterBreathingEffect count={15} />}
+
+        {/* Chakra particles for Naruto theme */}
+        {currentTheme.hasChakra && <ChakraField count={25} />}
+
+        {/* Fire embers for Attack on Titan theme */}
+        {currentTheme.hasTitanFire && <TitanFireField count={35} />}
+
+        {/* Super Saiyan aura for Dragon Ball theme */}
+        {currentTheme.hasSaiyanAura && <SaiyanAuraEffect />}
+
+        {/* Cursed energy for Jujutsu Kaisen theme */}
+        {currentTheme.hasCursedEnergy && <CursedEnergyField count={20} />}
+
 
         {/* Floating icons */}
         {currentTheme.floatingIcons.map(({ icon, cls }, idx) => (

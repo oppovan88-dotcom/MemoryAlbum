@@ -133,10 +133,10 @@ const Memory = ({ nightMode, currentTheme }) => {
   return (
     <div className="container pb-3">
       {/* Theme-Styled Title */}
-      <div className="text-center mb-4" style={{ marginTop: 26 }}>
-        {/* Decorative top ornaments */}
-        <div style={{ marginBottom: 8 }}>
-          <span style={{ fontSize: 22, filter: `drop-shadow(0 2px 8px ${accentColor}80)` }}>
+      <div className="text-center mb-3 mb-md-4" style={{ marginTop: 16 }}>
+        {/* Decorative top ornaments - hidden on small mobile */}
+        <div style={{ marginBottom: 4 }} className="d-none d-sm-block">
+          <span style={{ fontSize: 18, filter: `drop-shadow(0 2px 8px ${accentColor}80)` }}>
             ✨
           </span>
         </div>
@@ -144,39 +144,39 @@ const Memory = ({ nightMode, currentTheme }) => {
         <div
           style={{
             display: "inline-block",
-            padding: "12px 28px",
+            padding: "8px 16px",
             background: `linear-gradient(135deg, ${primaryColor}20 0%, ${secondaryColor}15 100%)`,
-            borderRadius: 20,
+            borderRadius: 14,
             border: `2px solid ${primaryColor}40`,
-            boxShadow: `0 4px 20px ${primaryColor}25`,
+            boxShadow: `0 4px 15px ${primaryColor}25`,
           }}
         >
           <span
             style={{
               fontFamily: "'Poppins', 'Montserrat', sans-serif",
               fontWeight: 700,
-              fontSize: "1.25rem",
-              letterSpacing: "1.5px",
-              background: `linear-gradient(90deg, ${primaryColor}, ${secondaryColor}, ${primaryColor})`,
+              fontSize: "0.95rem",
+              letterSpacing: "1px",
+              backgroundImage: `linear-gradient(90deg, ${primaryColor}, ${secondaryColor}, ${primaryColor})`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
             }}
           >
-            <span style={{ fontSize: 20, marginRight: 8 }}>💖</span>
+            <span style={{ fontSize: 14, marginRight: 4 }}>💖</span>
             Top Memory Album
-            <span style={{ fontSize: 20, marginLeft: 8 }}>💖</span>
+            <span style={{ fontSize: 14, marginLeft: 4 }}>💖</span>
           </span>
         </div>
 
-        {/* Subtitle */}
-        <div style={{ marginTop: 10 }}>
+        {/* Subtitle - smaller on mobile */}
+        <div style={{ marginTop: 6 }} className="d-none d-sm-block">
           <span
             style={{
               fontFamily: "'Quicksand', sans-serif",
-              fontSize: "0.85rem",
+              fontSize: "0.75rem",
               color: `${primaryColor}cc`,
-              letterSpacing: 1,
+              letterSpacing: 0.5,
             }}
           >
             ✨ Our precious moments together ✨
