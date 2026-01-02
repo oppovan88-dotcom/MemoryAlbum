@@ -8,6 +8,7 @@ import '../widgets/memory_section.dart';
 import '../widgets/relationship_section.dart';
 import '../widgets/floating_icons.dart';
 import '../widgets/animated_background.dart';
+import '../widgets/footer_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -86,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         const SizedBox(height: 40),
 
                         // Footer
-                        _buildFooter(theme),
+                        FooterWidget(theme: theme),
 
                         const SizedBox(height: 20),
                       ],
@@ -94,32 +95,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFooter(AppTheme theme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        children: [
-          Text(
-            '💕 Made with Love 💕',
-            style: GoogleFonts.quicksand(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: theme.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '© 2024 Love Memory',
-            style: GoogleFonts.quicksand(
-              fontSize: 12,
-              color: theme.isNight ? Colors.white54 : Colors.black45,
             ),
           ),
         ],
