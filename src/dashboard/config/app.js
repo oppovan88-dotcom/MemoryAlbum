@@ -65,7 +65,7 @@ export const appConfig = {
             fields: [
                 { key: 'person1Name', label: 'Name', type: 'text' },
                 { key: 'person1BirthDate', label: 'Date of Birth', type: 'date' },
-                { key: 'person1Photo', label: 'Photo URL', type: 'text' },
+                { key: 'person1Tagline', label: 'Tagline (optional)', type: 'text' },
             ]
         },
         person2: {
@@ -76,7 +76,7 @@ export const appConfig = {
             fields: [
                 { key: 'person2Name', label: 'Name', type: 'text' },
                 { key: 'person2BirthDate', label: 'Date of Birth', type: 'date' },
-                { key: 'person2Photo', label: 'Photo URL', type: 'text' },
+                { key: 'person2Tagline', label: 'Tagline (optional)', type: 'text' },
             ]
         }
     },
