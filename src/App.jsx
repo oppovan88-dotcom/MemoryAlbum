@@ -551,6 +551,21 @@ function App() {
     };
   }, []);
 
+  // Track visitor on mount
+  useEffect(() => {
+    const trackVisitor = async () => {
+      try {
+        await axios.post(`${API_URL}/track`, {
+          page: window.location.pathname || '/',
+          userAgent: navigator.userAgent
+        });
+      } catch (error) {
+        console.log('Tracking failed:', error);
+      }
+    };
+    trackVisitor();
+  }, []);
+
   // If admin route, show admin dashboard
   if (isAdmin) {
     return <AdminDashboard />;

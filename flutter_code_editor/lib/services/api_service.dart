@@ -7,6 +7,9 @@ class ApiService {
   // Your production API URL
   static const String baseUrl = 'https://memoryalbum-wi0j.onrender.com/api';
   
+  // Timeout for API requests (Render free tier may take up to 60s+ to wake up)
+  static const Duration apiTimeout = Duration(seconds: 90);
+  
   // Auth token storage key
   static const String _authTokenKey = 'auth_token';
 
@@ -29,7 +32,7 @@ class ApiService {
         Uri.parse('$baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'username': username, 'password': password}),
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(apiTimeout);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -74,7 +77,7 @@ class ApiService {
       request.headers['Authorization'] = 'Bearer $token';
       request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
 
-      final streamedResponse = await request.send().timeout(const Duration(seconds: 60));
+      final streamedResponse = await request.send().timeout(apiTimeout);
       final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
@@ -108,7 +111,7 @@ class ApiService {
       request.headers['Authorization'] = 'Bearer $token';
       request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
 
-      final streamedResponse = await request.send().timeout(const Duration(seconds: 60));
+      final streamedResponse = await request.send().timeout(apiTimeout);
       final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
@@ -142,7 +145,7 @@ class ApiService {
       request.headers['Authorization'] = 'Bearer $token';
       request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
 
-      final streamedResponse = await request.send().timeout(const Duration(seconds: 60));
+      final streamedResponse = await request.send().timeout(apiTimeout);
       final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
@@ -183,7 +186,7 @@ class ApiService {
           'description': description ?? '',
           'imageUrl': imageUrl,
         }),
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(apiTimeout);
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -208,7 +211,7 @@ class ApiService {
       final response = await http.delete(
         Uri.parse('$baseUrl/memories/$memoryId'),
         headers: {'Authorization': 'Bearer $token'},
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(apiTimeout);
 
       return response.statusCode == 200;
     } catch (e) {
@@ -223,7 +226,7 @@ class ApiService {
       final response = await http.get(
         Uri.parse('$baseUrl/memories'),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(apiTimeout);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -244,7 +247,7 @@ class ApiService {
       final response = await http.get(
         Uri.parse('$baseUrl/settings'),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(apiTimeout);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -265,7 +268,7 @@ class ApiService {
       final response = await http.get(
         Uri.parse('$baseUrl/appearance'),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(apiTimeout);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -286,7 +289,7 @@ class ApiService {
       final response = await http.get(
         Uri.parse('$baseUrl/timeline'),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(apiTimeout);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);

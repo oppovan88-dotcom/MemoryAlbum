@@ -3,7 +3,7 @@ import axios from 'axios';
 import { theme, appConfig, API_URL, CLOUDINARY } from './config';
 import { useResponsive } from './hooks/useResponsive';
 import { Sidebar, Header } from './components';
-import { DashboardTab, MemoriesTab, MessagesTab, TimelineTab, SettingsTab, AppearanceTab, EventsTab } from './components/tabs';
+import { DashboardTab, MemoriesTab, MessagesTab, TimelineTab, SettingsTab, AppearanceTab, EventsTab, AnalyticsTab } from './components/tabs';
 import { AddMemoryModal, EditMemoryModal, AddTimelineModal, EditTimelineModal } from './components/modals';
 
 const { colors, shadows } = theme;
@@ -220,6 +220,7 @@ const Dashboard = ({ admin, onLogout }) => {
                     {activeTab === 'messages' && <MessagesTab messages={messageList} isMobile={isMobile} onMarkAsRead={markAsRead} onDelete={deleteMessage} />}
                     {activeTab === 'timeline' && <TimelineTab timelineItems={timelineItems} isMobile={isMobile} onShowAddModal={() => setShowAddTimelineModal(true)} onEdit={(item) => { setEditTimelineItem({ ...item }); setShowEditTimelineModal(true); }} onDelete={deleteTimelineItem} onMove={moveTimelineItem} />}
                     {activeTab === 'events' && <EventsTab events={events} setEvents={setEvents} isMobile={isMobile} onRefresh={fetchData} />}
+                    {activeTab === 'analytics' && <AnalyticsTab isMobile={isMobile} />}
                     {activeTab === 'settings' && <SettingsTab settings={settings} setSettings={setSettings} isMobile={isMobile} onSave={saveSettings} saving={settingsSaving} />}
                     {activeTab === 'appearance' && <AppearanceTab appearance={appearance} setAppearance={setAppearance} isMobile={isMobile} onSave={saveAppearance} saving={appearanceSaving} />}
                 </main>
