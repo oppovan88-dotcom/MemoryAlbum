@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { theme, API_URL } from '../../config';
 
-const { colors, shadows, spacing, animations } = theme;
+const { colors, shadows, spacing } = theme;
 
 const AnalyticsTab = ({ isMobile }) => {
     const [analytics, setAnalytics] = useState(null);
@@ -229,8 +229,7 @@ const AnalyticsTab = ({ isMobile }) => {
                                         background: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`,
                                         borderRadius: 8,
                                         transition: 'all 0.3s ease',
-                                        boxShadow: shadows.sm,
-                                        animation: `${animations.slideUp} ${0.3 + idx * 0.05}s ease-out`
+                                        boxShadow: shadows.sm
                                     }} />
                                     <div style={{
                                         fontSize: 9,
@@ -280,8 +279,7 @@ const AnalyticsTab = ({ isMobile }) => {
                                 <div key={idx} style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: spacing.md,
-                                    animation: `${animations.slideUp} ${0.3 + idx * 0.1}s ease-out`
+                                    gap: spacing.md
                                 }}>
                                     <div style={{
                                         minWidth: isMobile ? 100 : 150,
@@ -362,8 +360,7 @@ const AnalyticsTab = ({ isMobile }) => {
                                 display: isMobile ? 'block' : 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
-                                gap: spacing.md,
-                                animation: `${animations.slideUp} ${0.3 + idx * 0.05}s ease-out`
+                                gap: spacing.md
                             }}>
                                 <div style={{ flex: 1 }}>
                                     <div style={{
@@ -412,12 +409,7 @@ const StatsCard = ({ icon, title, value, color }) => (
         alignItems: 'center',
         gap: spacing.lg,
         transition: 'all 0.3s ease',
-        animation: `${animations.slideUp} 0.5s ease-out`,
-        cursor: 'pointer',
-        ':hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: shadows.lg
-        }
+        cursor: 'pointer'
     }}>
         <div style={{
             width: 64,

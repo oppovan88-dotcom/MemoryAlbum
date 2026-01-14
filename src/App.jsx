@@ -551,14 +551,28 @@ function App() {
     };
   }, []);
 
-  // Track visitor on mount
+
+  // Track visitor on mount (prevent duplicate tracking in same session)
   useEffect(() => {
     const trackVisitor = async () => {
+      // Check if already tracked in this session
+      const sessionKey = 'visitor_tracked';
+      const alreadyTracked = sessionStorage.getItem(sessionKey);
+
+      if (alreadyTracked) {
+        console.log('Visitor already tracked in this session');
+        return;
+      }
+
       try {
         await axios.post(`${API_URL}/track`, {
           page: window.location.pathname || '/',
           userAgent: navigator.userAgent
         });
+
+        // Mark as tracked for this session
+        sessionStorage.setItem(sessionKey, 'true');
+        console.log('Visitor tracked successfully');
       } catch (error) {
         console.log('Tracking failed:', error);
       }
